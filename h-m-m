@@ -242,6 +242,9 @@ function decode_tree($lines, $root_id, $start_id){
         $lines[$lid]
       );
 
+    if (($lines[$lid][0]=='*' || $lines[$lid][0]=='-')&& $lines[$lid][1]==' ')
+      $lines[$lid][0]=' ';
+
     if (trim($lines[$lid])!='')
       $indentation_shift = 
         min( 
