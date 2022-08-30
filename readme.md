@@ -10,8 +10,8 @@
 
 Adding, removing, and editing nodes:
 
-* `i` and `enter` - create a new sibling to the active node
-* `I` and `tab` - create a new child for the active node
+* `o` and `enter` - create a new sibling to the active node
+* `O` and `tab` - create a new child for the active node
 * `y` - yanks (copies) the active node and its descendants
 * `Y` - yanks (copies) the descendants of the active node
 * `d` - deletes (cuts) the active node and its descendants

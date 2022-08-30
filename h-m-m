@@ -2177,8 +2177,8 @@ function monitor_key_presses(&$mm){
     if ($in=='J')   move_active_node_down($mm);
     if ($in=='K')   move_active_node_up($mm);
 
-    if ($in=='i' || $in=="\n")   insert_node($mm, insert_sibling);
-    if ($in=='I' || $in=="\t")   insert_node($mm, insert_child);
+    if ($in=='o' || $in=="\n")   insert_node($mm, insert_sibling);
+    if ($in=='O' || $in=="\t")   insert_node($mm, insert_child);
 
     if ($in=='e')   edit_node($mm);
     if ($in=='E')   edit_node($mm, true);
