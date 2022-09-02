@@ -600,16 +600,17 @@ function draw_connections(&$mm, $id){
 
   // if there's only one child in the same y coordinate
 
-  if (count($node['children'])==1) {
+  if (count($node['children'] ?? [])==1) {
 
-    $child = $mm['nodes'][ $node['children'][0] ];
+    $child_id = $node['children'][ array_key_first( $node['children'] ) ];
+    $child = $mm['nodes'][ $child_id ];
 
     $y1  = round($node['y']+$node['yo']) + round($node['lh']/2-0.6);
     $y2  = round($child['y']+$child['yo']) + round($child['lh']/2-0.6);
 
     mput(
       $mm,
-      $mm['nodes'][ $node['children'][0] ]['x'] - conn_left_len - conn_right_len,
+      $child['x'] - conn_left_len - conn_right_len,
       min($y1,$y2),
       $mm['conn_single']
     );
@@ -619,28 +620,28 @@ function draw_connections(&$mm, $id){
       for ($yy=min($y1,$y2); $yy<max($y1,$y2); $yy++)
       mput(
         $mm,
-        $mm['nodes'][ $node['children'][0] ]['x'] - 2,
+        $child['x'] - 2,
         $yy,
         '│'
       );
 
       mput(
         $mm,
-        $mm['nodes'][ $node['children'][0] ]['x'] - 2,
+        $child['x'] - 2,
         $y2,
         ( $y2 > $y1 ? '╰' : '╭' )
       );
 
       mput(
         $mm,
-        $mm['nodes'][ $node['children'][0] ]['x'] - 2,
+        $child['x'] - 2,
         min($y1,$y2),
         ( $y2 > $y1 ? '╮' : '╯' )
       );
 
     }
 
-    draw_connections($mm, $node['children'][0]);
+    draw_connections($mm, $child_id );
     return;
 
   }
