@@ -16,7 +16,7 @@ $mm['focus_lock']         = false;
 
 $mm['initial_depth']      = 1;
 
-$mm['show_logo']          = 2;
+$mm['show_logo']          = 1;
 
 
 function load_settings(&$mm){
@@ -242,16 +242,18 @@ function decode_tree($lines, $root_id, $start_id){
         $lines[$lid]
       );
 
-    $start = mb_substr($lines[$lid],0,2);
-
-    if ($start==='* ' || $start==='- ')
-      $lines[$lid][0]=' ';
+    $indentation = mb_strlen($lines[$lid]) - mb_strlen(ltrim($lines[$lid]));
+    $start = mb_substr($lines[$lid], $indentation, 2);
+    if ($start=='* ' || $start=='- ') {
+      $lines[$lid][$indentation] = ' ';
+      $indentation += 2;
+    }
 
     if (trim($lines[$lid])!='')
       $indentation_shift = 
         min( 
           $indentation_shift, 
-          mb_strlen($lines[$lid]) - mb_strlen(ltrim($lines[$lid]))
+          $indentation
         );
 
     }
@@ -292,6 +294,7 @@ function decode_tree($lines, $root_id, $start_id){
         $level_parent[$level] = $id-1;
 
       // done! saving the data
+
       $nodes[$id] = [ 
                       'title'   => trim($line),
                       'parent'  => $level_parent[$level]
@@ -2090,7 +2093,7 @@ function display(&$mm, $force_center = false){
 
     // adding the logo
 
-    if ($mm['show_logo'] > 0) {
+    if ($mm['show_logo']>0) {
 
       if     ($y==2)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' ╭────────────╮    '.default_color;
       elseif ($y==3)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │     ┏━ m   │    '.default_color;
