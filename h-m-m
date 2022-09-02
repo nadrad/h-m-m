@@ -605,8 +605,8 @@ function draw_connections(&$mm, $id){
     $child_id = $node['children'][ array_key_first( $node['children'] ) ];
     $child = $mm['nodes'][ $child_id ];
 
-    $y1  = round($node['y']+$node['yo']) + round($node['lh']/2-0.6);
-    $y2  = round($child['y']+$child['yo']) + round($child['lh']/2-0.6);
+    $y1  = round( $node['y']  + $node['yo']  ) + round( ($node['lh'] ) / 2 - 0.6  );
+    $y2  = round( $child['y'] + $child['yo'] ) + round( ($child['lh']) / 2 - 0.6 );
 
     mput(
       $mm,
@@ -615,7 +615,7 @@ function draw_connections(&$mm, $id){
       $mm['conn_single']
     );
 
-    if (abs($y1-$y2)>0) {
+    if (abs(min($y1,$y2)-$y2)>0) {
 
       for ($yy=min($y1,$y2); $yy<max($y1,$y2); $yy++)
       mput(
