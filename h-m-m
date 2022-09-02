@@ -1644,6 +1644,22 @@ function encode_tree(&$mm, $id, $exclude_parent = false, $base = 0){
 
 
 // }}}
+// {{{ append
+
+function append(&$mm){
+
+  $mm['nodes'][ $mm['active_node'] ]['title'] .=
+    ' '.
+    trim(get_from_clipboard());
+
+  build_map($mm);
+  display($mm);
+
+}
+
+
+
+// }}}
 // {{{ paste sub-tree
 
 function paste_sub_tree(&$mm, $as_sibling ){
@@ -2200,8 +2216,9 @@ function monitor_key_presses(&$mm){
     if ($in=='d')   delete_node($mm);
     if ($in=='D')   delete_node($mm, true);
 
-    if ($in=='p')   paste_sub_tree($mm, false);
-    if ($in=='P')   paste_sub_tree($mm, true);
+    if ($in=='p')    paste_sub_tree($mm, false);
+    if ($in=='P')    paste_sub_tree($mm, true);
+    if ($in=="\020") append($mm); // ^p
 
     if ($in=='J')   move_active_node_down($mm);
     if ($in=='K')   move_active_node_up($mm);
@@ -2216,7 +2233,7 @@ function monitor_key_presses(&$mm){
 
     // move(1,1);
     // for ($i=0; $i<strlen($in); $i++)
-    //   echo ord($in[$i]).' ';
+    //   echo base_convert(ord($in[$i]),10,8).' ';
     // echo '                    ';
 
   }
