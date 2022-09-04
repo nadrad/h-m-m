@@ -1,7 +1,7 @@
 
 # h-m-m (hackers mind map)
 
-**h-m-m** (pronounced like the interjection "hmm") is a simple, fast, keyboard-centric terminal tool for working with mind maps. 
+**h-m-m** (pronounced like the interjection "hmm") is a simple, fast, keyboard-centric terminal tool for mind maps. 
 
 ![screenshot](screenshot.png)
 
