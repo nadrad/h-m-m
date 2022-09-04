@@ -4,146 +4,148 @@
 
 $mm=[];
 
-$mm['max_parent_width']   = 25;
-$mm['max_leaf_width']     = 55;
-$mm['line_spacing']       = 1;
+$mm['max_parent_width']		= 25;
+$mm['max_leaf_width']		= 55;
+$mm['line_spacing']			= 1;
+$mm['center_lock']			= false;
+$mm['focus_lock']			= false;
+$mm['initial_depth']		= 1;
+$mm['show_logo']			= 1;
 
-$mm['active_node_color']  = "\033[38;5;0m\033[48;5;172m\033[1m";
-$mm['message_color']      = "\033[38;5;0m\033[48;5;141m\033[1m";
-
-$mm['center_lock']        = false;
-$mm['focus_lock']         = false;
-
-$mm['initial_depth']      = 1;
-
-$mm['show_logo']          = 1;
+$mm['active_node_color']	= "\033[38;5;0m\033[48;5;172m\033[1m";
+$mm['message_color']		= "\033[38;5;0m\033[48;5;141m\033[1m";
 
 
-function load_settings(&$mm){
+function load_settings(&$mm)
+{
+	global $argv;
 
-  global $argv;
+	$conf = $argv[0].'.conf';
+	if (!file_exists($conf))  return;
 
-  $conf = $argv[0].'.conf';
-  if (!file_exists($conf))  return;
+	$handle = fopen($conf, "r");
+	if (!$handle)  return;
 
-  $handle = fopen($conf, "r");
-  if (!$handle)  return;
+	while (($line = fgets($handle)) !== false)
+	{
+		if (empty(trim($line))) continue;
 
-  while (($line = fgets($handle)) !== false) {
+		$elements = explode('=',trim($line));
+		$setting = trim($elements[0] ?? '');
+		$value = trim($elements[1] ?? '');
 
-    if (empty(trim($line))) continue;
+		switch ($setting)
+		{
+			case 'max_parent_width':	$mm['max_parent_width']		= max( round($value), width_min ); break;
+			case 'max_leaf_width':		$mm['max_leaf_width']		= max( round($value), width_min ); break;
+			case 'line_spacing':		$mm['line_spacing']			= max( round($value), 0 ); break;
+			case 'initial_depth':		$mm['initial_depth']		= max( round($value), 1 ); break;
 
-    $elements = explode('=',trim($line));
-    $setting = trim($elements[0] ?? '');
-    $value = trim($elements[1] ?? '');
+			case 'active_node_color':	$mm['active_node_color']	= $value; break;
+			case 'message_color':		$mm['message_color']		= $value; break;
 
-    switch ($setting){
+			case 'center_lock':			$mm['center_lock']			= (bool)($value); break;
+			case 'focus_lock':			$mm['focus_lock']			= (bool)($value); break;
+		}
+	}
 
-      case 'max_parent_width':  $mm['max_parent_width']  = max( round($value), width_min ); break;
-      case 'max_leaf_width':    $mm['max_leaf_width']    = max( round($value), width_min ); break;
-      case 'line_spacing':      $mm['line_spacing']      = max( round($value), 0 ); break;
-      case 'initial_depth':     $mm['initial_depth']     = max( round($value), 1 ); break;
-
-      case 'active_node_color': $mm['active_node_color'] = $value; break;
-      case 'message_color':     $mm['message_color']     = $value; break;
-
-      case 'center_lock':       $mm['center_lock']       = (bool)($value); break;
-      case 'focus_lock':        $mm['focus_lock']        = (bool)($value); break;
-
-    }
-
-  }
-
-  fclose($handle);
-
+	fclose($handle);
 }
 
 
 // }}}
 // {{{ constants and defaults
 
-$mm['top_left_column']    = 0;
-$mm['top_left_row']       = 0;
-$mm['active_column']      = 0;
-$mm['active_row']         = 0;
-
-$mm['terminal_width']     = exec('tput cols');
-$mm['terminal_height']    = exec('tput lines');
-
-$mm['win_left'] = 0;
-$mm['win_top']  = 0;
-
-$mm['root'] = 2;
-
-const logo_color = "\033[38;5;222m";
-const default_color = "\033[0m";
-
-const min_indentation       = 2;
-const width_tolerance       = 1.3;
-const width_min             = 15;
-const width_change_factor   = 1.2;
-const max_width_padding     = 30;
-
-const default_leaf_width    = 55;
-const default_parent_width  = 25;
-
-const default_spacing       = 1;
-
-const width_wider    = 0;
-const width_narrower = 1;
-const width_default  = 2;
-
-const spacing_wider    = 0;
-const spacing_narrower = 1;
-const spacing_default  = 2;
-
-const conn_left_len      = 6;
-const conn_right_len     = 4;
-
-const vertical_offset   = 4;
-
-const move_up     = 0;
-const move_down   = 1;
-const move_left   = 2;
-const move_right  = 3;
-
-const left_padding = 1;
-
-const insert_sibling = 0;
-const insert_child   = 1;
-
-$mm['conn_left']   = str_repeat('─', conn_left_len );
-$mm['conn_right']  = str_repeat('─', conn_right_len - 2 ); 
-$mm['conn_single'] = str_repeat('─', conn_left_len + conn_right_len - 1 ); 
-
-
 // escape codes: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 
-const reset_page   = "\033[2J\033[0;0f";
-const reset_color  = "\033[0m";
+$mm['top_left_column']		= 0;
+$mm['top_left_row']			= 0;
+$mm['active_column']		= 0;
+$mm['active_row']			= 0;
 
-const invert_on    = "\033[7m";
-const invert_off   = "\033[27m";
+$mm['terminal_width']		= exec('tput cols');
+$mm['terminal_height']		= exec('tput lines');
 
-const dim_on       = "\033[2m";
-const dim_off      = "\033[22m";
+$mm['win_left']				= 0;
+$mm['win_top']				= 0;
 
-const line_on      = "\033[0m\033[38;5;95m";
-const line_off     = "\033[0m";
+$mm['root']					= 2;
 
-const collapsed_symbol_on   = "\033[1m\033[38;5;215m";
-const collapsed_symbol_off  = "\033[0m";
+const logo_color			= "\033[38;5;222m";
+const default_color			= "\033[0m";
+
+const min_indentation		= 2;
+const width_tolerance		= 1.3;
+const width_min				= 15;
+const width_change_factor	= 1.2;
+const max_width_padding		= 30;
+
+const default_leaf_width	= 55;
+const default_parent_width	= 25;
+
+const default_spacing		= 1;
+
+const width_wider			= 0;
+const width_narrower		= 1;
+const width_default			= 2;
+
+const spacing_wider			= 0;
+const spacing_narrower		= 1;
+const spacing_default		= 2;
+
+const conn_left_len			= 6;
+const conn_right_len		= 4;
+
+$mm['conn_left']			= str_repeat('─', conn_left_len );
+$mm['conn_right']			= str_repeat('─', conn_right_len - 2 );
+$mm['conn_single']			= str_repeat('─', conn_left_len + conn_right_len - 1 );
+
+const vertical_offset		= 4;
+
+const move_up				= 0;
+const move_down				= 1;
+const move_left				= 2;
+const move_right			= 3;
+
+const left_padding			= 1;
+
+const insert_sibling		= 0;
+const insert_child			= 1;
+
+const ctrl_p				= "\020";
+const ctrl_c				= "\003";
+
+const arr_down				= "\033\133\102";
+const arr_right 			= "\033\133\103";
+const arr_up				= "\033\133\101";
+const arr_left				= "\033\133\104";
+
+const reset_page			= "\033[2J\033[0;0f";
+const reset_color			= "\033[0m";
+
+const invert_on				= "\033[7m";
+const invert_off			= "\033[27m";
+
+const dim_on				= "\033[2m";
+const dim_off				= "\033[22m";
+
+const line_on				= "\033[0m\033[38;5;95m";
+const line_off				= "\033[0m";
+
+const collapsed_symbol_on	= "\033[1m\033[38;5;215m";
+const collapsed_symbol_off	= "\033[0m";
 
 
 
 // }}}
-// {{{ init 
+// {{{ alternative screen
 
 
-function shutdown(){ 
-    clear();
-    system("tput rmcup && tput cnorm && stty sane");
-    exit;
+function shutdown()
+{
+	clear();
+	system("tput rmcup && tput cnorm && stty sane");
+	exit;
 }
 
 register_shutdown_function("shutdown");
@@ -152,46 +154,32 @@ pcntl_signal(SIGINT,"shutdown");
 
 
 
+function set_up_screen()
+{
+	// https://www.computerhope.com/unix/ustty.htm
+	// https://www.ibm.com/docs/en/aix/7.1?topic=s-stty-command
 
-// -------------------------------------------------------------
+	// system('stty cbreak -echo ');                              // testing
+	system('stty cbreak -echo -crterase intr undef && tput smcup');      // production
 
-function set_up_screen(){
-
-  // https://www.computerhope.com/unix/ustty.htm
-  // https://www.ibm.com/docs/en/aix/7.1?topic=s-stty-command
-  //
-  // system('stty cbreak -echo ');                              // testing
-  system('stty cbreak -echo -crterase intr undef && tput smcup');      // production
-
-  // the first code disables the text cursor and the second one gets rid of the mouse!
-  // https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
-  // 'l' disables and 'h' enables
-
-  echo "\033[?25l\033[?9;1000;1001;1002;1003;1004;1007;1005;1006;1015;1016l";
-
+	// the first code disables the text cursor and the second one gets rid of the mouse!
+	// https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
+	// 'l' disables and 'h' enables
+	echo "\033[?25l\033[?9;1000;1001;1002;1003;1004;1007;1005;1006;1015;1016l";
 }
 
-
-
-
-// -------------------------------------------------------------
 
 function clear()       { echo "\033[2J"; }
 function move($x,$y)   { echo "\033[{$y};{$x}f"; }
 function put($x,$y,$t) { echo "\033[{$y};{$x}f{$t}"; }
 
 
-
-
-// -------------------------------------------------------------
-
-function mput(&$mm,$x,$y,$s){
-
-  $mm['map'][round($y)] = 
-    mb_substr( $mm['map'][round($y)], 0, $x).
-    $s.
-    mb_substr( $mm['map'][round($y)], $x + mb_strlen($s) );
-
+function mput(&$mm,$x,$y,$s)
+{
+	$mm['map'][round($y)]
+		= mb_substr( $mm['map'][round($y)], 0, $x)
+		. $s
+		. mb_substr( $mm['map'][round($y)], $x + mb_strlen($s) );
 }
 
 
@@ -199,198 +187,199 @@ function mput(&$mm,$x,$y,$s){
 // }}}
 // {{{ debug
 
-function debug($nodes){
-
-  echo " id   pr    x    w    y   yo    h   lh  clh     title\n";
-  $i = 0;
-
-  foreach ($nodes as $id=>$data) 
-    echo 
-      ($i++ % 4 == 0 ? "\n" : '').
-      str_pad($id,3,' ',STR_PAD_LEFT).
-      str_pad($data['parent'],5,' ',STR_PAD_LEFT).
-      str_pad($data['x'] ??  'x',5,' ',STR_PAD_LEFT).
-      str_pad($data['w'] ??  'x',5,' ',STR_PAD_LEFT).
-      str_pad($data['y'] ??  'x',5,' ',STR_PAD_LEFT).
-      str_pad($data['yo'] ?? 'x',5,' ',STR_PAD_LEFT).
-      str_pad($data['h']  ?? 'x',5,' ',STR_PAD_LEFT).
-      str_pad($data['lh'] ?? 'x',5,' ',STR_PAD_LEFT).
-      str_pad($data['clh'] ?? 'x',5,' ',STR_PAD_LEFT).
-      '     '.
-      substr($data['title'],0,70).
-      "\n";
-
+function debug($nodes)
+{
+	echo " id   pr    x    w    y   yo    h   lh  clh     title\n";
+	$i = 0;
+	foreach ($nodes as $id=>$data)
+		echo
+			 ($i++ % 4 == 0 ? "\n" : '')
+			.str_pad($id,3,' ',STR_PAD_LEFT)
+			.str_pad($data['parent'],5,' ',STR_PAD_LEFT)
+			.str_pad($data['x']   ?? 'x',5,' ',STR_PAD_LEFT)
+			.str_pad($data['w']   ?? 'x',5,' ',STR_PAD_LEFT)
+			.str_pad($data['y']   ?? 'x',5,' ',STR_PAD_LEFT)
+			.str_pad($data['yo']  ?? 'x',5,' ',STR_PAD_LEFT)
+			.str_pad($data['h']   ?? 'x',5,' ',STR_PAD_LEFT)
+			.str_pad($data['lh']  ?? 'x',5,' ',STR_PAD_LEFT)
+			.str_pad($data['clh'] ?? 'x',5,' ',STR_PAD_LEFT)
+			.'     '
+			.substr($data['title'],0,70)
+			."\n"
+		;
 }
 
 
 // }}}
 // {{{ decode tree
 
-function decode_tree($lines, $root_id, $start_id){
+function decode_tree($lines, $root_id, $start_id)
+{
+	// calculating the indentation shift and cleaning up the special characters
+	$indentation_shift = 9999999;
+	foreach ($lines as $lid=>$line)
+	{
+		$lines[$lid] =
+			str_replace
+			(
+				 [ "\t", "\n", "\r"]
+				,[ "  ", "  ", "  "]
+				,$lines[$lid]
+			)
+		;
+
+		$indentation = mb_strlen($lines[$lid]) - mb_strlen(ltrim($lines[$lid]));
+		$start = mb_substr($lines[$lid], $indentation, 2);
+
+		if ($start=='* ' || $start=='- ')
+		{
+			$lines[$lid][$indentation] = ' ';
+			$indentation += 2;
+		}
+
+		if (trim($lines[$lid])!='')
+			$indentation_shift =
+				min
+				(
+					 $indentation_shift
+					,$indentation
+				)
+			;
+	}
 
 
-  // calculating the indentation shift and cleaning up the special characters
+	// building the tree
 
-  $indentation_shift = 9999999;
+	$nodes = [];
+	$id = $start_id;
 
-  foreach ($lines as $lid=>$line) {
+	$previous_level = 1;
+	$level = 1;
+	$previous_indentation = 0;
 
-    $lines[$lid] = 
-      str_replace(
-        [ "\t", "\n", "\r"],
-        [ "  ", "  ", "  "],
-        $lines[$lid]
-      );
+	$level_parent[1]      = $root_id;
+	$level_indentation[1] = 0;
 
-    $indentation = mb_strlen($lines[$lid]) - mb_strlen(ltrim($lines[$lid]));
-    $start = mb_substr($lines[$lid], $indentation, 2);
-    if ($start=='* ' || $start=='- ') {
-      $lines[$lid][$indentation] = ' ';
-      $indentation += 2;
-    }
+	foreach ($lines as $line)
+		if (trim($line)!='')
+		{
+			// warming up for this round!
+			$indentation = mb_strlen($line) - mb_strlen(ltrim($line)) - $indentation_shift;
 
-    if (trim($lines[$lid])!='')
-      $indentation_shift = 
-        min( 
-          $indentation_shift, 
-          $indentation
-        );
+			// going one level down
+			if ($indentation > $previous_indentation )
+			{
+				$level = $previous_level + 1;
+				$level_indentation[$level] = $indentation;
+			}
 
-    }
+			// going one or more levels up
+			if ($indentation < $previous_indentation )
+				foreach ($level_indentation as $plevel=>$pindentation)
+					if ($pindentation == $indentation)
+						$level = $plevel;
 
+			// saving the latest level_parent
+			if ($level > $previous_level)
+				$level_parent[$level] = $id-1;
 
-  // building the tree
+			// done! saving the data
 
-  $nodes = [];
-  $id = $start_id;
+			$nodes[$id] =
+			[
+				 'title'   => trim($line)
+				,'parent'  => $level_parent[$level]
+			];
 
-  $previous_level = 1;
-  $level = 1;
-  $previous_indentation = 0;
-
-  $level_parent[1]      = $root_id;
-  $level_indentation[1] = 0;
-
-  foreach ($lines as $line)
-    if (trim($line)!='') {
-
-      // warming up for this round!
-      $indentation = mb_strlen($line) - mb_strlen(ltrim($line)) - $indentation_shift;
-
-      // going one level down
-      if ($indentation > $previous_indentation ){
-        $level = $previous_level + 1;
-        $level_indentation[$level] = $indentation;
-      }
-
-      // going one or more levels up
-      if ($indentation < $previous_indentation )
-        foreach ($level_indentation as $plevel=>$pindentation)
-          if ($pindentation == $indentation) 
-            $level = $plevel;
-
-      // saving the latest level_parent
-      if ($level > $previous_level)
-        $level_parent[$level] = $id-1;
-
-      // done! saving the data
-
-      $nodes[$id] = [ 
-                      'title'   => trim($line),
-                      'parent'  => $level_parent[$level]
-                    ];
-
-      // getting ready for the next round!
-      $previous_indentation = $indentation;
-      $previous_level = $level;
-      $id++;
-
-    }
+			// getting ready for the next round!
+			$previous_indentation = $indentation;
+			$previous_level = $level;
+			$id++;
+		}
 
 
-  // setting a few properties that simplify future calculations
+	// setting a few properties that simplify future calculations
 
-  foreach ($nodes as $id=>$node) {
-    $nodes[$id]['collapsed'] = false;
-    $nodes[$id]['is_leaf']   = true;
-    $nodes[$id]['children']  = [];
-  }
+	foreach ($nodes as $id=>$node)
+	{
+		$nodes[$id]['collapsed'] = false;
+		$nodes[$id]['is_leaf']   = true;
+		$nodes[$id]['children']  = [];
+	}
 
-  foreach ($nodes as $id=>$node) 
-    if (isset($nodes[ $node['parent'] ])) {
-      $nodes[ $node['parent'] ]['is_leaf']    = false;
-      $nodes[ $node['parent'] ]['children'][] = $id;
-    }
+	foreach ($nodes as $id=>$node)
+		if (isset($nodes[ $node['parent'] ]))
+		{
+			$nodes[ $node['parent'] ]['is_leaf']    = false;
+			$nodes[ $node['parent'] ]['children'][] = $id;
+		}
 
-  return($nodes);
-
+	return($nodes);
 }
 
 
 // }}}
 // {{{ load_file
 
-function load_file(&$mm){
+function load_file(&$mm)
+{
+	global $argv;
 
-  global $argv;
+	if (!isset($argv[1]))
+	{
+		load_empty_map($mm);
+		return;
+	}
 
-  if (!isset($argv[1])){
-    load_empty_map($mm);
-    return;
-  }
+	$mm['filename']=$argv[1];
 
-  $mm['filename']=$argv[1];
+	if (!file_exists($argv[1]))
+	{
+		load_empty_map($mm);
+		return;
+	}
 
-  if (!file_exists($argv[1])) {
-    load_empty_map($mm);
-    return;
-  }
+	$lines = file($argv[1], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
-  $lines = file($argv[1], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-
-  // starting from 2 instead of 1, in case the files doesn't have
-  // a single root and we have to inject one. leaving "1" empty
-  // won't cause any problems.
-  $new_nodes = decode_tree($lines, 0, 2);
+	// starting from 2 instead of 1, in case the files doesn't have
+	// a single root and we have to inject one. leaving "1" empty
+	// won't cause any problems.
+	$new_nodes = decode_tree($lines, 0, 2);
 
 
-  // checking to see how many first-level nodes we have
-  $first_level_nodes = [];
-  foreach ($new_nodes as $id=>$node)
-    if ($id!=0 && $node['parent']==0)
-      $first_level_nodes[] = $id;
+	// checking to see how many first-level nodes we have
+	$first_level_nodes = [];
+	foreach ($new_nodes as $id=>$node)
+		if ($id!=0 && $node['parent']==0)
+			$first_level_nodes[] = $id;
 
-  $mm['nodes'][0]['parent']   = -1;
-  $mm['nodes'][0]['title']    = 'X';
-  $mm['nodes'][0]['is_leaf']  = false;
+	$mm['nodes'][0]['parent']   = -1;
+	$mm['nodes'][0]['title']    = 'X';
+	$mm['nodes'][0]['is_leaf']  = false;
 
-  if (count($first_level_nodes)>1) {
+	if (count($first_level_nodes)>1)
+	{
+		$mm['root'] = 1;
 
-    $mm['root'] = 1;
+		$mm['nodes'][1]['parent']   = 0;
+		$mm['nodes'][1]['title']    = 'root';
+		$mm['nodes'][1]['is_leaf']  = false;
+		$mm['nodes'][1]['children'] = $first_level_nodes;
+		$mm['nodes'][0]['children'] = [1];
 
-    $mm['nodes'][1]['parent']   = 0;
-    $mm['nodes'][1]['title']    = 'root';
-    $mm['nodes'][1]['is_leaf']  = false;
-    $mm['nodes'][1]['children'] = $first_level_nodes;
-    $mm['nodes'][0]['children'] = [1];
+		foreach ($new_nodes as $id=>$node)
+			if ($node['parent']==0)
+				$new_nodes[$id]['parent'] = 1;
+	}
+	else
+		$mm['nodes'][0]['children'] = $first_level_nodes;
 
-    foreach ($new_nodes as $id=>$node)
-      if ($node['parent']==0)
-        $new_nodes[$id]['parent'] = 1;
+	$mm['nodes'] = $mm['nodes'] + $new_nodes;
 
-  } else {
-
-    $mm['nodes'][0]['children'] = $first_level_nodes;
-
-  }
-
-  $mm['nodes'] = $mm['nodes'] + $new_nodes;
-
-  if (isset($mm['nodes'][1]))
-    $mm['active_node']=1;
-  else
-    $mm['active_node']=2;
-
+	if (isset($mm['nodes'][1]))
+		$mm['active_node']=1;
+	else
+		$mm['active_node']=2;
 }
 
 
@@ -399,66 +388,64 @@ function load_file(&$mm){
 // {{{ calculate w, x, lh, and clh
 
 
-function calculate_x_and_lh(&$mm, $id){
+function calculate_x_and_lh(&$mm, $id)
+{
+	$node = $mm['nodes'][$id];
+
+	$mm['nodes'][$id]['x']
+		= $mm['nodes'][ $node['parent'] ]['x']
+		+ $mm['nodes'][ $node['parent'] ]['w']
+		+ conn_left_len
+		+ conn_right_len
+		+ 1
+		+
+		(
+			$node['parent']==0
+			? 1 - conn_right_len - conn_left_len
+			: 0
+		)
+	;
+
+	$max_width
+		=  ($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_leaf_width']
+		+ !($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_parent_width'];
+
+	if ( mb_strlen($node['title']) > width_tolerance * $max_width )
+	{
+		$lines = explode("\n" ,wordwrap($node['title'] ,$max_width));
+
+		$mm['nodes'][$id]['w'] = 0;
+		foreach ($lines as $line)
+			$mm['nodes'][$id]['w'] =
+				max($mm['nodes'][$id]['w'], trim(mb_strlen($line)));
+
+		$mm['nodes'][$id]['lh'] = count($lines);
+	}
+	else
+	{
+		$mm['nodes'][$id]['w']  = mb_strlen($node['title']);
+		$mm['nodes'][$id]['lh'] = 1;
+	}
+
+	$mm['map_width'] =
+		max
+		(
+			  $mm['map_width']
+			, $mm['nodes'][$id]['x']
+			+ $mm['nodes'][$id]['w']
+		)
+	;
 
 
-  $node = $mm['nodes'][$id];
+	$mm['nodes'][$id]['clh'] = 0;
+	if (($mm['nodes'][$id]['collapsed'] ?? false) || $mm['nodes'][$id]['is_leaf'])
+		$mm['nodes'][$id]['clh'] = $mm['nodes'][$id]['lh'];
 
-  $mm['nodes'][$id]['x'] = 
-    $mm['nodes'][ $node['parent'] ]['x'] +
-    $mm['nodes'][ $node['parent'] ]['w'] +
-    conn_left_len +
-    conn_right_len +
-    1 +
-    ( $node['parent']==0 ? 1 - conn_right_len - conn_left_len : 0 )
-  ;
-
-  $max_width = 
-     ($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_leaf_width'] +
-    !($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_parent_width'];
-
-  if ( mb_strlen($node['title']) > width_tolerance * $max_width ) {
-
-    $lines = explode(
-             "\n",
-             wordwrap(
-               $node['title'],
-               $max_width
-              )
-             );
-
-    $mm['nodes'][$id]['w'] = 0;
-    foreach ($lines as $line)
-      $mm['nodes'][$id]['w'] = 
-        max($mm['nodes'][$id]['w'], trim(mb_strlen($line)));
-
-    $mm['nodes'][$id]['lh'] = count($lines);
-
-  } else {
-
-    $mm['nodes'][$id]['w']  = mb_strlen($node['title']);
-    $mm['nodes'][$id]['lh'] = 1;
-
-  }
-
-
-  $mm['map_width'] =
-    max(
-      $mm['map_width'],
-      $mm['nodes'][$id]['x'] +
-      $mm['nodes'][$id]['w']
-    );
-
-
-  $mm['nodes'][$id]['clh'] = 0;
-  if (($mm['nodes'][$id]['collapsed'] ?? false) || $mm['nodes'][$id]['is_leaf'])
-    $mm['nodes'][$id]['clh'] = $mm['nodes'][$id]['lh'];
-
-  foreach ($node['children'] as $cid) {
-    calculate_x_and_lh($mm, $cid);
-    $mm['nodes'][$id]['clh'] += $mm['nodes'][$cid]['clh'];
-  }
-
+	foreach ($node['children'] as $cid)
+	{
+		calculate_x_and_lh($mm, $cid);
+		$mm['nodes'][$id]['clh'] += $mm['nodes'][$cid]['clh'];
+	}
 
 }
 
@@ -466,42 +453,49 @@ function calculate_x_and_lh(&$mm, $id){
 // }}}
 // {{{ calculate h
 
-function calculate_h(&$mm){
+function calculate_h(&$mm)
+{
+	$unfinished = true;
+	while ($unfinished)
+	{
+		$unfinished = false;
 
-  $unfinished = true;
-  while ($unfinished) {
+		foreach ($mm['nodes'] as $id=>$node)
 
-    $unfinished = false;
+			if ($node['is_leaf'] || ($node['collapsed'] ?? false))
 
-    foreach ($mm['nodes'] as $id=>$node)
+				$mm['nodes'][$id]['h'] 
+					= $mm['line_spacing']
+					+ $mm['nodes'][$id]['lh']
+				;
 
-      if ($node['is_leaf'] || ($node['collapsed'] ?? false))
+			else
+			{
+				$h = 0;
+				$unready = false;
 
-        $mm['nodes'][$id]['h'] = 
-          $mm['line_spacing'] + 
-          $mm['nodes'][$id]['lh'];
+				foreach ($node['children'] as $cid)
+					if ($mm['nodes'][$cid]['h']>=0)
+						$h += $mm['nodes'][$cid]['h'];
+					else
+					{
+						$unready = true;
+						break;
+					}
 
-      else {
-
-        $h = 0;
-        $unready = false;
-
-        foreach ($node['children'] as $cid) 
-          if ($mm['nodes'][$cid]['h']>=0)
-            $h += $mm['nodes'][$cid]['h'];
-          else {
-            $unready = true;
-            break;
-          }
-
-        if ($unready) 
-          $unfinished = true;
-        else 
-          $mm['nodes'][$id]['h'] = 
-            max( $h, $node['lh'] + $mm['line_spacing'] );
-      }
-  }
-
+				if ($unready)
+					$unfinished = true;
+				else
+					$mm['nodes'][$id]['h'] 
+						= max
+						( 
+							  $h
+							, $node['lh'] 
+							+ $mm['line_spacing'] 
+						)
+					;
+			}
+	}
 }
 
 
@@ -510,63 +504,61 @@ function calculate_h(&$mm){
 // }}}
 // {{{ calculate y and yo
 
-function calculate_y(&$mm){
+function calculate_y(&$mm)
+{
+	$mm['map_top']    = 0;
+	$mm['map_bottom'] = 0;
+	$mm['map_height'] = $mm['nodes'][0]['h'];
 
-  $mm['map_top']    = 0;
-  $mm['map_bottom'] = 0;
-  $mm['map_height'] = $mm['nodes'][0]['h'];
-
-  $mm['nodes'][0]['y'] = 0;
-  calculate_children_y($mm, 0);
-
+	$mm['nodes'][0]['y'] = 0;
+	calculate_children_y($mm, 0);
 }
 
-function calculate_children_y(&$mm,$pid){
+function calculate_children_y(&$mm,$pid)
+{
+		$y = $mm['nodes'][$pid]['y'];
 
-    $y = $mm['nodes'][$pid]['y'];
+		$mm['nodes'][$pid]['yo'] =
+			round(
+				(
+					+ $mm['nodes'][$pid]['h']
+					- $mm['nodes'][$pid]['lh']
+				)/2
+			)
+		;
 
-    $mm['nodes'][$pid]['yo'] =
-      round(
-        (
-          $mm['nodes'][$pid]['h'] -
-          $mm['nodes'][$pid]['lh']
-        )/2
-      );
+		if (!($mm['nodes'][$pid]['collapsed'] ?? false))
+			foreach ($mm['nodes'][$pid]['children'] as $cid)
+			{
+				$mm['nodes'][$cid]['y'] = $y;
 
-    if (!($mm['nodes'][$pid]['collapsed'] ?? false))
-      foreach ($mm['nodes'][$pid]['children'] as $cid) {
+				$mm['map_bottom'] =
+					max
+					(
+						 $mm['map_bottom']
+						,$mm['nodes'][$cid]['lh']
+						+$mm['line_spacing']
+						+$y
+					)
+				;
 
-        $mm['nodes'][$cid]['y'] = $y;
-
-        $mm['map_bottom'] = max(
-                              $mm['map_bottom'],
-                              $mm['nodes'][$cid]['lh']+
-                              $mm['line_spacing']+
-                              $y
-                            );
-
-        $mm['map_top']    = min($mm['map_top'],$y);
-
-        $y += $mm['nodes'][$cid]['h'];
-
-        calculate_children_y($mm,$cid);
-
-      }
-
+				$mm['map_top'] = min($mm['map_top'],$y);
+				$y += $mm['nodes'][$cid]['h'];
+				calculate_children_y($mm,$cid);
+			}
 }
 
 // }}}
 // {{{ calculate top-down height shift
 
-function calculate_height_shift(&$mm, $id, $shift = 0){
+function calculate_height_shift(&$mm, $id, $shift = 0)
+{
+	$mm['nodes'][$id]['yo'] += $shift;
+	$shift += max(0, round( ($mm['nodes'][$id]['lh'] - $mm['nodes'][$id]['clh'])/2 - 0.5 ));
 
-  $mm['nodes'][$id]['yo'] += $shift;
-  $shift += max(0, round( ($mm['nodes'][$id]['lh'] - $mm['nodes'][$id]['clh'])/2 - 0.5 ));
-
-  foreach ($mm['nodes'][$id]['children'] as $cid)
-    if (!$mm['nodes'][$id]['collapsed'])
-      calculate_height_shift($mm, $cid, $shift);
-
+	foreach ($mm['nodes'][$id]['children'] as $cid)
+		if (!$mm['nodes'][$id]['collapsed'])
+			calculate_height_shift($mm, $cid, $shift);
 }
 
 
@@ -574,210 +566,228 @@ function calculate_height_shift(&$mm, $id, $shift = 0){
 // }}}
 // {{{ draw connections on the map
 
-function draw_connections(&$mm, $id){
+function draw_connections(&$mm, $id)
+{
+	$node = $mm['nodes'][$id];
 
-  $node = $mm['nodes'][$id];
+	// if there's no child
+	if ($node['is_leaf']) return;
 
-  // if there's no child
+	// if the node is collapsed
+	if ($node['collapsed'] ?? false)
+	{
+		mput
+		(
+			 $mm
+			,$node['x'] + $node['w']+1
+			,$node['y'] + $node['yo']
+			,' [+]'
+		);
+		return;
+	}
 
-  if ($node['is_leaf']) return;
+	// if there's only one child in the same y coordinate
+	if (count($node['children'] ?? [])==1)
+	{
+		$child_id = $node['children'][ array_key_first( $node['children'] ) ];
+		$child = $mm['nodes'][ $child_id ];
 
+		$y1  = round( $node['y']  + $node['yo']  ) + round( ($node['lh'] ) / 2 - 0.6 );
+		$y2  = round( $child['y'] + $child['yo'] ) + round( ($child['lh']) / 2 - 0.6 );
 
-  // if the node is collapsed 
+		mput
+		(
+			 $mm
+			,$child['x'] - conn_left_len - conn_right_len
+			,min($y1,$y2)
+			,$mm['conn_single']
+		);
 
-  if ($node['collapsed'] ?? false) {
+		if (abs(min($y1,$y2)-$y2)>0)
+		{
+			for ($yy=min($y1,$y2); $yy<max($y1,$y2); $yy++)
+				mput
+				(
+					 $mm
+					,$child['x'] - 2
+					,$yy
+					,'│'
+				);
 
-    mput(
-      $mm,
-      $node['x'] + $node['w']+1,
-      $node['y'] + $node['yo'],
-      ' [+]'
-    );
+			mput
+			(
+				$mm
+				,$child['x'] - 2
+				,$y2
+				,( $y2 > $y1 ? '╰' : '╭' )
+			);
 
-    return;
-  }
+			mput
+			(
+				 $mm
+				,$child['x'] - 2
+				,min($y1,$y2)
+				,( $y2 > $y1 ? '╮' : '╯' )
+			);
+		}
 
+		draw_connections($mm, $child_id );
+		return;
+	}
 
-  // if there's only one child in the same y coordinate
+	// if there's more than one child
+	$bottom = 0;
+	$bottom_child = 0;
+	$top = $mm['map_height'];
+	$top_child = 0;
 
-  if (count($node['children'] ?? [])==1) {
+	foreach ($node['children'] as $cid)
+	{
+		if ($mm['nodes'][$cid]['y'] + $mm['nodes'][$cid]['yo'] > $bottom)
+		{
+			$bottom = $mm['nodes'][$cid]['y'] + $mm['nodes'][$cid]['yo'];
+			$bottom_child = $cid;
+		}
 
-    $child_id = $node['children'][ array_key_first( $node['children'] ) ];
-    $child = $mm['nodes'][ $child_id ];
+		if ($mm['nodes'][$cid]['y'] + $mm['nodes'][$cid]['yo'] < $top)
+		{
+			$top = $mm['nodes'][$cid]['y'] + $mm['nodes'][$cid]['yo'];
+			$top_child = $cid;
+		}
+	}
 
-    $y1  = round( $node['y']  + $node['yo']  ) + round( ($node['lh'] ) / 2 - 0.6  );
-    $y2  = round( $child['y'] + $child['yo'] ) + round( ($child['lh']) / 2 - 0.6 );
+	$middle  = round($node['y']+$node['yo']) + round($node['lh']/2-0.6);
 
-    mput(
-      $mm,
-      $child['x'] - conn_left_len - conn_right_len,
-      min($y1,$y2),
-      $mm['conn_single']
-    );
+	mput
+	(
+		 $mm
+		,$mm['nodes'][$top_child]['x'] - conn_left_len - conn_right_len
+		,$middle
+		,$mm['conn_left']
+	);
 
-    if (abs(min($y1,$y2)-$y2)>0) {
+	for ( $i = $top ; $i < $bottom ; $i++ )
+		mput
+		(
+			 $mm
+			,$mm['nodes'][$top_child]['x'] - conn_right_len
+			,$i
+			,'│'
+		);
 
-      for ($yy=min($y1,$y2); $yy<max($y1,$y2); $yy++)
-      mput(
-        $mm,
-        $child['x'] - 2,
-        $yy,
-        '│'
-      );
+	mput
+	(
+		 $mm
+		,$mm['nodes'][$top_child]['x'] - conn_right_len
+		,$top
+		,'╭'
+		.$mm['conn_right']
+	);
 
-      mput(
-        $mm,
-        $child['x'] - 2,
-        $y2,
-        ( $y2 > $y1 ? '╰' : '╭' )
-      );
+	mput
+	(
+		 $mm
+		,$mm['nodes'][$top_child]['x']-conn_right_len
+		,$bottom
+		,'╰'
+		.$mm['conn_right']
+	);
 
-      mput(
-        $mm,
-        $child['x'] - 2,
-        min($y1,$y2),
-        ( $y2 > $y1 ? '╮' : '╯' )
-      );
-
-    }
-
-    draw_connections($mm, $child_id );
-    return;
-
-  }
-
-
-  // if there's more than one child
-
-  $bottom = 0;
-  $bottom_child = 0;
-  $top = $mm['map_height'];
-  $top_child = 0;
-
-  foreach ($node['children'] as $cid) {
-
-    if ($mm['nodes'][$cid]['y'] + $mm['nodes'][$cid]['yo'] > $bottom) {
-      $bottom = $mm['nodes'][$cid]['y'] + $mm['nodes'][$cid]['yo'];
-      $bottom_child = $cid;
-    }
-
-    if ($mm['nodes'][$cid]['y'] + $mm['nodes'][$cid]['yo'] < $top) {
-      $top = $mm['nodes'][$cid]['y'] + $mm['nodes'][$cid]['yo'];
-      $top_child = $cid;
-    }
-
-  }
-
-  $middle  = round($node['y']+$node['yo']) + round($node['lh']/2-0.6);
-
-  mput(
-    $mm,
-    $mm['nodes'][$top_child]['x'] - conn_left_len - conn_right_len,
-    $middle,
-    $mm['conn_left']
-  );
-
-  for ( $i = $top ; $i < $bottom ; $i++ )
-    mput(
-      $mm,
-      $mm['nodes'][$top_child]['x'] - conn_right_len,
-      $i,
-      '│');
-
-  mput(
-    $mm,
-    $mm['nodes'][$top_child]['x'] - conn_right_len,
-    $top,
-    '╭'.
-    $mm['conn_right']);
-
-  mput( 
-    $mm,
-    $mm['nodes'][$top_child]['x']-conn_right_len, 
-    $bottom, 
-    '╰'.
-    $mm['conn_right']);
-
-  if (count($node['children'])>2)
-    foreach ($node['children'] as $cid)
-      if ($cid!=$top_child && $cid!=$bottom_child)
-        mput(
-          $mm,
-          $mm['nodes'][$cid]['x']-conn_right_len, 
-          $mm['nodes'][$cid]['y']+
-          $mm['nodes'][$cid]['lh']/2-0.2+
-          $mm['nodes'][$cid]['yo'],
-          '├'.
-          $mm['conn_right']);
-
-
-  $existing_char = 
-    mb_substr(
-      $mm['map'][$middle],
-      $mm['nodes'][$top_child]['x'] - conn_right_len,
-      1);
-
-  if ($existing_char=='│')
-    mput(
-      $mm,
-      $mm['nodes'][$top_child]['x'] - conn_right_len,
-      $middle,
-      '┤');
-
-  if ($existing_char=='╭')
-    mput(
-      $mm,
-      $mm['nodes'][$top_child]['x'] - conn_right_len,
-      $middle,
-      '┬');
-
-  if ($existing_char=='├')
-    mput(
-      $mm,
-      $mm['nodes'][$top_child]['x'] - conn_right_len,
-      $middle,
-      '┼');
+	if (count($node['children'])>2)
+		foreach ($node['children'] as $cid)
+			if ($cid!=$top_child && $cid!=$bottom_child)
+				mput
+				(
+					 $mm
+					,$mm['nodes'][$cid]['x']-conn_right_len
+					,$mm['nodes'][$cid]['y']
+					+$mm['nodes'][$cid]['lh']/2-0.2
+					+$mm['nodes'][$cid]['yo']
+					,'├'
+					.$mm['conn_right']
+				);
 
 
-  foreach ($node['children'] as $cid)
-    draw_connections($mm, $cid);
+	$existing_char =
+		mb_substr
+		(
+			 $mm['map'][$middle]
+			,$mm['nodes'][$top_child]['x'] - conn_right_len
+			,1
+		);
 
+	if ($existing_char=='│')
+		mput
+		(
+			 $mm
+			,$mm['nodes'][$top_child]['x'] - conn_right_len
+			,$middle
+			,'┤'
+		);
+
+	if ($existing_char=='╭')
+		mput
+		(
+			 $mm
+			,$mm['nodes'][$top_child]['x'] - conn_right_len
+			,$middle
+			,'┬'
+		);
+
+	if ($existing_char=='├')
+		mput
+		(
+			 $mm
+			,$mm['nodes'][$top_child]['x'] - conn_right_len
+			,$middle
+			,'┼'
+		);
+
+	foreach ($node['children'] as $cid)
+		draw_connections($mm, $cid);
 }
 
 
 // }}}
 // {{{ add content to the map
 
-function add_content_to_the_map(&$mm, $id){
+function add_content_to_the_map(&$mm, $id)
+{
+	$node = $mm['nodes'][$id];
 
-  $node = $mm['nodes'][$id];
+	$max_width
+		=  ($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_leaf_width']
+		+ !($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_parent_width']
+	;
 
-  $max_width = 
-    ($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_leaf_width'] +
-   !($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_parent_width'];
+	if ( mb_strlen($node['title']) > width_tolerance * $max_width)
+		$lines =
+			explode
+			(
+				"\n",
+				wordwrap
+				(
+					$node['title'],
+					$max_width
+				)
+			)
+		;
+	else
+		$lines = [$node['title']];
 
-  if ( mb_strlen($node['title']) > width_tolerance * $max_width)
-    $lines = explode("\n",wordwrap(
-              $node['title'],
-              $max_width
-             ));
-  else
-    $lines = [$node['title']];
+	$num_lines = count($lines);
+	for ( $i=0 ; $i<$num_lines ; $i++ )
+		mput
+		(
+			$mm,
+			$node['x'],
+			round($node['y']+$node['yo'])+$i,
+			$lines[$i].' '
+		);
 
-  $num_lines = count($lines);
-  for ( $i=0 ; $i<$num_lines ; $i++ ) 
-    mput(
-      $mm,
-      $node['x'],
-      round($node['y']+$node['yo'])+$i,
-      $lines[$i].' '
-    );
-
-  if (!($node['collapsed'] ?? false))
-    foreach ($node['children'] as $cid)
-      add_content_to_the_map($mm,$cid);
-
-
+	if (!($node['collapsed'] ?? false))
+		foreach ($node['children'] as $cid)
+			add_content_to_the_map($mm,$cid);
 }
 
 
@@ -785,53 +795,54 @@ function add_content_to_the_map(&$mm, $id){
 // }}}
 // {{{ build map
 
-function build_map(&$mm){
+function build_map(&$mm)
+{
+	// resetting the global values
+	$mm['map_width']  = 0;
+	$mm['map_height'] = 0;
+	$mm['map_top']    = 0;
+	$mm['map_bottom'] = 0;
 
-  // resetting the global values
-  $mm['map_width']  = 0;
-  $mm['map_height'] = 0;
-  $mm['map_top']    = 0;
-  $mm['map_bottom'] = 0;
+	// resetting the coordinates
+	foreach ($mm['nodes'] as $id=>$node)
+	{
+		$mm['nodes'][$id]['x']  = -1;
+		$mm['nodes'][$id]['y']  = -1;
+		$mm['nodes'][$id]['h']  = -1;
+		$mm['nodes'][$id]['lh'] = -1;
+	}
 
-  // resetting the coordinates
-  foreach ($mm['nodes'] as $id=>$node) {
-    $mm['nodes'][$id]['x']  = -1;
-    $mm['nodes'][$id]['y']  = -1;
-    $mm['nodes'][$id]['h']  = -1;
-    $mm['nodes'][$id]['lh'] = -1;
-  }
+	$mm['nodes'][0]['x']  = 0;
+	$mm['nodes'][0]['w']  = left_padding;
+	$mm['nodes'][0]['lh'] = 1;
 
-  $mm['nodes'][0]['x']  = 0;
-  $mm['nodes'][0]['w']  = left_padding;
-  $mm['nodes'][0]['lh'] = 1;
+	// resetting the map, 1/2
+	$mm['map']=[];
+	$mm['map_width']=0;
+	$mm['map_height']=0;
+	$mm['map_top']=0;
+	$mm['map_bottom']=0;
 
-  // resetting the map, 1/2
-  $mm['map']=[];
-  $mm['map_width']=0;
-  $mm['map_height']=0;
-  $mm['map_top']=0;
-  $mm['map_bottom']=0;
+	// calculating the new coordinates
+	calculate_x_and_lh($mm,$mm['root']);
+	calculate_h($mm);
+	calculate_y($mm);
+	calculate_height_shift($mm, $mm['root']);
 
-  // calculating the new coordinates
-  calculate_x_and_lh($mm,$mm['root']);
-  calculate_h($mm);
-  calculate_y($mm);
-  calculate_height_shift($mm, $mm['root']);
+	// in case it was resized!
+	$mm['terminal_width']  = exec('tput cols');
+	$mm['terminal_height'] = exec('tput lines');
 
-  // in case it was resized!
-  $mm['terminal_width']  = exec('tput cols');
-  $mm['terminal_height'] = exec('tput lines');
+	// resetting the map, 2/2
+	$height = max($mm['map_bottom'],$mm['terminal_height']);
+	$blank = str_repeat(' ', $mm['map_width']+$mm['terminal_width']);
 
-  // resetting the map, 2/2
-  $height = max($mm['map_bottom'],$mm['terminal_height']);
-  $blank = str_repeat(' ', $mm['map_width']+$mm['terminal_width']);
+	for ($i=$mm['map_top'] ; $i<=$height ; $i++)
+		$mm['map'][$i] = $blank;
 
-  for ($i=$mm['map_top'] ; $i<=$height ; $i++)
-    $mm['map'][$i] = $blank;
-
-  // building the new map
-  draw_connections($mm, $mm['root']);
-  add_content_to_the_map($mm, $mm['root']);
+	// building the new map
+	draw_connections($mm, $mm['root']);
+	add_content_to_the_map($mm, $mm['root']);
 
 }
 
@@ -841,16 +852,15 @@ function build_map(&$mm){
 // }}}
 // {{{ toggle
 
-function toggle(&$mm){
+function toggle(&$mm)
+{
+	if ($mm['nodes'][ $mm['active_node'] ]['is_leaf']) return;
 
-  if ($mm['nodes'][ $mm['active_node'] ]['is_leaf']) return;
+	$mm['nodes'][ $mm['active_node'] ]['collapsed'] =
+		!($mm['nodes'][ $mm['active_node'] ]['collapsed'] ?? false);
 
-  $mm['nodes'][ $mm['active_node'] ]['collapsed'] =
-    !($mm['nodes'][ $mm['active_node'] ]['collapsed'] ?? false);
-
-  build_map($mm);
-  display($mm);
-
+	build_map($mm);
+	display($mm);
 }
 
 
@@ -858,47 +868,48 @@ function toggle(&$mm){
 // }}}
 // {{{ spacing adjuster
 
-function adjust_spacing(&$mm, $task){
+function adjust_spacing(&$mm, $task)
+{
+	if ($task==spacing_wider)     $mm['line_spacing']++;
+	if ($task==spacing_narrower)  $mm['line_spacing'] = max(0, $mm['line_spacing']-1);
+	if ($task==spacing_default)   $mm['line_spacing'] = default_spacing;
 
-  if ($task==spacing_wider)     $mm['line_spacing']++;
-  if ($task==spacing_narrower)  $mm['line_spacing'] = max(0, $mm['line_spacing']-1);
-  if ($task==spacing_default)   $mm['line_spacing'] = default_spacing;
-
-  build_map($mm);
-  center_active_node($mm);
-  display($mm);
-  message($mm,'Spacing: '.$mm['line_spacing']);
-
+	build_map($mm);
+	center_active_node($mm);
+	display($mm);
+	message($mm,'Spacing: '.$mm['line_spacing']);
 }
 
 
 // }}}
 // {{{ width adjuster
 
-function adjust_width(&$mm, $task){
+function adjust_width(&$mm, $task)
+{
+	if ($task==width_wider)
+	{
+		$mx = $mm['terminal_width'] - max_width_padding;
+		$mm['max_parent_width'] = round(min($mx, max( width_min, $mm['max_parent_width'] * width_change_factor )));
+		$mm['max_leaf_width']   = round(min($mx, max( width_min, $mm['max_leaf_width']   * width_change_factor )));
+	}
 
-  if ($task==width_wider) {
-    $mx = $mm['terminal_width'] - max_width_padding;
-    $mm['max_parent_width'] = round(min($mx, max( width_min, $mm['max_parent_width'] * width_change_factor )));
-    $mm['max_leaf_width']   = round(min($mx, max( width_min, $mm['max_leaf_width']   * width_change_factor )));
-  }
+	if ($task==width_narrower)
+	{
+		$mm['max_parent_width'] = round(max( width_min, $mm['max_parent_width'] / width_change_factor ));
+		$mm['max_leaf_width']   = round(max( width_min, $mm['max_leaf_width']   / width_change_factor ));
+	}
 
-  if ($task==width_narrower) {
-    $mm['max_parent_width'] = round(max( width_min, $mm['max_parent_width'] / width_change_factor ));
-    $mm['max_leaf_width']   = round(max( width_min, $mm['max_leaf_width']   / width_change_factor ));
-  }
+	if ($task==width_default)
+	{
+		$mm['max_parent_width'] = default_parent_width;
+		$mm['max_leaf_width']   = default_leaf_width;
+	}
 
-  if ($task==width_default) {
-    $mm['max_parent_width'] = default_parent_width;
-    $mm['max_leaf_width']   = default_leaf_width;
-  }
+	build_map($mm);
+	center_active_node($mm);
+	display($mm);
 
-  build_map($mm);
-  center_active_node($mm);
-  display($mm);
-
-  message($mm,'Width: '.$mm['max_parent_width'].' / '.$mm['max_leaf_width']);
-
+	message($mm,'Width: '.$mm['max_parent_width'].' / '.$mm['max_leaf_width']);
 }
 
 
@@ -906,33 +917,34 @@ function adjust_width(&$mm, $task){
 // }}}
 // {{{ move nodes
 
-function push_node_down(&$mm, $id){
+function push_node_down(&$mm, $id)
+{
+	if ($id==0)  return;
 
-  if ($id==0)  return;
+	$mm['modified'] = true;
 
-  $mm['modified'] = true; 
+	if (isset($mm['nodes'][$id+1]))
+		push_node_down($mm,$id+1);
 
-  if (isset($mm['nodes'][$id+1]))
-    push_node_down($mm,$id+1);
+	$mm['nodes'][$id+1] = $mm['nodes'][$id];
+	unset($mm['nodes'][$id]);
 
-  $mm['nodes'][$id+1] = $mm['nodes'][$id];
-  unset($mm['nodes'][$id]);
+	$mm['nodes'][ $mm['nodes'][$id+1]['parent'] ]['children'] =
+		array_diff
+		(
+			$mm['nodes'][ $mm['nodes'][$id+1]['parent'] ]['children'],
+			[$id]
+		);
 
-  $mm['nodes'][ $mm['nodes'][$id+1]['parent'] ]['children'] = 
-    array_diff(
-      $mm['nodes'][ $mm['nodes'][$id+1]['parent'] ]['children'],
-      [$id]
-    );
+	$mm['nodes'][ $mm['nodes'][$id+1]['parent'] ]['children'] =
+		array_push
+		(
+			$mm['nodes'][ $mm['nodes'][$id+1]['parent'] ]['children'],
+			[$id+1]
+		);
 
-  $mm['nodes'][ $mm['nodes'][$id+1]['parent'] ]['children'] = 
-    array_push(
-      $mm['nodes'][ $mm['nodes'][$id+1]['parent'] ]['children'],
-      [$id+1]
-    );
-
-  foreach($mm['nodes'][$id+1]['children'] as $cid=>$cdata)
-    $mm['nodes'][$cid]['parent'] = $id+1;
-
+	foreach($mm['nodes'][$id+1]['children'] as $cid=>$cdata)
+		$mm['nodes'][$cid]['parent'] = $id+1;
 }
 
 
@@ -940,60 +952,54 @@ function push_node_down(&$mm, $id){
 // }}}
 // {{{ insert node
 
+function insert_node(&$mm, $type)
+{
 
-function insert_node(&$mm, $type){
+	if ($mm['active_node']==$mm['root'])
+		$type=insert_child;
 
-  if ($mm['active_node']==$mm['root']) 
-    $type=insert_child;
+	$mm['modified'] = true;
 
-  $mm['modified'] = true; 
+	if ($type==insert_sibling)
+		$parent_id  = $mm['nodes'][ $mm['active_node'] ]['parent'];
+	else
+		$parent_id  = $mm['active_node'];
 
-  if ($type==insert_sibling)
-    $parent_id  = $mm['nodes'][ $mm['active_node'] ]['parent'];
-  else
-    $parent_id  = $mm['active_node'];
+	$mm['nodes'][$parent_id]['is_leaf']   = false;
+	$mm['nodes'][$parent_id]['collapsed'] = false;
 
-  $mm['nodes'][$parent_id]['is_leaf']   = false;
-  $mm['nodes'][$parent_id]['collapsed'] = false;
+	$new_id = max(array_keys($mm['nodes'])) + 1;
 
-  $new_id = max(array_keys($mm['nodes'])) + 1;
+	$mm['nodes'][$new_id] =
+	[
+		'title'     => 'NEW',
+		'is_leaf'   => true,
+		'collapsed' => false,
+		'children'  => [],
+		'parent'    => $parent_id
+	];
 
-  $mm['nodes'][$new_id] = [
+	if ($type==insert_sibling)
+	{
+		$children = [];
+		foreach ($mm['nodes'][$parent_id]['children'] as $child)
+		{
+			$children[] = $child;
+			if ($child==$mm['active_node'])
+				$children[] = $new_id;
+		}
+		$mm['nodes'][$parent_id]['children'] = $children;
+	}
+	else
+		$mm['nodes'][$parent_id]['children'][] = $new_id;
 
-    'title'     => 'NEW',
-    'is_leaf'   => true,
-    'collapsed' => false,
-    'children'  => [],
-    'parent'    => $parent_id
+	$mm['active_node'] = $new_id;
 
-  ];
+	build_map($mm);
+	display($mm);
 
-  if ($type==insert_sibling) {
-
-    $children = [];
-    foreach ($mm['nodes'][$parent_id]['children'] as $child) {
-      $children[] = $child;
-      if ($child==$mm['active_node'])
-        $children[] = $new_id;
-    }
-
-    $mm['nodes'][$parent_id]['children'] = $children;
-
-  } else {
-
-    $mm['nodes'][$parent_id]['children'][] = $new_id;
-
-  }
-
-
-  $mm['active_node'] = $new_id;
-
-  build_map($mm);
-  display($mm);
-
-  $mm['nodes'][ $mm['active_node'] ]['title']='';
-  edit_node($mm);
-
+	$mm['nodes'][ $mm['active_node'] ]['title']='';
+	edit_node($mm);
 }
 
 
@@ -1001,152 +1007,151 @@ function insert_node(&$mm, $type){
 // }}}
 // {{{ edit node
 
-function show_line(&$mm, $title, $cursor, $shift){
+function show_line(&$mm, $title, $cursor, $shift)
+{
+	$output =
+		str_pad
+		(
+			substr($title,$shift,$mm['terminal_width']-1),
+			$mm['terminal_width']
+		)
+	;
 
-  $output = 
-    str_pad(
-      substr($title,$shift,$mm['terminal_width']-1),
-      $mm['terminal_width']
-    );
+	$output = substr_replace( $output, invert_off, $cursor-$shift  , 0);
+	$output = substr_replace( $output, invert_on,  $cursor-$shift-1, 0);
 
-  $output = substr_replace( $output, invert_off, $cursor-$shift  , 0);
-  $output = substr_replace( $output, invert_on,  $cursor-$shift-1, 0);
-
-  put(0,$mm['terminal_height'],$mm['active_node_color'].$output);
-
+	put(0,$mm['terminal_height'],$mm['active_node_color'].$output);
 }
 
 
-function edit_node(&$mm, $rewrite = false){
+function edit_node(&$mm, $rewrite = false)
+{
+	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
+	if ($mm['active_node']==0 && $title=='root') $title='';
 
-  $title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
-  if ($mm['active_node']==0 && $title=='root') $title='';
+	$in = '';
+	$cursor = strlen($title)+1;
+	$shift = max( 0, $cursor - $mm['terminal_width'] );
 
-  $in = '';
-  $cursor = strlen($title)+1;
-  $shift = max( 0, $cursor - $mm['terminal_width'] );
+	show_line($mm, $title, $cursor, $shift);
 
-  show_line($mm, $title, $cursor, $shift);
+	while(true)
+	{
+		usleep(10000);
+		$in = fread(STDIN, 9);
 
-  while(true){
+		if ($in != '')
+		{
+			// Esc.
+			if ($in=="\033")
+			{
+				display($mm);
+				message($mm, 'Editing cancelled');
+				return;
+			}
 
-    usleep(10000);
-    $in = fread(STDIN, 9);
+			// up arrow and home
+			elseif ($in=="\033\133\101" || $in=="\033\133\110")  $cursor = 1;
 
-    if ($in != '') {
+			// right arrow
+			elseif ($in=="\033\133\103")  $cursor = min( strlen($title)+1, $cursor+1);
 
+			// down arrow and end
+			elseif ($in=="\033\133\102" || $in=="\033\133\106")  $cursor = strlen($title)+1;
 
-      // Esc.
-      if ($in=="\033") {
-        display($mm);
-        message($mm, 'Editing cancelled');
-        return;
-      }
+			// left arrow
+			elseif ($in=="\033\133\104")  $cursor = max(1, $cursor-1);
 
+			// ctrl+left and shift+left
+			elseif ($in=="\033\133\061\073\065\104" || $in=="\033\133\061\073\062\104")
+				$cursor =
+					$cursor < 3
+					? 1
+					: max
+						(
+							1,
+							(
+								strrpos($title,' ',$cursor-strlen($title)-3) !== false
+								? strrpos($title,' ',$cursor-strlen($title)-3) + 2
+								: 1
+							)
+						);
 
-      // up arrow and home
-      elseif ($in=="\033\133\101" || $in=="\033\133\110")  $cursor = 1;
+			// ctrl+right and shift+right
+			elseif ($in=="\033\133\061\073\065\103" || $in=="\033\133\061\073\062\103")
+				$cursor =
+					$cursor > strlen($title) -2
+					? strlen($title) + 1
+					: min
+						(
+							strlen($title)+1,
+							(
+								strpos($title,' ',$cursor+1) !== false
+								? strpos($title,' ',$cursor+1) + 2
+								: strlen($title) + 1
+							)
+						);
 
-      // right arrow
-      elseif ($in=="\033\133\103")  $cursor = min( strlen($title)+1, $cursor+1);
+			// ctrl+backspace
+			elseif ($in=="\010")
+			{
+				$from = mb_strrpos($title, ' ', min(1,$cursor-mb_strlen($title)-3));
+				if ($from === false) $from=1;
+				$title = mb_substr($title, 0, $from) . mb_substr($title,$cursor-1);
+				$cursor = $from+1;
+			}
 
-      // down arrow and end
-      elseif ($in=="\033\133\102" || $in=="\033\133\106")  $cursor = strlen($title)+1;
+			// backspace
+			elseif ($in=="\177")
+			{
+				if ($cursor>1)
+				{
+					$title = substr_replace($title, '',  $cursor-2, 1);
+					$cursor--;
+				}
+			}
 
-      // left arrow
-      elseif ($in=="\033\133\104")  $cursor = max(1, $cursor-1);
+			// ctrl+delete
+			elseif ($in=="\033\133\63\073\065\176")
+			{
+				$title  = '';
+				$cursor = 1;
+			}
 
+			// delete
+			elseif ($in=="\033\133\63\176")
+			{
+				$title = substr_replace($title, '',  $cursor-1, 1);
+			}
 
-      // ctrl+left and shift+left
-      elseif ($in=="\033\133\061\073\065\104" || $in=="\033\133\061\073\062\104")
-        $cursor =
-          $cursor < 3
-          ? 1
-          : max(
-              1,
-              (
-                strrpos($title,' ',$cursor-strlen($title)-3) !== false 
-                ? strrpos($title,' ',$cursor-strlen($title)-3) + 2
-                : 1
-              )
-            );
+			// enter
+			elseif ($in=="\012")
+			{
+				$title = trim($title);
+				$mm['nodes'][ $mm['active_node'] ]['title'] = $title;
+				$original['nodes'][ $mm['active_node'] ]['title'] = $title;
+				$mm['modified'] = true;
+				build_map($mm);
+				display($mm);
+				return;
+			}
 
+			// normal characters
+			elseif (strlen($in)==1)
+			{
+				if ($in=="\011") $in='  ';
+				$title = substr_replace($title, $in, $cursor-1, 0);
+				$cursor++;
+			}
 
-      // ctrl+right and shift+right
-      elseif ($in=="\033\133\061\073\065\103" || $in=="\033\133\061\073\062\103")
-        $cursor =
-          $cursor > strlen($title) -2
-          ? strlen($title) + 1
-          : min(
-              strlen($title)+1, 
-              (
-                strpos($title,' ',$cursor+1) !== false 
-                ? strpos($title,' ',$cursor+1) + 2
-                : strlen($title) + 1
-              )
-           );
+			// adjusting the position and shift
 
+			$shift = max( 0, $shift, $cursor - $mm['terminal_width'] );
+			$shift = min( $shift, $cursor-1 );
 
-      // ctrl+backspace
-      elseif ($in=="\010") {
-        $from = mb_strrpos($title, ' ', min(1,$cursor-mb_strlen($title)-3));
-        if ($from === false) $from=1;
-        $title = mb_substr($title, 0, $from) . mb_substr($title,$cursor-1);
-        $cursor = $from+1;
-      }
-
-
-      // backspace
-      elseif ($in=="\177") {
-        if ($cursor>1) {
-          $title = substr_replace($title, '',  $cursor-2, 1);
-          $cursor--;
-        }
-      }
-
-
-      // ctrl+delete 
-      elseif ($in=="\033\133\63\073\065\176"){
-        $title  = '';
-        $cursor = 1;
-      }
-
-
-      // delete
-      elseif ($in=="\033\133\63\176") {
-        $title = substr_replace($title, '',  $cursor-1, 1); 
-      }
-
-
-      // enter
-      elseif ($in=="\012") {
-        $title = trim($title);
-        $mm['nodes'][ $mm['active_node'] ]['title'] = $title;
-        $original['nodes'][ $mm['active_node'] ]['title'] = $title;
-        $mm['modified'] = true; 
-        build_map($mm);
-        display($mm);
-        return;
-      }
-
-      // normal characters
-      elseif (strlen($in)==1) {
-        if ($in=="\011") $in='  ';
-        $title = substr_replace($title, $in, $cursor-1, 0); 
-        $cursor++; 
-      }
-
-      // adjusting the position and shift
-
-      $shift = max( 0, $shift, $cursor - $mm['terminal_width'] );
-      $shift = min( $shift, $cursor-1 );
-
-      show_line($mm, $title, $cursor, $shift);
-
-    }
-
-  }
-
+			show_line($mm, $title, $cursor, $shift);
+		}
+	}
 }
 
 
@@ -1154,63 +1159,61 @@ function edit_node(&$mm, $rewrite = false){
 // }}}
 // {{{ center active node
 
-function center_active_node(&$mm, $only_vertically = false){
+function center_active_node(&$mm, $only_vertically = false)
+{
+	$node = $mm['nodes'][ $mm['active_node'] ];
 
-  $node = $mm['nodes'][ $mm['active_node'] ];
+	$midx = $node['w']/2 + $node['x'];
+	$midy = $node['lh']/2 + $node['y'] + $node['yo'];
 
-  $midx = $node['w']/2 + $node['x'];
-  $midy = $node['lh']/2 + $node['y'] + $node['yo'];
+	if (!$only_vertically)
+		$mm['win_left'] = max(0, round( $midx - $mm['terminal_width']/2 ) );
 
-  if (!$only_vertically)
-    $mm['win_left'] = max(0, round( $midx - $mm['terminal_width']/2 ) );
-
-  $mm['win_top'] = round( $midy - $mm['terminal_height']/2 );
-
+	$mm['win_top'] = round( $midy - $mm['terminal_height']/2 );
 }
 
 
 // }}}
 // {{{ goto's
 
-function go_to_root(&$mm){
-
-  $mm['active_node']=$mm['root'];
-  display($mm, true);
-
+function go_to_root(&$mm)
+{
+	$mm['active_node']=$mm['root'];
+	display($mm, true);
 }
 
 
-function go_to_top(&$mm){
+function go_to_top(&$mm)
+{
+	$yid = 0;
+	$y = $mm['map_height'];
 
-  $yid = 0;
-  $y = $mm['map_height'];
+	foreach ($mm['nodes'] as $id=>$node)
+		if ($node['y']>=0 && $node['y']+$node['yo'] < $y)
+		{
+			$y = $node['y']+$node['yo'];
+			$yid = $id;
+		}
 
-  foreach ($mm['nodes'] as $id=>$node)
-    if ($node['y']>=0 && $node['y']+$node['yo'] < $y) {
-      $y = $node['y']+$node['yo'];
-      $yid = $id;
-    }
-
-  $mm['active_node'] = $yid;
-  display($mm, true);
-
+	$mm['active_node'] = $yid;
+	display($mm, true);
 }
 
 
-function go_to_bottom(&$mm){
+function go_to_bottom(&$mm)
+{
+	$yid = 0;
+	$y = 0;
 
-  $yid = 0;
-  $y = 0;
+	foreach ($mm['nodes'] as $id=>$node)
+		if ($node['y']>=0 && $node['y']+$node['yo'] > $y)
+		{
+			$y = $node['y']+$node['yo']+$node['lh'];
+			$yid = $id;
+		}
 
-  foreach ($mm['nodes'] as $id=>$node)
-    if ($node['y']>=0 && $node['y']+$node['yo'] > $y) {
-      $y = $node['y']+$node['yo']+$node['lh'];
-      $yid = $id;
-    }
-
-  $mm['active_node'] = $yid;
-  display($mm, true);
-
+	$mm['active_node'] = $yid;
+	display($mm, true);
 }
 
 
@@ -1218,160 +1221,164 @@ function go_to_bottom(&$mm){
 // }}}
 // {{{ search
 
-function search(&$mm){
+function search(&$mm)
+{
+	put(0,$mm['terminal_height'],$mm['active_node_color'].str_repeat(' ',$mm['terminal_width']));
+	move(0,$mm['terminal_height']);
 
-  put(0,$mm['terminal_height'],$mm['active_node_color'].str_repeat(' ',$mm['terminal_width']));
-  move(0,$mm['terminal_height']);
+	system("stty sane");
+	$mm['query'] = readline('Search for: ');
+	system('stty cbreak -echo');
 
-  system("stty sane");
-  $mm['query'] = readline('Search for: ');
-  system('stty cbreak -echo');
+	if (empty($mm['query']))
+	{
+		display($mm);
+		return;
+	}
 
-  if (empty($mm['query'])) {
-    display($mm);
-    return;
-  }
-
-  next_search_result($mm);
-
+	next_search_result($mm);
 }
 
-function previous_search_result(&$mm){
+function previous_search_result(&$mm)
+{
+	$cy
+		= $mm['nodes'][ $mm['active_node'] ]['y']
+		+ $mm['nodes'][ $mm['active_node'] ]['yo']
+	;
 
-  $cy = $mm['nodes'][ $mm['active_node'] ]['y'] + 
-        $mm['nodes'][ $mm['active_node'] ]['yo'];
+	$ny = -1;
+	$nid = -1;
 
-  $ny = -1;
-  $nid = -1;
+	foreach ($mm['nodes'] as $id=>$node)
+		if
+		(
+			$id != 0 &&
+			$node['y'] > -1 &&
+			$node['y']+$node['yo'] < $cy &&
+			$node['y']+$node['yo'] > $ny &&
+			mb_stripos($node['title'],$mm['query'])!==false
+		)
+		{
+			 $ny = $node['y'] + $node['yo'];
+			 $nid = $id;
+		}
 
-  foreach ($mm['nodes'] as $id=>$node)
-    if (
-         $id != 0 &&
-         $node['y'] > -1 &&
-         $node['y']+$node['yo'] < $cy && 
-         $node['y']+$node['yo'] > $ny &&
-         mb_stripos($node['title'],$mm['query'])!==false 
-       )
-       {
-         $ny = $node['y'] + $node['yo'];
-         $nid = $id;
-       }
+	if ($nid<0)
+	{
+		display($mm);
+		return;
+	}
 
-  if ($nid<0) {
-    display($mm);
-    return;
-  }
-
-  $mm['active_node'] = $nid;
-  display($mm);
-
+	$mm['active_node'] = $nid;
+	display($mm);
 }
 
-function next_search_result(&$mm){
+function next_search_result(&$mm)
+{
+	$cy
+		= $mm['nodes'][ $mm['active_node'] ]['y']
+		+ $mm['nodes'][ $mm['active_node'] ]['yo']
+	;
 
-  $cy = $mm['nodes'][ $mm['active_node'] ]['y'] + 
-        $mm['nodes'][ $mm['active_node'] ]['yo'];
+	$ny = $mm['map_height']+1;
+	$nid = -1;
 
-  $ny = $mm['map_height']+1;
-  $nid = -1;
+	foreach ($mm['nodes'] as $id=>$node)
+		if
+		(
+			$id != 0 &&
+			$node['y'] > -1 &&
+			$node['y']+$node['yo'] > $cy &&
+			$node['y']+$node['yo'] < $ny &&
+			mb_stripos($node['title'],$mm['query'])!==false
+		)
+		{
+			$ny = $node['y'] + $node['yo'];
+			$nid = $id;
+		}
 
-  foreach ($mm['nodes'] as $id=>$node)
-    if (
-         $id != 0 &&
-         $node['y'] > -1 &&
-         $node['y']+$node['yo'] > $cy && 
-         $node['y']+$node['yo'] < $ny &&
-         mb_stripos($node['title'],$mm['query'])!==false 
-       )
-       {
-         $ny = $node['y'] + $node['yo'];
-         $nid = $id;
-       }
+	if ($nid<0)
+	{
+		display($mm);
+		return;
+	}
 
-  if ($nid<0) {
-    display($mm);
-    return;
-  }
-
-  $mm['active_node'] = $nid;
-  display($mm);
-
+	$mm['active_node'] = $nid;
+	display($mm);
 }
 
 
 // }}}
 // {{{ move active node
 
-function move_active_node_down(&$mm){
+function move_active_node_down(&$mm)
+{
+	if ($mm['active_node']==0) return;
 
-  if ($mm['active_node']==0) return;
+	$mm['modified'] = true;
 
-  $mm['modified'] = true; 
+	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
+	$children = [];
+	$now = false;
 
-  $parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
-  $children = [];
-  $now = false;
+	foreach ($mm['nodes'][ $parent_id ]['children'] as $child)
+	{
+		if ($child!=$mm['active_node'])
+			$children[] = $child;
 
-  foreach ($mm['nodes'][ $parent_id ]['children'] as $child) {
+		if ($now)
+		{
+			$children[] = $mm['active_node'];
+			$now = false;
+		}
 
-    if ($child!=$mm['active_node'])
-      $children[] = $child;
+		if ($child==$mm['active_node'])
+			$now = true;
+	}
 
-    if ($now) {
-      $children[] = $mm['active_node'];
-      $now = false;
-    }
+	if ($now)
+		$children[] = $mm['active_node'];
 
-    if ($child==$mm['active_node'])
-      $now = true;
+	$mm['nodes'][ $parent_id ]['children'] = $children;
 
-  }
-
-  if ($now) 
-    $children[] = $mm['active_node'];
-
-  $mm['nodes'][ $parent_id ]['children'] = $children;
-
-  build_map($mm);
-  display($mm);
-
+	build_map($mm);
+	display($mm);
 }
 
 
-function move_active_node_up(&$mm){
+function move_active_node_up(&$mm)
+{
+	if ($mm['active_node']==0) return;
 
-  if ($mm['active_node']==0) return;
+	$mm['modified'] = true;
 
-  $mm['modified'] = true; 
+	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
+	$children = [];
+	$now = false;
+	$rev_children = array_reverse($mm['nodes'][$parent_id]['children']);
 
-  $parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
-  $children = [];
-  $now = false;
-  $rev_children = array_reverse($mm['nodes'][$parent_id]['children']);
+	foreach ($rev_children as $child)
+	{
+		if ($child!=$mm['active_node'])
+			$children[] = $child;
 
-  foreach ($rev_children as $child) {
+		if ($now)
+		{
+			$children[] = $mm['active_node'];
+			$now = false;
+		}
 
-    if ($child!=$mm['active_node'])
-      $children[] = $child;
+		if ($child==$mm['active_node'])
+			$now = true;
+	}
 
-    if ($now) {
-      $children[] = $mm['active_node'];
-      $now = false;
-    }
+	if ($now)
+		$children[] = $mm['active_node'];
 
-    if ($child==$mm['active_node'])
-      $now = true;
+	$mm['nodes'][ $parent_id ]['children'] = array_reverse($children);
 
-  }
-
-
-  if ($now) 
-    $children[] = $mm['active_node'];
-
-  $mm['nodes'][ $parent_id ]['children'] = array_reverse($children);
-
-  build_map($mm);
-  display($mm);
+	build_map($mm);
+	display($mm);
 }
 
 
@@ -1379,58 +1386,59 @@ function move_active_node_up(&$mm){
 // }}}
 // {{{ save
 
-function save(&$mm, $new_name = false){
+function save(&$mm, $new_name = false)
+{
+	if (empty($mm['filename']))
+		$new_name = true;
 
-  if (empty($mm['filename']))
-    $new_name = true;
+	if ($new_name)
+	{
+		$path = exec('pwd');
+		put(0,$mm['terminal_height'],$mm['active_node_color'].str_repeat(' ',$mm['terminal_width']));
+		put(0,$mm['terminal_height']," $path -- new path and file name: ");
 
-  if ($new_name) {
+		system("stty sane");
+		$mm['filename'] = trim(readline());
+		system('stty cbreak -echo');
 
-    $path = exec('pwd');
-    put(0,$mm['terminal_height'],$mm['active_node_color'].str_repeat(' ',$mm['terminal_width']));
-    put(0,$mm['terminal_height']," $path -- new path and file name: ");
+		if ($mm['filename']=='')
+		{
+			display($mm);
+			message($mm, 'Saving cancelled');
+			return;
+		}
 
-    system("stty sane");
-    $mm['filename'] = trim(readline());
-    system('stty cbreak -echo');
+		$ext = mb_substr( $mm['filename'], mb_strrpos($mm['filename'],'.') + 1);
 
-    if ($mm['filename']=='') {
-      display($mm);
-      message($mm, 'Saving cancelled');
-      return;
-    }
+		if ($ext!='hmm')
+			$mm['filename'] .= '.hmm';
 
-    $ext = mb_substr( $mm['filename'], mb_strrpos($mm['filename'],'.') + 1);
+		display($mm);
+	}
 
-    if ($ext!='hmm') 
-      $mm['filename'] .= '.hmm';
+	if (file_exists($mm['filename']) && !is_writable($mm['filename']))
+	{
+		message($mm, "ERROR! I don't have access to write into \"$mm[filename]\". Use shift+s and set another path and filename.");
+		sleep(1);
+		return;
+	}
 
-    display($mm);
+	$file = fopen($mm['filename'], "w");
 
-  }
+	$mm['modified'] = false;
 
-  if (file_exists($mm['filename']) && !is_writable($mm['filename'])) {
-    message($mm, "ERROR! I don't have access to write into \"$mm[filename]\". Use shift+s and set another path and filename.");
-    sleep(1);
-    return;
-  }
+	if ($file===false)
+	{
+		message($mm, 'ERROR! Could not save the file');
+		$mm['modified'] = true;
+		return;
+	}
 
-  $file = fopen($mm['filename'], "w");
- 
-  $mm['modified'] = false; 
+	fwrite($file, encode_tree($mm, $mm['root']));
+	fclose($file);
 
-  if ($file===false) {
-    message($mm, 'ERROR! Could not save the file');
-    $mm['modified'] = true; 
-    return;
-  }
-
-  fwrite($file, encode_tree($mm, $mm['root']));
-  fclose($file);
-
-  display($mm);
-  message($mm, 'Saved '.$mm['filename']);
-
+	display($mm);
+	message($mm, 'Saved '.$mm['filename']);
 }
 
 
@@ -1438,164 +1446,154 @@ function save(&$mm, $new_name = false){
 // }}}
 // {{{ message
 
-function message(&$mm, $text){
+function message(&$mm, $text)
+{
+	put
+	(
+		$mm['terminal_width'] - strlen($text) - 1,
+		$mm['terminal_height'],
+		$mm['message_color'].' '.$text.' '.reset_color
+	);
 
-  put( 
-    $mm['terminal_width'] - strlen($text) - 1, 
-    $mm['terminal_height'], 
-    $mm['message_color'].' '.$text.' '.reset_color
-  );
-
-  usleep(200000);
-
+	usleep(200000);
 }
 
 
 // }}}
 // {{{ quit
 
-function quit(&$mm){
-
-  if (($mm['modified'] ?? false) === false) exit;
-  message($mm, "You have unsaved changes. Save them, or use shift+Q to quit without saving.");
-
+function quit(&$mm)
+{
+	if (($mm['modified'] ?? false) === false) exit;
+	message($mm, "You have unsaved changes. Save them, or use shift+Q to quit without saving.");
 }
 
 
 // }}}
 // {{{ move_window
 
-function move_window(&$mm){
+function move_window(&$mm)
+{
+	$node = $mm['nodes'][ $mm['active_node'] ];
 
-  $node = $mm['nodes'][ $mm['active_node'] ];
+	$x1 = max(0, $node['x'] - conn_right_len - 2);
+	$x2 = $node['x'] + $node['w'] + 2;
+	$y1 = max(0, $node['y'] + $node['yo'] - vertical_offset);
+	$y2 = $y1 + $node['lh'] + vertical_offset*2;
 
-  $x1 = max(0, $node['x'] - conn_right_len - 2);
-  $x2 = $node['x'] + $node['w'] + 2;
-  $y1 = max(0, $node['y'] + $node['yo'] - vertical_offset);
-  $y2 = $y1 + $node['lh'] + vertical_offset*2;
+	$mm['win_left'] = min( $mm['win_left'], $x1);
+	$mm['win_left'] = max( $mm['win_left'], $x2 - $mm['terminal_width']);
 
-  $mm['win_left'] = min( $mm['win_left'], $x1);
-  $mm['win_left'] = max( $mm['win_left'], $x2 - $mm['terminal_width']);
-
-  $mm['win_top']  = min( $mm['win_top'],  $y1);
-  $mm['win_top']  = max( $mm['win_top'],  $y2 - $mm['terminal_height']);
-
+	$mm['win_top']  = min( $mm['win_top'],  $y1);
+	$mm['win_top']  = max( $mm['win_top'],  $y2 - $mm['terminal_height']);
 }
 
 
 // }}}
 // {{{ change active node
 
-function change_active_node(&$mm, $direction) {
+function change_active_node(&$mm, $direction)
+{
+	$node = $mm['nodes'][ $mm['active_node'] ];
 
-  $node = $mm['nodes'][ $mm['active_node'] ];
+	// we go to the child that is closest to the parent node;
+	// i.e., closest to the middle.
 
+	if ($direction==move_right)
+	{
+		if ($node['is_leaf'] || ($node['collapsed'] ?? false) ) return;
 
-  // we go to the child that is closest to the parent node;
-  // i.e., closest to the middle.
+		$distance = [];
+		foreach ($node['children'] as $cid)
+			$distance[$cid] =
+				abs
+				(
+					+ $node['y']
+					+ $node['yo']
+					+ $node['lh']/2
+					- $mm['nodes'][$cid]['y']
+					- $mm['nodes'][$cid]['yo']
+					- $mm['nodes'][$cid]['lh']/2
+				)
+			;
 
-  if ($direction==move_right){
+		asort($distance);
 
-    if ($node['is_leaf'] || ($node['collapsed'] ?? false) ) return;
+		$mm['active_node'] = array_keys($distance)[0];
 
-    $distance = [];
-    foreach ($node['children'] as $cid)
-      $distance[$cid] = 
-        abs( 
-          + $node['y']
-          + $node['yo']
-          + $node['lh']/2 
-          - $mm['nodes'][$cid]['y']
-          - $mm['nodes'][$cid]['yo']
-          - $mm['nodes'][$cid]['lh']/2
-        );
-
-    asort($distance);
-
-    $mm['active_node'] = array_keys($distance)[0];
-
-    display($mm);
-    return;
-
-  }
-
-
-  // no other movement applies to the root element
-
-  if ( $mm['active_node']==0 ) return;
+		display($mm);
+		return;
+	}
 
 
-  // it can't be easier than moving to the left!
-
-  if ($direction==move_left) {
-    if ($mm['active_node']==$mm['root']) return;
-    $mm['active_node'] = $node['parent'];
-    display($mm);
-    return;
-  }
+	// no other movement applies to the root element
+	if ( $mm['active_node']==0 ) return;
 
 
-  // for up and down, we'll try to move between siblings first,
-  // considering that their order is set based on their list
-  // in the parent item.
-
-  if ($direction==move_up){
-
-    $rchildren = array_reverse($mm['nodes'][ $node['parent'] ]['children']);
-    foreach ($rchildren as $cid)
-      if ($mm['nodes'][$cid]['y']+$mm['nodes'][$cid]['yo'] < $node['y']+$node['yo']) {
-        $mm['active_node'] = $cid;
-        display($mm);
-        return;
-      }
-
-  }
-
-  if ($direction==move_down){
-
-    foreach ($mm['nodes'][ $node['parent'] ]['children'] as $cid)
-      if ($mm['nodes'][$cid]['y']+$mm['nodes'][$cid]['yo'] > $node['y']+$node['yo']) {
-        $mm['active_node'] = $cid;
-        display($mm);
-        return;
-      }
-
-  }
+	// it can't be easier than moving to the left!
+	if ($direction==move_left)
+	{
+		if ($mm['active_node']==$mm['root']) return;
+		$mm['active_node'] = $node['parent'];
+		display($mm);
+		return;
+	}
 
 
-  // if it's not possible to move up or down between siblings, 
-  // we'll measure distance and move to the nearest node.
-  // because the goal is to move vertically, and also because 
-  // the aspect ratio of characters is not 1, there's a factor
-  // for y to give it more importance. I've set the amount by 
-  // trial and erros and doesn't follow an exact logic. It may 
-  // need refinements in the future. 
+	// for up and down, we'll try to move between siblings first,
+	// considering that their order is set based on their list
+	// in the parent item.
 
-  $distance = [];
+	if ($direction==move_up)
+	{
+		$rchildren = array_reverse($mm['nodes'][ $node['parent'] ]['children']);
+		foreach ($rchildren as $cid)
+			if ($mm['nodes'][$cid]['y']+$mm['nodes'][$cid]['yo'] < $node['y']+$node['yo'])
+			{
+				$mm['active_node'] = $cid;
+				display($mm);
+				return;
+			}
+	}
 
-  foreach ($mm['nodes'] as $id=>$nd) 
-    if ($id != $mm['active_node'] && $nd['y']!=-1) {
-
-      $dy = $nd['y'] + $nd['yo'] + $nd['lh']/2 - $node['y'] - $node['yo'] - $node['lh']/2;
-
-      if ( ($direction==move_down && $dy>0) || ($direction==move_up && $dy<0) ) {
-
-        $dx = $nd['x'] + $nd['w']/2 - $node['x'] - $node['w']/2;
-        $distance[$id] = pow($dy*15,2) + pow($dx,2);
-
-      }
-
-    }
-
-  if ($distance==[]) return;
-  asort($distance);
-
-  $mm['active_node'] = array_keys($distance)[0];
-
-  display($mm);
-  return;
+	if ($direction==move_down)
+		foreach ($mm['nodes'][ $node['parent'] ]['children'] as $cid)
+			if ($mm['nodes'][$cid]['y']+$mm['nodes'][$cid]['yo'] > $node['y']+$node['yo'])
+			{
+				$mm['active_node'] = $cid;
+				display($mm);
+				return;
+			}
 
 
+	// if it's not possible to move up or down between siblings,
+	// we'll measure distance and move to the nearest node.
+	// because the goal is to move vertically, and also because
+	// the aspect ratio of characters is not 1, there's a factor
+	// for y to give it more importance. I've set the amount by
+	// trial and erros and doesn't follow an exact logic. It may
+	// need refinements in the future.
+
+	$distance = [];
+
+	foreach ($mm['nodes'] as $id=>$nd)
+		if ($id != $mm['active_node'] && $nd['y']!=-1)
+		{
+			$dy = $nd['y'] + $nd['yo'] + $nd['lh']/2 - $node['y'] - $node['yo'] - $node['lh']/2;
+			if ( ($direction==move_down && $dy>0) || ($direction==move_up && $dy<0) )
+			{
+				$dx = $nd['x'] + $nd['w']/2 - $node['x'] - $node['w']/2;
+				$distance[$id] = pow($dy*15,2) + pow($dx,2);
+			}
+		}
+
+	if ($distance==[]) return;
+	asort($distance);
+
+	$mm['active_node'] = array_keys($distance)[0];
+
+	display($mm);
+	return;
 }
 
 
@@ -1603,59 +1601,53 @@ function change_active_node(&$mm, $direction) {
 // }}}
 // {{{ expand
 
-function expand(&$mm, $id){
+function expand(&$mm, $id)
+{
+	$mm['nodes'][$id]['collapsed'] = false;
 
-  $mm['nodes'][$id]['collapsed'] = false;
-
-  foreach ($mm['nodes'][$id]['children'] as $cid) 
-    expand($mm, $cid);
-
+	foreach ($mm['nodes'][$id]['children'] as $cid)
+		expand($mm, $cid);
 }
 
 
-function expand_all(&$mm){
+function expand_all(&$mm)
+{
+	foreach ($mm['nodes'] as $id=>$node)
+		$mm['nodes'][$id]['collapsed'] = false;
 
-  foreach ($mm['nodes'] as $id=>$node)
-    $mm['nodes'][$id]['collapsed'] = false;
-
-  $mm['show_logo'] = 0;
-  build_map($mm);
-  center_active_node($mm);
-  display($mm);
-
+	$mm['show_logo'] = 0;
+	build_map($mm);
+	center_active_node($mm);
+	display($mm);
 }
 
 
 // }}}
 // {{{ encode tree
 
-function encode_tree(&$mm, $id, $exclude_parent = false, $base = 0){
+function encode_tree(&$mm, $id, $exclude_parent = false, $base = 0)
+{
+	if (!$exclude_parent)
+		$output = str_repeat("\t",$base).$mm['nodes'][$id]['title']."\n";
+	else
+		$output = '';
 
-  if (!$exclude_parent)
-    $output = str_repeat("\t",$base).$mm['nodes'][$id]['title']."\n";
-  else 
-    $output = '';
+	foreach ($mm['nodes'][$id]['children'] as $cid)
+		$output .= encode_tree($mm, $cid, false, $base+1-$exclude_parent);
 
-  foreach ($mm['nodes'][$id]['children'] as $cid)
-    $output .= encode_tree($mm, $cid, false, $base+1-$exclude_parent);
-
-  return $output;
-
+	return $output;
 }
 
 
 // }}}
 // {{{ append
 
-function append(&$mm){
-
-  $mm['nodes'][ $mm['active_node'] ]['title'] .=
-    ' '.
-    trim(get_from_clipboard());
-
-  build_map($mm);
-  display($mm);
-
+function append(&$mm)
+{
+	$mm['nodes'][ $mm['active_node'] ]['title'] .= 
+		' '. str_replace("\n",' ',str_replace("\t",' ',trim(get_from_clipboard())));
+	build_map($mm);
+	display($mm);
 }
 
 
@@ -1663,73 +1655,73 @@ function append(&$mm){
 // }}}
 // {{{ paste sub-tree
 
-function paste_sub_tree(&$mm, $as_sibling ){
+function paste_sub_tree(&$mm, $as_sibling )
+{
 
-  if ($as_sibling && $mm['active_node']==$mm['root']) return;
+	if ($as_sibling && $mm['active_node']==$mm['root']) return;
 
-  $mm['modified'] = true; 
+	$mm['modified'] = true;
 
-  if ($as_sibling) 
-    $parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
-  else 
-    $parent_id = $mm['active_node'];
+	if ($as_sibling)
+		$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
+	else
+		$parent_id = $mm['active_node'];
 
-  $mm['nodes'][$parent_id]['collapsed'] = false;
-  $mm['nodes'][ $parent_id ]['is_leaf'] = false;
+	$mm['nodes'][$parent_id]['collapsed'] = false;
+	$mm['nodes'][ $parent_id ]['is_leaf'] = false;
 
-  $new_id = 1 + max(array_keys($mm['nodes']));
+	$new_id = 1 + max(array_keys($mm['nodes']));
 
-  $st = 
-    decode_tree(
-      explode("\n",get_from_clipboard()), 
-      $parent_id,
-      $new_id
-    ); 
+	$st =
+		decode_tree
+		(
+			explode("\n",get_from_clipboard()),
+			$parent_id,
+			$new_id
+		)
+	;
 
-  $mm['nodes'] += $st;
-
-
-  // doing it like this, in case the sub-tree has more than 
-  // one top-level element.
-
-  foreach ($st as $cid=>$cdata)
-    if ($cdata['parent'] == $parent_id)
-      $mm['nodes'][ $parent_id ]['children'][] = $cid;
+	$mm['nodes'] += $st;
 
 
-  // rearranging the items only if they are pasted as siblings
-  // (for pasting as children, it makes sense to have them 
-  // at the end)
+	// doing it like this, in case the sub-tree has more than
+	// one top-level element.
 
-  if ($as_sibling) {
-
-    $sub_roots = [];
-    foreach ($st as $cid=>$cdata)
-      if ($cdata['parent']==$parent_id)
-        $sub_roots[] = $cid;
-
-    $children = [];
-
-    foreach ($mm['nodes'][ $parent_id ]['children'] as $child_id) {
-
-      if (!in_array($child_id, $sub_roots))
-        $children[] = $child_id;
-
-      if ($child_id == $mm['active_node'])
-        $children = array_merge($children, $sub_roots);
-
-    }
-
-    $mm['nodes'][ $parent_id ]['children'] = $children;
-
-  }
+	foreach ($st as $cid=>$cdata)
+		if ($cdata['parent'] == $parent_id)
+			$mm['nodes'][ $parent_id ]['children'][] = $cid;
 
 
-  $mm['active_node'] = $new_id;
+	// rearranging the items only if they are pasted as siblings
+	// (for pasting as children, it makes sense to have them
+	// at the end)
 
-  build_map($mm);
-  display($mm);
+	if ($as_sibling)
+	{
+		$sub_roots = [];
+		foreach ($st as $cid=>$cdata)
+			if ($cdata['parent']==$parent_id)
+				$sub_roots[] = $cid;
 
+		$children = [];
+
+		foreach ($mm['nodes'][ $parent_id ]['children'] as $child_id)
+		{
+			if (!in_array($child_id, $sub_roots))
+				$children[] = $child_id;
+
+			if ($child_id == $mm['active_node'])
+				$children = array_merge($children, $sub_roots);
+		}
+
+		$mm['nodes'][ $parent_id ]['children'] = $children;
+	}
+
+
+	$mm['active_node'] = $new_id;
+
+	build_map($mm);
+	display($mm);
 }
 
 
@@ -1737,196 +1729,188 @@ function paste_sub_tree(&$mm, $as_sibling ){
 // }}}
 // {{{ clipboard
 
-function copy_to_clipboard($text){
+function copy_to_clipboard($text)
+{
+	if     (PHP_OS_FAMILY === "Linux")    $clip = popen('xclip -selection clipboard','wb');
+	elseif (PHP_OS_FAMILY === "Windows")  $clip = popen("clip","wb");
+	elseif (PHP_OS_FAMILY === "Darwin")   $clip = popen('pbcopy','wb');
 
-  if     (PHP_OS_FAMILY === "Linux")    $clip = popen('xclip -selection clipboard','wb');
-  elseif (PHP_OS_FAMILY === "Windows")  $clip = popen("clip","wb");
-  elseif (PHP_OS_FAMILY === "Darwin")   $clip = popen('pbcopy','wb');
+	if (!isset($clip)) return;
 
-  if (!isset($clip)) return;
-
-  fwrite($clip,$text);
-  pclose($clip);
-
+	fwrite($clip,$text);
+	pclose($clip);
 }
 
-function get_from_clipboard(){
+function get_from_clipboard()
+{
+	if     (PHP_OS_FAMILY === "Linux")
+		return shell_exec('xclip -out -selection clipboard');
 
-  if     (PHP_OS_FAMILY === "Linux")
-    return shell_exec('xclip -out -selection clipboard');
+	elseif (PHP_OS_FAMILY === "Windows")
+		return shell_exec('powershell -sta "add-type -as System.Windows.Forms; [windows.forms.clipboard]::GetText()"');
 
-  elseif (PHP_OS_FAMILY === "Windows")
-    return shell_exec('powershell -sta "add-type -as System.Windows.Forms; [windows.forms.clipboard]::GetText()"');
-
-  elseif (PHP_OS_FAMILY === "Darwin")
-    return shell_exec('pbpaste');
-
+	elseif (PHP_OS_FAMILY === "Darwin")
+		return shell_exec('pbpaste');
 }
 
 
 // }}}
 // {{{ load empty map
 
-function load_empty_map(&$mm){
+function load_empty_map(&$mm)
+{
+	if (isset($mm['nodes']))  unset($mm['nodes']);
 
-  if (isset($mm['nodes']))
-    unset($mm['nodes']);
+	$mm['nodes'][0] = [ 'title'=>'X',    'is_leaf'=>false, 'children'=>[1], 'collapsed'=>false, 'parent'=>-1 ];
+	$mm['nodes'][1] = [ 'title'=>'root', 'is_leaf'=>true,  'children'=>[],  'collapsed'=>false, 'parent'=>0 ];
 
-  $mm['nodes'][0] = [ 'title'=>'X',    'is_leaf'=>false, 'children'=>[1], 'collapsed'=>false, 'parent'=>-1 ];
-  $mm['nodes'][1] = [ 'title'=>'root', 'is_leaf'=>true,  'children'=>[],  'collapsed'=>false, 'parent'=>0 ];
-
-  $mm['active_node']=1;
-  $mm['root']=1;
-
+	$mm['active_node']=1;
+	$mm['root']=1;
 }
 
 
 // }}}
 // {{{ yank
 
-
-function yank_node(&$mm, $exclude_parent = false ){
-
-  copy_to_clipboard(encode_tree($mm, $mm['active_node'], $exclude_parent));
-  message($mm, 'Item(s) are copied to the clipboard.');
-
+function yank_node(&$mm, $exclude_parent = false )
+{
+	copy_to_clipboard(encode_tree($mm, $mm['active_node'], $exclude_parent));
+	message($mm, 'Item(s) are copied to the clipboard.');
 }
 
 // }}}
 // {{{ delete
 
-function delete_node(&$mm, $exclude_parent = false ){
+function delete_node(&$mm, $exclude_parent = false )
+{
+	if ($mm['active_node']==$mm['root']) $exclude_parent = true;
 
-  if ($mm['active_node']==$mm['root']) $exclude_parent = true;
+	copy_to_clipboard( encode_tree($mm, $mm['active_node'], $exclude_parent) );
 
-  copy_to_clipboard( encode_tree($mm, $mm['active_node'], $exclude_parent) );
+	$mm['modified'] = true;
 
-  $mm['modified'] = true; 
+	delete_node_internal($mm, $mm['active_node'], $exclude_parent);
 
-  delete_node_internal($mm, $mm['active_node'], $exclude_parent);
+	build_map($mm);
+	display($mm);
 
-  build_map($mm);
-  display($mm);
-
-  message($mm, 'Item(s) are cut and placed into the clipboard.');
-
+	message($mm, 'Item(s) are cut and placed into the clipboard.');
 }
 
 
-function delete_node_internal(&$mm, $active_node, $exclude_parent = false ){
+function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
+{
+
+	// taking a shorter approach if it's for the whole tree
+
+	if ($active_node==$mm['root'] && !$exclude_parent)
+	{
+		load_empty_map($mm);
+		display($mm, true);
+		return;
+	}
 
 
-  // taking a shorter approach if it's for the whole tree
+	// if it's for a sub-tree, then...
 
-  if ($active_node==$mm['root'] && !$exclude_parent) {
+	delete_children($mm, $active_node);
 
-    load_empty_map($mm);
-    display($mm, true);
-    return;
+	if ($exclude_parent)
+	{
+		$mm['nodes'][ $active_node ]['is_leaf'] = true;
+		$mm['nodes'][ $active_node ]['children'] = [];
 
-  }
+	}
+	else
+	{
 
+		$parent_id = $mm['nodes'][ $active_node ]['parent'];
 
-  // if it's for a sub-tree, then...
+		$previous_sibling = 0;
+		$passed = false;
+		foreach ($mm['nodes'][$parent_id]['children'] as $cid)
+			if ($cid==$active_node)
+			{
+				if ($previous_sibling!=0) break;
+				$passed = true;
+			}
+			else
+			{
+				$previous_sibling = $cid;
+				if ($passed) break;
+			}
 
-  delete_children($mm, $active_node);
+		$mm['nodes'][$parent_id]['children'] =
+			array_diff
+			(
+				$mm['nodes'][$parent_id]['children'],
+				[$active_node]
+			)
+		;
 
-  if ($exclude_parent) {
+		if (count($mm['nodes'][$parent_id]['children'])==0)
+			$mm['nodes'][$parent_id]['is_leaf'] = true;
 
-    $mm['nodes'][ $active_node ]['is_leaf'] = true;
-    $mm['nodes'][ $active_node ]['children'] = [];
+		unset($mm['nodes'][ $active_node ]);
 
-  } else {
-
-    $parent_id = $mm['nodes'][ $active_node ]['parent'];
-
-    $previous_sibling = 0;
-    $passed = false;
-    foreach ($mm['nodes'][$parent_id]['children'] as $cid) 
-      if ($cid==$active_node){
-        if ($previous_sibling!=0) break;
-        $passed = true;
-      }
-      else {
-        $previous_sibling = $cid;
-        if ($passed) break;
-      }
-
-    $mm['nodes'][$parent_id]['children'] = 
-      array_diff(
-        $mm['nodes'][$parent_id]['children'],
-        [$active_node]
-      );
-
-    if (count($mm['nodes'][$parent_id]['children'])==0) 
-      $mm['nodes'][$parent_id]['is_leaf'] = true;
-
-    unset($mm['nodes'][ $active_node ]);
-
-    if ($mm['nodes'][$parent_id]['is_leaf'])
-      $mm['active_node'] = $parent_id;
-    else
-      $mm['active_node'] = $previous_sibling;
-
-  }
-
+		if ($mm['nodes'][$parent_id]['is_leaf'])
+			$mm['active_node'] = $parent_id;
+		else
+			$mm['active_node'] = $previous_sibling;
+	}
 }
 
 
-function delete_children(&$mm,$id){
-
-  foreach (($mm['nodes'][$id]['children'] ?? []) as $cid) {
-    delete_children($mm, $cid);
-    unset($mm['nodes'][$cid]);
-  }
-
+function delete_children(&$mm,$id)
+{
+	foreach (($mm['nodes'][$id]['children'] ?? []) as $cid)
+	{
+		delete_children($mm, $cid);
+		unset($mm['nodes'][$cid]);
+	}
 }
 
 
 // }}}
 // {{{ focus
 
-function toggle_focus(&$mm){
+function toggle_focus(&$mm)
+{
+	$mm['focus_lock'] = !$mm['focus_lock'];
+	
+	message($mm, $mm['focus_lock'] ? 'Focus locked' : 'Focus unlocked');
 
-  $mm['focus_lock'] = !$mm['focus_lock']; 
-  
-  message($mm, $mm['focus_lock'] ? 'Focus locked' : 'Focus unlocked');
-
-  build_map($mm);
-  display($mm);
-
+	build_map($mm);
+	display($mm);
 }
 
-function focus(&$mm){
-
-  collapse_siblings($mm, $mm['active_node']);
-  expand_siblings($mm, $mm['active_node']);
-
+function focus(&$mm)
+{
+	collapse_siblings($mm, $mm['active_node']);
+	expand_siblings($mm, $mm['active_node']);
 }
 
-function collapse_siblings(&$mm, $id){
+function collapse_siblings(&$mm, $id)
+{
+	if ($id <= $mm['root']) return;
 
-  if ($id <= $mm['root']) return;
+	$parent_id = $mm['nodes'][$id]['parent'];
 
-  $parent_id = $mm['nodes'][$id]['parent'];
+	foreach ($mm['nodes'][$parent_id]['children'] as $cid)
+		if ($cid!=$id)
+			$mm['nodes'][$cid]['collapsed'] = true;
 
-  foreach ($mm['nodes'][$parent_id]['children'] as $cid)
-    if ($cid!=$id)
-      $mm['nodes'][$cid]['collapsed'] = true;
-
-  collapse_siblings($mm, $parent_id);
-
+	collapse_siblings($mm, $parent_id);
 }
 
 
-function expand_siblings(&$mm, $id){
+function expand_siblings(&$mm, $id)
+{
+	if ($mm['nodes'][$id]['is_leaf']) return;
 
-  if ($mm['nodes'][$id]['is_leaf']) return;
-
-  $mm['nodes'][$id]['collapsed'] = false;
-  foreach ($mm['nodes'][$id]['children'] as $cid)
-    expand_siblings($mm, $cid);
-
+	$mm['nodes'][$id]['collapsed'] = false;
+	foreach ($mm['nodes'][$id]['children'] as $cid)
+		expand_siblings($mm, $cid);
 }
 
 
@@ -1934,208 +1918,217 @@ function expand_siblings(&$mm, $id){
 // }}}
 // {{{ collapse
 
+function collapse_all(&$mm)
+{
+	foreach ($mm['nodes'] as $id=>$node)
+		if (!$node['is_leaf'] && $id!=0 && $id!=$mm['root'])
+			$mm['nodes'][$id]['collapsed'] = true;
 
-function collapse_all(&$mm){
+	$mm['active_node'] = $mm['root'];
 
-  foreach ($mm['nodes'] as $id=>$node)
-    if (!$node['is_leaf'] && $id!=0 && $id!=$mm['root'])
-      $mm['nodes'][$id]['collapsed'] = true;
-
-  $mm['active_node'] = $mm['root'];
-
-  build_map($mm);
-  center_active_node($mm);
-  display($mm);
+	build_map($mm);
+	center_active_node($mm);
+	display($mm);
 }
 
 
-function collapse(&$mm, $id, $keep){
+function collapse(&$mm, $id, $keep)
+{
+	if ($mm['nodes'][$id]['is_leaf']) return;
 
-  if ($mm['nodes'][$id]['is_leaf']) return;
-
-  if ($keep<=0) {
-    $mm['nodes'][$id]['collapsed'] = true;
-  } else {
-    $mm['nodes'][$id]['collapsed'] = false;
-    foreach ($mm['nodes'][$id]['children'] as $cid)
-      collapse($mm, $cid, $keep-1);
-  }
-
-}
-
-
-
-function collapse_level(&$mm, $level, $no_display = false){
-
-  collapse($mm, $mm['root'], $level);
-
-  $id_collapsed = [];
-  $current = $mm['active_node'];
-  while ($current != $mm['root']) {
-    $id_collapsed[$current] = $mm['nodes'][$current]['collapsed'];
-    $current = $mm['nodes'][$current]['parent'];
-  }
-
-  $id_collapsed = array_reverse( $id_collapsed, true);
-  foreach ($id_collapsed as $id=>$collapsed)
-    if ($collapsed) {
-      $mm['active_node'] = $id;
-      break;
-    }
-
-  if ($no_display) return;
-
-  build_map($mm);
-  center_active_node($mm);
-  display($mm);
+	if ($keep<=0)
+		$mm['nodes'][$id]['collapsed'] = true;
+	else
+	{
+		$mm['nodes'][$id]['collapsed'] = false;
+		foreach ($mm['nodes'][$id]['children'] as $cid)
+			collapse($mm, $cid, $keep-1);
+	}
 
 }
 
+
+
+function collapse_level(&$mm, $level, $no_display = false)
+{
+	collapse($mm, $mm['root'], $level);
+
+	$id_collapsed = [];
+	$current = $mm['active_node'];
+	while ($current != $mm['root'])
+	{
+		$id_collapsed[$current] = $mm['nodes'][$current]['collapsed'];
+		$current = $mm['nodes'][$current]['parent'];
+	}
+
+	$id_collapsed = array_reverse( $id_collapsed, true);
+	foreach ($id_collapsed as $id=>$collapsed)
+		if ($collapsed)
+		{
+			$mm['active_node'] = $id;
+			break;
+		}
+
+	if ($no_display) return;
+
+	build_map($mm);
+	center_active_node($mm);
+	display($mm);
+}
 
 
 
 // }}}
 // {{{ display
 
-function display(&$mm, $force_center = false){
+function display(&$mm, $force_center = false)
+{
+	if ($mm['focus_lock'])
+	{
+		focus($mm);
+		build_map($mm);
+	}
 
-  if ($mm['focus_lock']) {
-    focus($mm);
-    build_map($mm);
-  }
+	if ($mm['center_lock'] || $force_center)
+		center_active_node($mm);
+	else
+		move_window($mm);
 
-  if ($mm['center_lock'] || $force_center)
-    center_active_node($mm);
-  else
-    move_window($mm);
+	$mm['terminal_width']  = exec('tput cols');
+	$mm['terminal_height'] = exec('tput lines');
 
-  $mm['terminal_width']  = exec('tput cols');
-  $mm['terminal_height'] = exec('tput lines');
-
-  $blank = str_repeat(' ', $mm['terminal_width']);
-
-
-  // calculating the coordinates of the active node
-
-  $x1 =
-    max(
-      0,
-      $mm['nodes'][ $mm['active_node'] ]['x'] -
-      1 -
-      $mm['win_left']
-    );
-
-  $x2 =
-    $mm['nodes'][ $mm['active_node'] ]['w'] +
-    $x1 +
-    2 -
-    ($mm['active_node']==0 && left_padding==0);
-
-  $y1 =
-    max(
-      0,
-      $mm['nodes'][ $mm['active_node'] ]['y'] +
-      $mm['nodes'][ $mm['active_node'] ]['yo'] -
-      $mm['win_top']
-    );
-
-  $y2 =
-    $mm['nodes'][ $mm['active_node'] ]['lh'] +
-    $y1;
+	$blank = str_repeat(' ', $mm['terminal_width']);
 
 
-  // building the output
+	// calculating the coordinates of the active node
 
-  $output = '';
+	$x1 =
+		max
+		(
+			 0
+			,$mm['nodes'][ $mm['active_node'] ]['x']
+			-1
+			-$mm['win_left']
+		)
+	;
 
-  for ( $y = 0 ; $y < $mm['terminal_height'] ; $y++ ) {
+	$x2 
+		= $mm['nodes'][ $mm['active_node'] ]['w']
+		+ $x1
+		+ 2
+		- ($mm['active_node']==0 && left_padding==0)
+	;
 
-    if (isset($mm['map'][$y+$mm['win_top']]))
-      $line = 
-        mb_substr(
-          $mm['map'][$y+$mm['win_top']],
-          $mm['win_left'],
-          $mm['terminal_width']
-        );
-    else
-      $line = $blank;
+	$y1 =
+		max
+		(
+			  0
+			, $mm['nodes'][ $mm['active_node'] ]['y']
+			+ $mm['nodes'][ $mm['active_node'] ]['yo']
+			- $mm['win_top']
+		)
+	;
 
-    // this one really depends on (x,y), but after this, the
-    // coordinates are not reliable anymore because of the 
-    // added escape codes.
-
-    if ( $y >= $y1 && $y < $y2 )
-      $line =
-        mb_substr($line, 0, $x1).
-        $mm['active_node_color'].
-        mb_substr($line, $x1, $x2-$x1).
-        reset_color.
-        mb_substr($line, $x2);
-
-
-    // this is here, because it doesn't need coordinates.
-    // only inverting instead of giving another color, 
-    // because, otherwise, it would conflict with the active
-    // node's highlight and it's a little complicated to fix.
-
-    if ($mm['query'] ?? '' != '')
-      $line = 
-        str_ireplace(
-          $mm['query'],
-          invert_on.$mm['query'].invert_off,
-          $line);
-
-    // styling the collapsed symbol 
-
-    $line =
-      str_replace(
-        ' [+]',
-        ' '.
-        collapsed_symbol_on.
-        '[+]'.
-        collapsed_symbol_off,
-        $line
-      );
-
-    // styling the lines
-
-    mb_regex_encoding("UTF-8");
-    mb_internal_encoding("UTF-8");
-    $line = 
-      mb_ereg_replace(
-        '([─-╱]+)',
-        line_on.'\\1'.line_off,
-        $line
-      );
-
-    // adding the logo
-
-    if ($mm['show_logo']>0) {
-
-      if     ($y==2)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' ╭────────────╮    '.default_color;
-      elseif ($y==3)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │     ┏━ m   │    '.default_color;
-      elseif ($y==4)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │ h ━━┫      │    '.default_color;
-      elseif ($y==5)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │     ┗━━━ m │    '.default_color;
-      elseif ($y==6)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' ╰────────────╯    '.default_color;
-      elseif ($y==7)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '                   '.default_color;
-      elseif ($y==8)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '       hackers     '.default_color;
-      elseif ($y==9)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '          mind     '.default_color;
-      elseif ($y==10) $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '           map     '.default_color;
-
-    } 
+	$y2 
+		= $mm['nodes'][ $mm['active_node'] ]['lh']
+		+ $y1
+	;
 
 
-    // done!
+	// building the output
 
-    $output .= $line;
+	$output = '';
 
-  }
+	for ( $y = 0 ; $y < $mm['terminal_height'] ; $y++ )
+	{
+		if (isset($mm['map'][$y+$mm['win_top']]))
+			$line =
+				mb_substr(
+					$mm['map'][$y+$mm['win_top']],
+					$mm['win_left'],
+					$mm['terminal_width']
+				)
+			;
+		else
+			$line = $blank;
+
+		// this one really depends on (x,y), but after this, the
+		// coordinates are not reliable anymore because of the
+		// added escape codes.
+
+		if ( $y >= $y1 && $y < $y2 )
+			$line =
+				 mb_substr($line, 0, $x1)
+				.$mm['active_node_color']
+				.mb_substr($line, $x1, $x2-$x1)
+				.reset_color
+				.mb_substr($line, $x2)
+			;
 
 
-  echo reset_page.reset_color.$output; 
+		// this is here, because it doesn't need coordinates.
+		// only inverting instead of giving another color,
+		// because, otherwise, it would conflict with the active
+		// node's highlight and it's a little complicated to fix.
 
-  $mm['show_logo']--;
+		if ($mm['query'] ?? '' != '')
+			$line =
+				str_ireplace
+				(
+					$mm['query']
+					,invert_on.$mm['query'].invert_off
+					,$line
+				)
+			;
 
+		// styling the collapsed symbol
+
+		$line =
+			str_replace
+			(
+				 ' [+]'
+				,' '
+				.collapsed_symbol_on
+				.'[+]'
+				.collapsed_symbol_off
+				,$line
+			)
+		;
+
+		// styling the lines
+
+		mb_regex_encoding("UTF-8");
+		mb_internal_encoding("UTF-8");
+		$line =
+			mb_ereg_replace
+			(
+				 '([─-╱]+)'
+				,line_on.'\\1'.line_off
+				,$line
+			)
+		;
+
+		// adding the logo
+
+		if ($mm['show_logo']>0)
+		{
+			if     ($y==2)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' ╭────────────╮    '.default_color;
+			elseif ($y==3)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │     ┏━ m   │    '.default_color;
+			elseif ($y==4)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │ h ━━┫      │    '.default_color;
+			elseif ($y==5)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │     ┗━━━ m │    '.default_color;
+			elseif ($y==6)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' ╰────────────╯    '.default_color;
+			elseif ($y==7)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '                   '.default_color;
+			elseif ($y==8)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '       hackers     '.default_color;
+			elseif ($y==9)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '          mind     '.default_color;
+			elseif ($y==10) $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '           map     '.default_color;
+		}
+
+		// done!
+		$output .= $line;
+	}
+
+	echo reset_page.reset_color.$output;
+	$mm['show_logo']--;
 }
 
 
@@ -2143,102 +2136,100 @@ function display(&$mm, $force_center = false){
 // }}}
 // {{{ monitor key presses
 
-function monitor_key_presses(&$mm){
+function monitor_key_presses(&$mm)
+{
+	stream_set_blocking(STDIN,false);
 
-  stream_set_blocking(STDIN,false);
+	while(true)
+	{
+		usleep(20000);
+		$in = fread(STDIN, 16);
+		if (empty($in)) continue;
 
-  while(true){
+		switch ($in)
+		{
+			case 'q':			quit($mm); break;
+			case ctrl_c:		quit($mm); break;
+			case 'Q':			exit; break;
 
-    usleep(20000);
-    $in = fread(STDIN, 16);
-    if (empty($in)) continue;
+			case 'm':			go_to_root($mm); break;
+			case '~':			go_to_root($mm); break;
+			case 'g':			go_to_top($mm); break;
+			case 'G':			go_to_bottom($mm); break;
 
-    // --- easier than :wq? ;)
+			case arr_down:		change_active_node($mm, move_down); break;
+			case arr_right:		change_active_node($mm, move_right); break;
+			case arr_up:		change_active_node($mm, move_up); break;
+			case arr_left:		change_active_node($mm, move_left); break;
 
-    if ($in=='q')    quit($mm);
-    if ($in=="\003") quit($mm); // ctrl+c
-    if ($in=='Q')    exit;
+			case 'j':			change_active_node($mm, move_down); break;
+			case 'l':			change_active_node($mm, move_right); break;
+			case 'k':			change_active_node($mm, move_up); break;
+			case 'h':			change_active_node($mm, move_left); break;
 
+			case 'w':			adjust_width($mm, width_wider); break;
+			case 'W':			adjust_width($mm, width_narrower); break;
 
-    // --- only changing the view ---
+			case 'Z':			adjust_spacing($mm, spacing_wider); break;
+			case 'z':			adjust_spacing($mm, spacing_narrower); break;
 
-    if ($in=='m')   go_to_root($mm);
-    if ($in=='~')   go_to_root($mm);
-    if ($in=='g')   go_to_top($mm);
-    if ($in=='G')   go_to_bottom($mm);
+			case 'y':			yank_node($mm); break;
+			case 'Y':			yank_node($mm, true); break;
 
-    if ($in=="\033\133\102")  change_active_node($mm, move_down);
-    if ($in=="\033\133\103")  change_active_node($mm, move_right);
-    if ($in=="\033\133\101")  change_active_node($mm, move_up);
-    if ($in=="\033\133\104")  change_active_node($mm, move_left);
+			case 'f':			{ focus($mm); build_map($mm); display($mm,true); } break;
+			case 'F':			toggle_focus($mm); break;
 
-    if ($in=='j')   change_active_node($mm, move_down);
-    if ($in=='l')   change_active_node($mm, move_right);
-    if ($in=='k')   change_active_node($mm, move_up);
-    if ($in=='h')   change_active_node($mm, move_left);
+			case 'c':			{ center_active_node($mm); display($mm); } break;
+			case 'C':			{ $mm['center_lock'] = !$mm['center_lock']; display($mm); } break;
 
-    if ($in=='w')   adjust_width($mm, width_wider);
-    if ($in=='W')   adjust_width($mm, width_narrower);
+			case '/':			search($mm); break;
+			case 'n':			next_search_result($mm); break;
+			case 'N':			previous_search_result($mm); break;
 
-    if ($in=='Z')   adjust_spacing($mm, spacing_wider);
-    if ($in=='z')   adjust_spacing($mm, spacing_narrower);
+			case 's':			save($mm); break;
+			case 'S':			save($mm, true); break;
 
-    if ($in=='y')   yank_node($mm);
-    if ($in=='Y')   yank_node($mm, true);
+			case ' ':			toggle($mm); break;
 
-    if ($in=='f')   { focus($mm); build_map($mm); display($mm,true); }
-    if ($in=='F')   toggle_focus($mm);
+			case 'b':			expand_all($mm); break;
+			case 'v':			collapse_all($mm); break;
 
-    if ($in=='c')   { center_active_node($mm); display($mm); }
-    if ($in=='C')   { $mm['center_lock'] = !$mm['center_lock']; display($mm); }
+			case '1':			collapse_level($mm, 1); break;
+			case '2':			collapse_level($mm, 2); break;
+			case '3':			collapse_level($mm, 3); break;
+			case '4':			collapse_level($mm, 4); break;
+			case '5':			collapse_level($mm, 5); break;
+			case '6':			collapse_level($mm, 6); break;
+			case '7':			collapse_level($mm, 7); break;
+			case '8':			collapse_level($mm, 8); break;
+			case '9':			collapse_level($mm, 9); break;
 
-    if ($in=='/')   search($mm);
-    if ($in=='n')   next_search_result($mm);
-    if ($in=='N')   previous_search_result($mm);
+			case 'd':			delete_node($mm); break;
+			case 'D':			delete_node($mm, true); break;
 
-    if ($in=='s')   save($mm);
-    if ($in=='S')   save($mm, true);
+			case 'p':			paste_sub_tree($mm, false); break;
+			case 'P':			paste_sub_tree($mm, true); break;
+			case ctrl_p:		append($mm); break;
 
-    if ($in==' ')   toggle($mm);
+			case 'J':			move_active_node_down($mm); break;
+			case 'K':			move_active_node_up($mm); break;
 
-    if ($in=='b')   expand_all($mm);
-    if ($in=='v')   collapse_all($mm);
+			case 'o':			insert_node($mm, insert_sibling); break;
+			case "\n":			insert_node($mm, insert_sibling); break;
+			case 'O':			insert_node($mm, insert_child); break;
+			case "\t":			insert_node($mm, insert_child); break;
 
-    if ($in=='1')   collapse_level($mm, 1);
-    if ($in=='2')   collapse_level($mm, 2);
-    if ($in=='3')   collapse_level($mm, 3);
-    if ($in=='4')   collapse_level($mm, 4);
-    if ($in=='5')   collapse_level($mm, 5);
-    if ($in=='6')   collapse_level($mm, 6);
-    if ($in=='7')   collapse_level($mm, 7);
-    if ($in=='8')   collapse_level($mm, 8);
-    if ($in=='9')   collapse_level($mm, 9);
+			case 'e':			edit_node($mm); break;
+			case 'E':			edit_node($mm, true); break;
 
-    if ($in=='d')   delete_node($mm);
-    if ($in=='D')   delete_node($mm, true);
+			case 'U':			debug($mm['nodes']); break;
+		}
 
-    if ($in=='p')    paste_sub_tree($mm, false);
-    if ($in=='P')    paste_sub_tree($mm, true);
-    if ($in=="\020") append($mm); // ^p
-
-    if ($in=='J')   move_active_node_down($mm);
-    if ($in=='K')   move_active_node_up($mm);
-
-    if ($in=='o' || $in=="\n")   insert_node($mm, insert_sibling);
-    if ($in=='O' || $in=="\t")   insert_node($mm, insert_child);
-
-    if ($in=='e')   edit_node($mm);
-    if ($in=='E')   edit_node($mm, true);
-
-    if ($in=='U')   debug($mm['nodes']);
-
-    // move(1,1);
-    // for ($i=0; $i<strlen($in); $i++)
-    //   echo base_convert(ord($in[$i]),10,8).' ';
-    // echo '                    ';
-
-  }
-
+		// move(1,1);
+		// for ($i=0; $i<strlen($in); $i++)
+		//   echo base_convert(ord($in[$i]),10,8).' ';
+		// echo '                    ';
+	}
 }
 
 // }}}
@@ -2251,7 +2242,7 @@ load_file($mm);
 
 collapse_level($mm, $mm['initial_depth'], true);
 
-build_map($mm); 
+build_map($mm);
 center_active_node($mm);
 display($mm);
 monitor_key_presses($mm);
