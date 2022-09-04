@@ -3,7 +3,7 @@
 
 **h-m-m** (pronounced like the interjection "hmm") is a simple, fast, keyboard-centric terminal tool for working with mind maps. 
 
-![screenshot](h-m-m.png)
+![screenshot](screenshot.png)
 
 
 # Key bindings
