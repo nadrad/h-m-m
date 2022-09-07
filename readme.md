@@ -58,10 +58,11 @@ Search:
 * `n` - goes to the next search result
 * `N` - goes to the previous search result
 
-Save and quit:
+Save, export, and quit:
 
 * `s` - saves with the previous file name (or asks for one if there's none)
 * `S` - saves with a new file name
+* `x` - export as HTML
 * `q` - quits (if the changes were already saved)
 * `Q` - quits, ignoring the changes
 

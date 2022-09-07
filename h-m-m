@@ -829,10 +829,6 @@ function build_map(&$mm)
 	calculate_y($mm);
 	calculate_height_shift($mm, $mm['root']);
 
-	// in case it was resized!
-	$mm['terminal_width']  = exec('tput cols');
-	$mm['terminal_height'] = exec('tput lines');
-
 	// resetting the map, 2/2
 	$height = max($mm['map_bottom'],$mm['terminal_height']);
 	$blank = str_repeat(' ', $mm['map_width']+$mm['terminal_width']);
@@ -1379,6 +1375,109 @@ function move_active_node_up(&$mm)
 
 	build_map($mm);
 	display($mm);
+}
+
+
+
+// }}}
+// {{{ export html
+
+function export_html(&$mm)
+{
+
+	if (empty($mm['filename']))
+	{
+		message($mm, "Can't export the map when it doesn't have a file name yet. Save it first.");
+		return;
+	}
+
+	$file = fopen($mm['filename'].'.html', "w");
+
+	if ($file===false)
+	{
+		message($mm, 'ERROR! Could not save the file');
+		return;
+	}
+
+
+	fwrite
+	(
+		$file
+		,'<!DOCTYPE html>'
+		.'<html>'
+		.'<head>'
+		.'<style>'
+		.'body { background-color: #222; color: #ddd; font-family: monospaced; padding: 0;}'
+		.'#root {margin:10px 0}'
+		.'p:before { content: "━ "; }'
+		.'p, summary { padding: 8px; margin: 0; }'
+		.'details, p { padding-left: 29px; border-left: 3px solid #444; }'
+		.'summary { margin-left: -10px; cursor: pointer; }'
+		.'summary:hover { color: #fbc531; }'
+		.'details:hover, p:hover { border-color: #e1b12c; }'
+		.'#source { position: absolute; bottom: 0; left: 0; padding: 5px 15px 8px 15px; margin: 100px 0 0 0; }'
+		.'#source { background-color: #333; border: none; box-sizing: border-box;}'
+		.'#source > summary { list-style: none; }'
+		.'#source[open] { position: static; margin: 100px 0 0 0; }'
+		.'#map { margin: 40px 30px; }'
+		.'</style>'
+		.'</head>'
+		.'<body>'
+		.'<div id=map>'
+		.export_html_node($mm, $mm['root'])
+		.'</div>'
+		.'<details id=source>'
+		.'<summary>This is a limited, read-only version of a mind-map created in h-m-m | view source!</summary>'
+		.'<pre>'
+		.encode_tree($mm,$mm['root'])
+		.'</pre>'
+		.'</details>'
+		.'</body>'
+		.'</html>'
+	);
+
+	fclose($file);
+
+	message($mm, 'Exported as '.$mm['filename'].'.html');
+
+}
+
+
+function export_html_node(&$mm, $parent_id)
+{
+	if ($mm['nodes'][$parent_id]['children']==[])
+	{
+		$output =
+			"<p>"
+			.$mm['nodes'][$parent_id]['title']
+			."</p>";
+	}
+	elseif ($parent_id==$mm['root'])
+	{
+		$output = 
+			"<div id=root>"
+			.$mm['nodes'][$parent_id]['title']
+			."</div>";
+
+		foreach ($mm['nodes'][$parent_id]['children'] as $cid)
+			$output .= export_html_node($mm, $cid);
+	}
+	else
+	{
+		$output =
+			"<details>"
+			."<summary>"
+			.$mm['nodes'][$parent_id]['title']
+			."</summary>";
+
+		foreach ($mm['nodes'][$parent_id]['children'] as $cid)
+			$output .= export_html_node($mm, $cid);
+
+		$output .=
+			"</details>";
+	}
+
+	return $output;
 }
 
 
@@ -2185,6 +2284,8 @@ function monitor_key_presses(&$mm)
 			case '/':			search($mm); break;
 			case 'n':			next_search_result($mm); break;
 			case 'N':			previous_search_result($mm); break;
+
+			case 'x':			export_html($mm); break;
 
 			case 's':			save($mm); break;
 			case 'S':			save($mm, true); break;
