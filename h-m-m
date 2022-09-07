@@ -1439,6 +1439,7 @@ function export_html(&$mm)
 	fclose($file);
 
 	message($mm, 'Exported as '.$mm['filename'].'.html');
+	copy_to_clipboard($mm['filename'].'.html');
 
 }
 
