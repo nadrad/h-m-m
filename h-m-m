@@ -1234,7 +1234,8 @@ function search(&$mm)
 		return;
 	}
 
-	next_search_result($mm);
+	if (!next_search_result($mm))
+		previous_search_result($mm);
 }
 
 function previous_search_result(&$mm)
@@ -1262,10 +1263,7 @@ function previous_search_result(&$mm)
 		}
 
 	if ($nid<0)
-	{
-		display($mm);
-		return;
-	}
+		return false;
 
 	$mm['active_node'] = $nid;
 	display($mm);
@@ -1296,10 +1294,7 @@ function next_search_result(&$mm)
 		}
 
 	if ($nid<0)
-	{
-		display($mm);
-		return;
-	}
+		return false;
 
 	$mm['active_node'] = $nid;
 	display($mm);
