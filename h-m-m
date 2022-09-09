@@ -10,7 +10,7 @@ $mm['line_spacing']			= 1;
 $mm['center_lock']			= false;
 $mm['focus_lock']			= false;
 $mm['initial_depth']		= 1;
-$mm['show_logo']			= 1;
+$mm['show_logo']			= 0;
 
 $mm['active_node_color']	= "\033[38;5;0m\033[48;5;172m\033[1m";
 $mm['message_color']		= "\033[38;5;0m\033[48;5;141m\033[1m";
@@ -207,6 +207,7 @@ function debug($nodes)
 			.substr($data['title'],0,70)
 			."\n"
 		;
+	echo " id   pr    x    w    y   yo    h   lh  clh     title\n";
 }
 
 
@@ -516,36 +517,36 @@ function calculate_y(&$mm)
 
 function calculate_children_y(&$mm,$pid)
 {
-		$y = $mm['nodes'][$pid]['y'];
+	$y = $mm['nodes'][$pid]['y'];
 
-		$mm['nodes'][$pid]['yo'] =
-			round(
+	$mm['nodes'][$pid]['yo'] =
+		round(
+			(
+				+ $mm['nodes'][$pid]['h']
+				- $mm['nodes'][$pid]['lh']
+			)/2
+		)
+	;
+
+	if (!($mm['nodes'][$pid]['collapsed'] ?? false))
+		foreach ($mm['nodes'][$pid]['children'] as $cid)
+		{
+			$mm['nodes'][$cid]['y'] = $y;
+
+			$mm['map_bottom'] =
+				max
 				(
-					+ $mm['nodes'][$pid]['h']
-					- $mm['nodes'][$pid]['lh']
-				)/2
-			)
-		;
+					 $mm['map_bottom']
+					,$mm['nodes'][$cid]['lh']
+					+$mm['line_spacing']
+					+$y
+				)
+			;
 
-		if (!($mm['nodes'][$pid]['collapsed'] ?? false))
-			foreach ($mm['nodes'][$pid]['children'] as $cid)
-			{
-				$mm['nodes'][$cid]['y'] = $y;
-
-				$mm['map_bottom'] =
-					max
-					(
-						 $mm['map_bottom']
-						,$mm['nodes'][$cid]['lh']
-						+$mm['line_spacing']
-						+$y
-					)
-				;
-
-				$mm['map_top'] = min($mm['map_top'],$y);
-				$y += $mm['nodes'][$cid]['h'];
-				calculate_children_y($mm,$cid);
-			}
+			$mm['map_top'] = min($mm['map_top'],$y);
+			$y += $mm['nodes'][$cid]['h'];
+			calculate_children_y($mm,$cid);
+		}
 }
 
 // }}}
@@ -1404,21 +1405,26 @@ function export_html(&$mm)
 	(
 		$file
 		,'<!DOCTYPE html>'
-		.'<html>'
+		.'<html lang=en>'
 		.'<head>'
+		.'<title>'
+		.$mm['nodes'][ $mm['root'] ]['title']
+		.'</title>'
+		.'<meta charset="UTF-8">'
+    	.'<meta name=viewport content="width=device-width,initial-scale=1,user-scalable=yes">'
 		.'<style>'
 		.'body { background-color: #222; color: #ddd; font-family: monospace; padding: 0; font-size: 16px; }'
 		.'#root {margin:10px 0}'
 		.'p:before { content: "━ "; }'
-		.'p, summary { padding: 8px; margin: 0; }'
-		.'details, p { padding-left: 29px; border-left: 3px solid #444; }'
+		.'p, summary { padding: 8px; margin: 0; font-size: 16px; }'
+		.'details, p { padding-left: 29px; border-left: 3px solid #444; font-size:16px; }'
 		.'summary { margin-left: -10px; cursor: pointer; }'
 		.'summary:hover, p:hover { color: #fbc531; }'
 		.'details:hover, p:hover { border-color: #e1b12c; }'
 		.'#source { position: absolute; bottom: 0; left: 0; padding: 5px 15px 8px 15px; margin: 100px 0 0 0; }'
 		.'#source { background-color: #333; border: none; box-sizing: border-box;}'
 		.'#source > summary { list-style: none; }'
-		.'#source[open] { position: static; margin: 100px 0 0 0; }'
+		.'#source[open] { position: static; margin: 100px 0 0 0; font-size: 16px; }'
 		.'#map { margin: 40px 30px; }'
 		.'</style>'
 		.'</head>'
@@ -2202,11 +2208,29 @@ function display(&$mm, $force_center = false)
 		$line =
 			mb_ereg_replace
 			(
-				 '([─-╱]+)'
+				'([─-╱]+)'
 				,line_on.'\\1'.line_off
 				,$line
 			)
 		;
+
+		// dimming {meta}s
+
+		$line = 
+			str_replace
+			(
+				'{'
+				,dim_on.'{'
+				,$line
+			);
+
+		$line = 
+			str_replace
+			(
+				 '}'
+				,'}'.dim_off
+				,$line
+			);
 
 		// adding the logo
 
@@ -2342,6 +2366,7 @@ load_settings($mm);
 clear();
 load_file($mm);
 
+collapse_all($mm);
 collapse_level($mm, $mm['initial_depth'], true);
 
 build_map($mm);
