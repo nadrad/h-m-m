@@ -2172,7 +2172,6 @@ function display(&$mm, $force_center = false)
 				.mb_substr($line, $x2)
 			;
 
-
 		// this is here, because it doesn't need coordinates.
 		// only inverting instead of giving another color,
 		// because, otherwise, it would conflict with the active
@@ -2211,6 +2210,17 @@ function display(&$mm, $force_center = false)
 			(
 				'([─-╱]+)'
 				,line_on.'\\1'.line_off
+				,$line
+			)
+		;
+
+		// styling the codes
+
+		$line =
+			mb_ereg_replace
+			(
+				'\b(.\d)\. '
+				,dim_on.'\\1. '.dim_off
 				,$line
 			)
 		;
@@ -2283,53 +2293,72 @@ function monitor_key_presses(&$mm)
 
 		switch ($in)
 		{
-			case 'q':			quit($mm); break;
-			case ctrl_c:		quit($mm); break;
-			case 'Q':			exit; break;
 
-			case 'm':			go_to_root($mm); break;
-			case '~':			go_to_root($mm); break;
+			case 'b':			expand_all($mm); break;
+
+			case 'c':			{ center_active_node($mm); display($mm); } break;
+			case 'C':			{ $mm['center_lock'] = !$mm['center_lock']; display($mm); } break;
+			case ctrl_c:		quit($mm); break;
+
+			case 'd':			delete_node($mm); break;
+			case 'D':			delete_node($mm, true); break;
+
+			case 'e':			edit_node($mm); break;
+			case 'E':			edit_node($mm, true); break;
+
+			case 'f':			{ focus($mm); build_map($mm); display($mm,true); } break;
+			case 'F':			toggle_focus($mm); break;
+
 			case 'g':			go_to_top($mm); break;
 			case 'G':			go_to_bottom($mm); break;
+
+			case 'h':			change_active_node($mm, move_left); break;
+
+			case 'j':			change_active_node($mm, move_down); break;
+			case 'J':			move_active_node_down($mm); break;
+
+			case 'k':			change_active_node($mm, move_up); break;
+			case 'K':			move_active_node_up($mm); break;
+
+			case 'l':			change_active_node($mm, move_right); break;
+
+			case 'm':			go_to_root($mm); break;
+
+			case 'n':			next_search_result($mm); break;
+			case 'N':			previous_search_result($mm); break;
+
+			case 'o':			insert_node($mm, insert_sibling); break;
+			case 'O':			insert_node($mm, insert_child); break;
+
+			case 'p':			paste_sub_tree($mm, false); break;
+			case 'P':			paste_sub_tree($mm, true); break;
+			case ctrl_p:		append($mm); break;
+
+			case 'q':			quit($mm); break;
+			case 'Q':			exit; break;
+
+			case 's':			save($mm); break;
+			case 'S':			save($mm, true); break;
+
+			case 'U':			debug($mm['nodes']); break;
+
+			case 'v':			collapse_all($mm); break;
+
+			case 'w':			adjust_width($mm, width_wider); break;
+			case 'W':			adjust_width($mm, width_narrower); break;
+
+			case 'x':			export_html($mm); break;
+
+			case 'y':			yank_node($mm); break;
+			case 'Y':			yank_node($mm, true); break;
+
+			case 'Z':			adjust_spacing($mm, spacing_wider); break;
+			case 'z':			adjust_spacing($mm, spacing_narrower); break;
 
 			case arr_down:		change_active_node($mm, move_down); break;
 			case arr_right:		change_active_node($mm, move_right); break;
 			case arr_up:		change_active_node($mm, move_up); break;
 			case arr_left:		change_active_node($mm, move_left); break;
-
-			case 'j':			change_active_node($mm, move_down); break;
-			case 'l':			change_active_node($mm, move_right); break;
-			case 'k':			change_active_node($mm, move_up); break;
-			case 'h':			change_active_node($mm, move_left); break;
-
-			case 'w':			adjust_width($mm, width_wider); break;
-			case 'W':			adjust_width($mm, width_narrower); break;
-
-			case 'Z':			adjust_spacing($mm, spacing_wider); break;
-			case 'z':			adjust_spacing($mm, spacing_narrower); break;
-
-			case 'y':			yank_node($mm); break;
-			case 'Y':			yank_node($mm, true); break;
-
-			case 'f':			{ focus($mm); build_map($mm); display($mm,true); } break;
-			case 'F':			toggle_focus($mm); break;
-
-			case 'c':			{ center_active_node($mm); display($mm); } break;
-			case 'C':			{ $mm['center_lock'] = !$mm['center_lock']; display($mm); } break;
-
-			case '/':			search($mm); break;
-			case 'n':			next_search_result($mm); break;
-			case 'N':			previous_search_result($mm); break;
-
-			case 'x':			export_html($mm); break;
-
-			case 's':			save($mm); break;
-			case 'S':			save($mm, true); break;
-
-			case ' ':			toggle($mm); break;
-
-			case 'b':			expand_all($mm); break;
-			case 'v':			collapse_all($mm); break;
 
 			case '1':			collapse_level($mm, 1); break;
 			case '2':			collapse_level($mm, 2); break;
@@ -2341,25 +2370,13 @@ function monitor_key_presses(&$mm)
 			case '8':			collapse_level($mm, 8); break;
 			case '9':			collapse_level($mm, 9); break;
 
-			case 'd':			delete_node($mm); break;
-			case 'D':			delete_node($mm, true); break;
+			case '~':			go_to_root($mm); break;
+			case ' ':			toggle($mm); break;
+			case '/':			search($mm); break;
 
-			case 'p':			paste_sub_tree($mm, false); break;
-			case 'P':			paste_sub_tree($mm, true); break;
-			case ctrl_p:		append($mm); break;
-
-			case 'J':			move_active_node_down($mm); break;
-			case 'K':			move_active_node_up($mm); break;
-
-			case 'o':			insert_node($mm, insert_sibling); break;
 			case "\n":			insert_node($mm, insert_sibling); break;
-			case 'O':			insert_node($mm, insert_child); break;
 			case "\t":			insert_node($mm, insert_child); break;
 
-			case 'e':			edit_node($mm); break;
-			case 'E':			edit_node($mm, true); break;
-
-			case 'U':			debug($mm['nodes']); break;
 		}
 
 		// move(1,1);
