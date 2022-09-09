@@ -133,7 +133,7 @@ const dim_off				= "\033[22m";
 const line_on				= "\033[0m\033[38;5;95m";
 const line_off				= "\033[0m";
 
-const collapsed_symbol_on	= "\033[1m\033[38;5;215m";
+const collapsed_symbol_on	= "\033[38;5;215m";
 const collapsed_symbol_off	= "\033[0m";
 
 
@@ -2020,6 +2020,31 @@ function expand_siblings(&$mm, $id)
 // }}}
 // {{{ collapse
 
+function collapse_other_branches(&$mm)
+{
+	if ($mm['active_node'] == $mm['root'])
+		return;
+
+	$branch = find_branch($mm, $mm['active_node']);
+
+	foreach ($mm['nodes'][ $mm['root'] ]['children'] as $bid)
+		if ($bid != $branch)
+			$mm['nodes'][$bid]['collapsed'] = true;
+
+	build_map($mm);
+	center_active_node($mm);
+	display($mm);
+}
+
+function find_branch(&$mm, $cid)
+{
+	if ($mm['nodes'][$cid]['parent'] == $mm['root'])
+		return $cid;
+	else
+		return find_branch($mm, $mm['nodes'][$cid]['parent']);
+}
+
+
 function collapse_all(&$mm)
 {
 	foreach ($mm['nodes'] as $id=>$node)
@@ -2308,6 +2333,8 @@ function monitor_key_presses(&$mm)
 			case 'G':			go_to_bottom($mm); break;
 
 			case 'h':			change_active_node($mm, move_left); break;
+
+			case 'i':			collapse_other_branches($mm); break;
 
 			case 'j':			change_active_node($mm, move_down); break;
 			case 'J':			move_active_node_down($mm); break;
