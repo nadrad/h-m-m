@@ -14,6 +14,7 @@ $mm['show_logo']			= 0;
 
 $mm['active_node_color']	= "\033[38;5;0m\033[48;5;172m\033[1m";
 $mm['message_color']		= "\033[38;5;0m\033[48;5;141m\033[1m";
+$mm['question_color']		= "\033[38;5;168m";
 
 
 function load_settings(&$mm)
@@ -2213,6 +2214,16 @@ function display(&$mm, $force_center = false)
 				,$line
 			)
 		;
+
+		// styling "???"
+
+		$line = 
+			str_replace
+			(
+				 '???'
+				,$mm['question_color'].'???'.default_color
+				,$line
+			);
 
 		// dimming {meta}s
 
