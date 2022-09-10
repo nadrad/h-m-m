@@ -853,7 +853,8 @@ function build_map(&$mm)
 
 function toggle(&$mm)
 {
-	if ($mm['nodes'][ $mm['active_node'] ]['is_leaf']) return;
+	if ($mm['nodes'][ $mm['active_node'] ]['is_leaf'])
+		$mm['active_node'] = $mm['nodes'][ $mm['active_node'] ]['parent'];
 
 	$mm['nodes'][ $mm['active_node'] ]['collapsed'] =
 		!($mm['nodes'][ $mm['active_node'] ]['collapsed'] ?? false);
