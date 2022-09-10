@@ -438,7 +438,6 @@ function calculate_x_and_lh(&$mm, $id)
 		)
 	;
 
-
 	$mm['nodes'][$id]['clh'] = 0;
 	if (($mm['nodes'][$id]['collapsed'] ?? false) || $mm['nodes'][$id]['is_leaf'])
 		$mm['nodes'][$id]['clh'] = $mm['nodes'][$id]['lh'];
@@ -495,6 +494,8 @@ function calculate_h(&$mm)
 							, $node['lh'] 
 							+ $mm['line_spacing'] 
 						)
+						+ ($mm['nodes'][$id]['parent'] == $mm['root'])
+						* $mm['line_spacing'];
 					;
 			}
 	}
