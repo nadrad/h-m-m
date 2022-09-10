@@ -2193,11 +2193,17 @@ function display(&$mm, $force_center = false)
 				.reset_color
 				.mb_substr($line, $x2)
 			;
+		else // styling the codes when the node is not active
+			$line =
+				mb_ereg_replace
+				(
+					'\b(.\d)\. '
+					,dim_on.'\\1. '.dim_off
+					,$line
+				)
+			;
 
-		// this is here, because it doesn't need coordinates.
-		// only inverting instead of giving another color,
-		// because, otherwise, it would conflict with the active
-		// node's highlight and it's a little complicated to fix.
+		// styling the search results
 
 		if ($mm['query'] ?? '' != '')
 			$line =
@@ -2232,17 +2238,6 @@ function display(&$mm, $force_center = false)
 			(
 				'([─-╱]+)'
 				,line_on.'\\1'.line_off
-				,$line
-			)
-		;
-
-		// styling the codes
-
-		$line =
-			mb_ereg_replace
-			(
-				'\b(.\d)\. '
-				,dim_on.'\\1. '.dim_off
 				,$line
 			)
 		;
