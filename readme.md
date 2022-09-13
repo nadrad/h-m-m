@@ -52,6 +52,7 @@ Collapsing and expanding:
 * `f` - focuses by collapsing all, but the ancestors and descendants of the active node
 * `F` - locks focus as the active node changes (try it with the center lock)
 * `i` - collapses all the first level items except for the one that contains the active node
+* `I` - collapses the children of the active node
 
 Search:
 

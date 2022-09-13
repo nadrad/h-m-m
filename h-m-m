@@ -2038,6 +2038,20 @@ function collapse_other_branches(&$mm)
 	display($mm);
 }
 
+
+function collapse_inner(&$mm)
+{
+	foreach ($mm['nodes'][ $mm['active_node'] ]['children'] as $cid)
+		$mm['nodes'][$cid]['collapsed'] = true;
+
+	$mm['nodes'][ $mm['active_node'] ]['collapsed'] = false;
+
+	build_map($mm);
+	center_active_node($mm);
+	display($mm);
+}
+
+
 function find_branch(&$mm, $cid)
 {
 	if ($mm['nodes'][$cid]['parent'] == $mm['root'])
@@ -2332,6 +2346,7 @@ function monitor_key_presses(&$mm)
 			case 'h':			change_active_node($mm, move_left); break;
 
 			case 'i':			collapse_other_branches($mm); break;
+			case 'I':			collapse_inner($mm); break;
 
 			case 'j':			change_active_node($mm, move_down); break;
 			case 'J':			move_active_node_down($mm); break;
