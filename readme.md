@@ -10,8 +10,8 @@
 
 Adding, removing, and editing nodes:
 
-* `o` and `enter` - create a new sibling to the active node
-* `O` and `tab` - create a new child for the active node
+* `o` or `enter` - create a new sibling to the active node
+* `O` or `tab` - create a new child for the active node
 * `y` - yanks (copies) the active node and its descendants
 * `Y` - yanks (copies) the descendants of the active node
 * `d` - deletes (cuts) the active node and its descendants
@@ -24,10 +24,10 @@ Adding, removing, and editing nodes:
 
 Relative navigating and moving:
 
-* `h` and `←` - activate the parent of the previously active node
-* `l` and `→` - activate the middle child of the previously active node
-* `j` and `↓` - activate the lower sibling (or the nearest lower node if there's no lower sibling)
-* `k` and `↑` - activate the higher sibling (or the nearest higher node if there's no higher sibling)
+* `h` or `←` - activate the parent of the previously active node
+* `l` or `→` - activate the middle child of the previously active node
+* `j` or `↓` - activate the lower sibling (or the nearest lower node if there's no lower sibling)
+* `k` or `↑` - activate the higher sibling (or the nearest higher node if there's no higher sibling)
 * `J` - moves the current node down among its siblings
 * `K` - moves the current node up among its siblings
 
@@ -35,7 +35,7 @@ Adjusting the view:
 
 * `c` - centers the active node on the screen
 * `C` - locks and always keeps active nodes on the center 
-* `~` and `m` - activate the root element
+* `~` or `m` - activate the root element
 * `g` - goes to the highest element
 * `G` - goes to the lowest element
 * `w` - increases the maximum node width
