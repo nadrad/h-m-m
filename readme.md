@@ -115,6 +115,11 @@ After downloading or cloning, you can run `php h-m-m` in your terminal to run th
 Optionally, you can make the file executable by running the `chmod +x h-m-m` in your terminal, and afterward, you can run it as `h-m-m filename` (assuming that **h-m-m** is in your path). 
 
 
+# Troubleshooting
+
+If it doesn't work, you probably need to install `php7.2-mbstring` (e.g., `sudo apt install php7.2-mbstring` in Ubuntu). Replace `7.2` with the version of php installed on your system. Just in case, you can find the version number by running `php -v`.
+
+
 # Compatibility 
 
 I think the method I've used in this program to interact with the terminal emulator is general and standard enough to be cross-platform, but I've developed it in Linux and I don't have any other operating system to test it on. If you run into a problem in Windows or Mac, let me know, especially if you know how to fix it, and I'll try to make it work. 
