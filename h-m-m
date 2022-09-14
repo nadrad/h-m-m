@@ -139,18 +139,35 @@ const collapsed_symbol_off	= "\033[0m";
 
 
 // }}}
-// {{{ alternative screen
+// {{{ checking the required extensions
 
+function check_required_extensions(): bool
+{
+	if (!function_exists('pcntl_signal')) 
+	{
+		echo 'Required extension pcntl is not enabled; please check your php installation!';
+		echo PHP_EOL;
+		return false;
+	}
+
+	if (!function_exists('mb_strlen')) 
+	{
+		echo 'Required extension mbstring is not enabled; please check your php installation!';
+		echo PHP_EOL;
+		return false;
+	}
+
+	return true;
+}
+
+// }}}
+// {{{ alternative screen
 
 function shutdown()
 {
 	clear();
 	system("tput rmcup && tput cnorm && stty sane");
 	exit;
-}
-
-if (false === check_required_extensions()) {
-    return 1;
 }
 
 register_shutdown_function("shutdown");
@@ -2424,25 +2441,11 @@ function monitor_key_presses(&$mm)
 	}
 }
 
-function check_required_extensions(): bool
-{
-    if (!function_exists('pcntl_signal')) {
-        echo 'Required extension pcntl is not enabled; please check your php installation!';
-        echo PHP_EOL;
-        return false;
-    }
-
-    if (!function_exists('mb_strlen')) {
-        echo 'Required extension mbstring is not enabled; please check your php installation!';
-        echo PHP_EOL;
-        return false;
-    }
-
-    return true;
-}
-
 // }}}
 // {{{ main
+
+if (false === check_required_extensions()) 
+	return 1;
 
 set_up_screen();
 load_settings($mm);
