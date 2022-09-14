@@ -149,6 +149,10 @@ function shutdown()
 	exit;
 }
 
+if (false === check_required_extensions()) {
+    return 1;
+}
+
 register_shutdown_function("shutdown");
 declare(ticks = 1);
 pcntl_signal(SIGINT,"shutdown");
@@ -2418,6 +2422,23 @@ function monitor_key_presses(&$mm)
 		//   echo base_convert(ord($in[$i]),10,8).' ';
 		// echo '                    ';
 	}
+}
+
+function check_required_extensions(): bool
+{
+    if (!function_exists('pcntl_signal')) {
+        echo 'Required extension pcntl is not enabled; please check your php installation!';
+        echo PHP_EOL;
+        return false;
+    }
+
+    if (!function_exists('mb_strlen')) {
+        echo 'Required extension mbstring is not enabled; please check your php installation!';
+        echo PHP_EOL;
+        return false;
+    }
+
+    return true;
 }
 
 // }}}
