@@ -119,6 +119,8 @@ Optionally, you can make the file executable by running the `chmod +x h-m-m` in 
 
 If it doesn't work, you probably need to install `php7.2-mbstring` (e.g., `sudo apt install php7.2-mbstring` in Ubuntu). Replace `7.2` with the version of php installed on your system. Just in case, you can find the version number by running `php -v`.
 
+In general, upgrading to a newer version of php would help as well; at least 7.4. 
+
 
 # Compatibility 
 
