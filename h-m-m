@@ -1,5 +1,8 @@
 #!/usr/bin/env php
 <?php
+
+namespace Hmm;
+
 // {{{ settings
 
 $mm=[];
