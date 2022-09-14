@@ -179,7 +179,7 @@ function check_the_available_clipboard_tool(&$mm)
 		return;
 	}
 
-	if (PHP_OS_FAMILY === "Darwin") 
+	if (PHP_OS_FAMILY === "Darwin")
 	{
 		$mm['clipboard']['write'] = "pbcopy";
 		$mm['clipboard']['read']  = 'pbpaste';
@@ -233,7 +233,7 @@ function shutdown()
 	exit;
 }
 
-if (false === check_required_extensions()) 
+if (false === check_required_extensions())
 	return 1;
 
 
@@ -2647,6 +2647,9 @@ function monitor_key_presses(&$mm)
 // {{{ main
 
 check_the_available_clipboard_tool($mm);
+
+if (defined('INCLUDE_BUT_NOT_EXECUTE'))
+    return 0;
 
 set_up_screen();
 load_settings($mm);
