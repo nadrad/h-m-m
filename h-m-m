@@ -1220,7 +1220,7 @@ function magic_readline(&$mm, $title)
 			// ctrl+v
 			elseif ($in==ctrl_v)
 			{
-				$content = 
+				$content =
 					trim
 					(
 						str_replace
@@ -2080,7 +2080,7 @@ function copy_to_clipboard(&$mm, $text)
 
 function get_from_clipboard(&$mm)
 {
-	return 
+	return
 		mb_ereg_replace
 		(
 			"[\000-\010\013-\037\177]|".BOM
@@ -2121,7 +2121,7 @@ function yank_node(&$mm, $exclude_parent = false )
 
 function delete_node(&$mm, $exclude_parent = false, $dont_copy_to_clipboard = false )
 {
-	if ($mm['active_node']==$mm['root']) 
+	if ($mm['active_node']==$mm['root'])
 		$exclude_parent = true;
 
 	if (!$dont_copy_to_clipboard)
@@ -2646,10 +2646,10 @@ function monitor_key_presses(&$mm)
 // }}}
 // {{{ main
 
-check_the_available_clipboard_tool($mm);
-
 if (defined('INCLUDE_BUT_NOT_EXECUTE'))
     return 0;
+
+check_the_available_clipboard_tool($mm);
 
 set_up_screen();
 load_settings($mm);
