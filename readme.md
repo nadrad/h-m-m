@@ -118,6 +118,15 @@ In Linux, you need to have `xclip`, `xsel`, or `wl-clipboard` installed as well.
 
 In Arch Linux, you can use the `h-m-m-git` AUR package to install it.
 
+It's also possible to execute `h-m-m` through docker (or podman), just run:
+
+```sh
+# Build the image
+docker build -t hmm .
+
+# Run it
+docker run --rm -it -v $(pwd):/app/ hmm
+```
 
 # Troubleshooting
 
