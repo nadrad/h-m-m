@@ -114,6 +114,8 @@ After downloading or cloning, you can run `php h-m-m` in your terminal to run th
  
 Optionally, you can make the file executable by running the `chmod +x h-m-m` in your terminal, and afterward, you can run it as `h-m-m filename` (assuming that **h-m-m** is in your path). 
 
+In Linux, you need to have `xclip`, `xsel`, or `wl-clipboard` installed as well.
+
 
 # Troubleshooting
 

@@ -185,7 +185,7 @@ function check_the_available_clipboard_tool(&$mm)
 
 	if (trim($tool)==='')
 	{
-		echo "Can't find your clipboard tool! I expected to find xclip, xsel, or wl-copy.\n";
+		echo "Can't find your clipboard tool! I expected to find xclip, xsel, or wl-clipboard.\n";
 		exit;
 	}
 
