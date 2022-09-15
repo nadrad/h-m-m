@@ -2024,7 +2024,7 @@ function copy_to_clipboard(&$mm, $text)
 
 function get_from_clipboard(&$mm)
 {
-	return shell_exec($mm['clipboard']['read']);
+	return str_replace(BOM,'',shell_exec($mm['clipboard']['read']));
 }
 
 
