@@ -16,6 +16,9 @@ $mm['active_node_color']	= "\033[38;5;0m\033[48;5;172m\033[1m";
 $mm['message_color']		= "\033[38;5;0m\033[48;5;141m\033[1m";
 $mm['question_color']		= "\033[38;5;168m";
 
+mb_regex_encoding("UTF-8");
+mb_internal_encoding("UTF-8");
+
 
 function load_settings(&$mm)
 {
@@ -96,6 +99,8 @@ const spacing_default		= 2;
 
 const conn_left_len			= 6;
 const conn_right_len		= 4;
+
+const BOM                   = "\xEF\xBB\xBF";
 
 $mm['conn_left']			= str_repeat('─', conn_left_len );
 $mm['conn_right']			= str_repeat('─', conn_right_len - 2 );
@@ -256,10 +261,12 @@ function put($x,$y,$t) { echo "\033[{$y};{$x}f{$t}"; }
 
 function mput(&$mm,$x,$y,$s)
 {
-	$mm['map'][round($y)]
-		= mb_substr( $mm['map'][round($y)], 0, $x)
+	$y = round($y);
+
+	$mm['map'][$y]
+		= mb_substr( $mm['map'][$y], 0, $x)
 		. $s
-		. mb_substr( $mm['map'][round($y)], $x + mb_strlen($s) );
+		. mb_substr( $mm['map'][$y], $x + mb_strlen($s) );
 }
 
 
@@ -297,14 +304,16 @@ function debug($nodes)
 function decode_tree($lines, $root_id, $start_id)
 {
 	// calculating the indentation shift and cleaning up the special characters
+
 	$indentation_shift = 9999999;
+
 	foreach ($lines as $lid=>$line)
 	{
 		$lines[$lid] =
 			str_replace
 			(
-				 [ "\t", "\n", "\r"]
-				,[ "  ", "  ", "  "]
+				 [ "\t", "\n", "\r", BOM ]
+				,[ "  ", "  ", "  ", "" ]
 				,$lines[$lid]
 			)
 		;
@@ -504,7 +513,7 @@ function calculate_x_and_lh(&$mm, $id)
 	}
 	else
 	{
-		$mm['nodes'][$id]['w']  = mb_strlen($node['title']);
+		$mm['nodes'][$id]['w']  = mb_strlen(trim($node['title']));
 		$mm['nodes'][$id]['lh'] = 1;
 	}
 
@@ -863,7 +872,7 @@ function add_content_to_the_map(&$mm, $id)
 		(
 			$mm,
 			$node['x'],
-			round($node['y']+$node['yo'])+$i,
+			$node['y']+$node['yo']+$i,
 			$lines[$i].' '
 		);
 
@@ -1229,7 +1238,6 @@ function edit_node(&$mm, $rewrite = false)
 			// delete
 			elseif ($in=="\033\133\63\176")
 			{
-				// $title = substr_replace($title, '',  $cursor-1, 1);
 				$title =
 					mb_substr
 					(
@@ -1297,6 +1305,7 @@ function edit_node(&$mm, $rewrite = false)
 			else
 			{
 				if ($in=="\011") $in='  ';
+
 				$title =
 					mb_substr
 					(
@@ -1310,6 +1319,8 @@ function edit_node(&$mm, $rewrite = false)
 						$title
 						,$cursor-1
 					);
+
+				$title = str_replace(BOM,'',$title);
 				$cursor++;
 			}
 
@@ -1723,7 +1734,7 @@ function message(&$mm, $text)
 {
 	put
 	(
-		$mm['terminal_width'] - strlen($text) - 1,
+		$mm['terminal_width'] - mb_strlen($text) - 1,
 		$mm['terminal_height'],
 		$mm['message_color'].' '.$text.' '.reset_color
 	);
@@ -2404,8 +2415,6 @@ function display(&$mm, $force_center = false)
 
 		// styling the lines
 
-		mb_regex_encoding("UTF-8");
-		mb_internal_encoding("UTF-8");
 		$line =
 			mb_ereg_replace
 			(
