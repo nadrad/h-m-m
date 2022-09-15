@@ -9,10 +9,22 @@ if [ ! -d "$DESTINATION_DIR" ]; then
     DESTINATION_DIR="/usr/bin"
 fi
 
-# If h-m-m doesn't exist in the same directory as this script, exit
+# If h-m-m doesn't exist in the same directory as this script, tries to download from github repository
 if [ ! -f "$HMM_PATH" ]; then
-    echo -e "ERROR: h-m-m not found in the same directory as this script.\n"
-    exit 1
+
+    if [[ $(curl --write-out '%{http_code}' --silent https://raw.githubusercontent.com/nadrad/h-m-m/main/h-m-m --output /dev/null) == 200 ]]; then
+        curl --silent https://raw.githubusercontent.com/nadrad/h-m-m/main/h-m-m --output /tmp/h-m-m
+
+        if [ $? -ne 0 ]; then
+            echo -e "ERROR: Could not download h-m-m\n"
+            exit 1
+        fi
+
+        HMM_PATH="/tmp/h-m-m"
+    else
+        echo -e "ERROR: Online repository not available or Internet is down\n"
+        exit 1
+    fi
 fi
 
 echo -e "\n> Installer for h-m-m\n"
@@ -62,6 +74,9 @@ if [ $? -ne 0 ]; then
    echo -e "ERROR: Could not copy h-m-m to $DESTINATION_DIR\n"
    exit 1
 fi
+
+# Delete temporary file, if exists.
+rm -f /tmp/h-m-m
 
 # Make the copied file executable
 sudo chmod +x $DESTINATION_DIR/h-m-m
