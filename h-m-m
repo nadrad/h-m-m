@@ -139,7 +139,7 @@ const collapsed_symbol_off	= "\033[0m";
 
 
 // }}}
-// {{{ checking the required extensions
+// {{{ checking the requirements
 
 function check_required_extensions(): bool
 {
@@ -159,6 +159,61 @@ function check_required_extensions(): bool
 
 	return true;
 }
+
+
+function check_the_available_clipboard_tool(&$mm)
+{
+	if (PHP_OS_FAMILY === "Windows")
+	{
+		$mm['clipboard']['write'] = "clip";
+		$mm['clipboard']['read']  = 'powershell -sta "add-type -as System.Windows.Forms; [windows.forms.clipboard]::GetText()"';
+		return;
+	}
+
+	if (PHP_OS_FAMILY === "Darwin") 
+	{
+		$mm['clipboard']['write'] = "pbcopy";
+		$mm['clipboard']['read']  = 'pbpaste';
+		return;
+	}
+
+
+	// now, the main OS ;)
+
+	exec('command -v xclip xsel wl-copy', $result);
+	$tool = basename($result[0] ?? '');
+
+	if (trim($tool)==='')
+	{
+		echo "Can't find your clipboard tool! I expected to find xclip, xsel, or wl-copy.\n";
+		exit;
+	}
+
+	switch ($tool)
+	{
+		case 'xclip':
+			$mm['clipboard']['write'] = 'xclip -selection clipboard';
+			$mm['clipboard']['read']  = 'xclip -out -selection clipboard';
+			break;
+
+		case 'xsel':
+			$mm['clipboard']['write'] = 'xsel --clipboard';
+			$mm['clipboard']['read']  = 'xsel --clipboard';
+			break;
+
+		case 'wl-copy':
+			$mm['clipboard']['write'] = 'wl-copy';
+			$mm['clipboard']['read']  = 'wl-paste';
+			break;
+
+		default:
+			echo "I can't find your clipboard tool!\n";
+			exit;
+	}
+
+}
+
+
 
 // }}}
 // {{{ alternative screen
@@ -1464,7 +1519,7 @@ function export_html(&$mm)
 	fclose($file);
 
 	message($mm, 'Exported as '.$mm['filename'].'.html');
-	copy_to_clipboard($mm['filename'].'.html');
+	copy_to_clipboard($mm, $mm['filename'].'.html');
 
 }
 
@@ -1770,7 +1825,7 @@ function encode_tree(&$mm, $id, $exclude_parent = false, $base = 0)
 function append(&$mm)
 {
 	$mm['nodes'][ $mm['active_node'] ]['title'] .= 
-		' '. str_replace("\n",' ',str_replace("\t",' ',trim(get_from_clipboard())));
+		' '. str_replace("\n",' ',str_replace("\t",' ',trim(get_from_clipboard($mm))));
 	build_map($mm);
 	display($mm);
 }
@@ -1800,7 +1855,7 @@ function paste_sub_tree(&$mm, $as_sibling )
 	$st =
 		decode_tree
 		(
-			explode("\n",get_from_clipboard()),
+			explode("\n",get_from_clipboard($mm)),
 			$parent_id,
 			$new_id
 		)
@@ -1854,28 +1909,18 @@ function paste_sub_tree(&$mm, $as_sibling )
 // }}}
 // {{{ clipboard
 
-function copy_to_clipboard($text)
+function copy_to_clipboard(&$mm, $text)
 {
-	if     (PHP_OS_FAMILY === "Linux")    $clip = popen('xclip -selection clipboard','wb');
-	elseif (PHP_OS_FAMILY === "Windows")  $clip = popen("clip","wb");
-	elseif (PHP_OS_FAMILY === "Darwin")   $clip = popen('pbcopy','wb');
-
+	$clip = popen($mm['clipboard']['write'],'wb');
 	if (!isset($clip)) return;
 
 	fwrite($clip,$text);
 	pclose($clip);
 }
 
-function get_from_clipboard()
+function get_from_clipboard(&$mm)
 {
-	if     (PHP_OS_FAMILY === "Linux")
-		return shell_exec('xclip -out -selection clipboard');
-
-	elseif (PHP_OS_FAMILY === "Windows")
-		return shell_exec('powershell -sta "add-type -as System.Windows.Forms; [windows.forms.clipboard]::GetText()"');
-
-	elseif (PHP_OS_FAMILY === "Darwin")
-		return shell_exec('pbpaste');
+	return shell_exec($mm['clipboard']['read']);
 }
 
 
@@ -1899,7 +1944,7 @@ function load_empty_map(&$mm)
 
 function yank_node(&$mm, $exclude_parent = false )
 {
-	copy_to_clipboard(encode_tree($mm, $mm['active_node'], $exclude_parent));
+	copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent));
 	message($mm, 'Item(s) are copied to the clipboard.');
 }
 
@@ -1910,7 +1955,7 @@ function delete_node(&$mm, $exclude_parent = false )
 {
 	if ($mm['active_node']==$mm['root']) $exclude_parent = true;
 
-	copy_to_clipboard( encode_tree($mm, $mm['active_node'], $exclude_parent) );
+	copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent) );
 
 	$mm['modified'] = true;
 
@@ -2446,6 +2491,8 @@ function monitor_key_presses(&$mm)
 
 if (false === check_required_extensions()) 
 	return 1;
+
+check_the_available_clipboard_tool($mm);
 
 set_up_screen();
 load_settings($mm);
