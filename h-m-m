@@ -225,6 +225,9 @@ function shutdown()
 	exit;
 }
 
+if (false === check_required_extensions()) 
+	return 1;
+
 register_shutdown_function("shutdown");
 declare(ticks = 1);
 pcntl_signal(SIGINT,"shutdown");
@@ -2488,9 +2491,6 @@ function monitor_key_presses(&$mm)
 
 // }}}
 // {{{ main
-
-if (false === check_required_extensions()) 
-	return 1;
 
 check_the_available_clipboard_tool($mm);
 
