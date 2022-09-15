@@ -1215,6 +1215,29 @@ function edit_node(&$mm, $rewrite = false)
 				return;
 			}
 
+			// pasting
+			elseif ($in=="\026")
+			{
+				$content = 
+					trim
+					(
+						str_replace
+						(
+							"\n",
+							" ",
+							str_replace
+							(
+								"\t",
+								"  ",
+								get_from_clipboard($mm)
+							)
+						)
+					);
+				$title = substr_replace($title, $content, $cursor-1, 0);
+				$cursor += mb_strlen($content);
+			}
+
+
 			// normal characters
 			elseif (strlen($in)==1)
 			{
