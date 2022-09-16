@@ -120,6 +120,12 @@ In Linux, you need to have `xclip`, `xsel`, or `wl-clipboard` installed as well.
 
 In Arch Linux, you can use the `h-m-m-git` AUR package to install it.
 
+## Installation script for Linux
+
+Download and execute the [install.sh](https://raw.githubusercontent.com/nadrad/h-m-m/main/install.sh) (right click, save as)
+
+The installer will download and copy `h-m-m` to `/usr/local/bin` and make it executable, so after install you just need to type `h-m-m` from anywhere to use it.
+
 
 # Troubleshooting
 
