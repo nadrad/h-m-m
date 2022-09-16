@@ -1283,16 +1283,11 @@ function edit_node(&$mm, $rewrite = false)
 				$content = 
 					trim
 					(
-						mb_ereg_replace
+						str_replace
 						(
-							"[\000-\040\177".BOM."]"
-							,''
-							,str_replace
-							(
-								["\n", "\r", "\t"]
-								,[" ",  "", "  " ]
-								,get_from_clipboard($mm)
-							)
+							["\n", "\r", "\t"]
+							,[" ",  "", "  " ]
+							,get_from_clipboard($mm)
 						)
 					);
 
@@ -1987,7 +1982,15 @@ function encode_tree(&$mm, $id, $exclude_parent = false, $base = 0)
 function append(&$mm)
 {
 	$mm['nodes'][ $mm['active_node'] ]['title'] .= 
-		' '. str_replace("\n",' ',str_replace("\t",' ',trim(get_from_clipboard($mm))));
+		' '
+		.str_replace
+		(
+			["\n","\r","\t"]
+			,[' ','',  '  ']
+			,trim(get_from_clipboard($mm))
+		)
+	;
+
 	build_map($mm);
 	display($mm);
 }
@@ -2084,7 +2087,14 @@ function copy_to_clipboard(&$mm, $text)
 
 function get_from_clipboard(&$mm)
 {
-	return str_replace(BOM,'',shell_exec($mm['clipboard']['read']));
+	return 
+		mb_ereg_replace
+		(
+			"[\000-\040\177".BOM."]"
+			,''
+			,shell_exec($mm['clipboard']['read'])
+		)
+	;
 }
 
 
