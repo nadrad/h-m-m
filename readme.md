@@ -10,19 +10,20 @@
 
 Adding, removing, and editing nodes:
 
-* `o` or `enter` - create a new sibling to the active node
-* `O` or `tab` - create a new child for the active node
+* `o` or `Enter` - create a new sibling to the active node
+* `O` or `Tab` - create a new child for the active node
 * `y` - yanks (copies) the active node and its descendants
 * `Y` - yanks (copies) the descendants of the active node
 * `d` - deletes (cuts) the active node and its descendants
 * `D` - deletes (cuts) the descendants of the active node
+* `Delete` - deletes the active node and its descendants without putting them in the clipboard 
 * `p` - pastes as descendants of the active node
 * `P` - pastes as siblings of the active node 
-* `ctrl+p` - appends the clipboard text at the end of the active node's title
+* `Ctrl+p` - appends the clipboard text at the end of the active node's title
 * `e`, `i`, or `a` - edits the active node
 * `E`, `I`, or `A` - edits the active node, ignoring the existing text
 * `u` - undo
-* `ctrl+r` - redo
+* `Ctrl+r` - redo
 
 Relative navigating and moving:
 
@@ -47,7 +48,7 @@ Adjusting the view:
 
 Collapsing and expanding:
 
-* `space` - toggles the active node
+* `Space` - toggles the active node
 * `v` - collapses everything other than the first-level nodes
 * `b` - expands all nodes
 * `1` to `9` - collapse the nth level and expand those before
@@ -58,7 +59,7 @@ Collapsing and expanding:
 
 Search:
 
-* `/` - searches for a phrase
+* `/`, `?`, or `Ctrl+f` - searches for a phrase
 * `n` - goes to the next search result
 * `N` - goes to the previous search result
 
@@ -70,6 +71,21 @@ Save, export, and quit:
 * `q` - quits (if the changes were already saved)
 * `Q` - quits, ignoring the changes
 
+In the text editor:
+
+* `↓` - move the cursor to the end of the line
+* `↑` - move the cursor to the beginning of the line
+* `←` or `Home` - move the cursor to the left
+* `→` or `End` - move the cursor to the right
+* `Ctrl+Left` or `Shift+Left` - move cursor to the previous word
+* `Ctrl+Right` or `Shift+right` - move cursor to the next word
+* `Delete` - delete character
+* `Ctrl+Delete` - delete word
+* `Backspace` - delete previous character
+* `ctrl+Backspace` - delete previous word
+* `Ctrl+v` or `Ctrl+Shift+v` - paste
+* `Esc` - cancel editing
+* `Enter` - wanna guess? ;)
 
 
 # Configuration 
@@ -84,6 +100,7 @@ You can create an `h-m-m.conf` file in the same directory as the application and
     message_color = "\033[38;5;0m\033[48;5;141m\033[1m"
     center_lock = false
     focus_lock = false
+    undo_steps = 24
 
 The colors are ASCII escape codes. 
 
