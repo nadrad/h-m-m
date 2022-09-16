@@ -136,6 +136,8 @@ const arr_right 			= "\033\133\103";
 const arr_up				= "\033\133\101";
 const arr_left				= "\033\133\104";
 
+const del					= "\033\133\063\176";
+
 const reset_page			= "\033[2J\033[0;0f";
 const reset_color			= "\033[0m";
 
@@ -2150,11 +2152,13 @@ function yank_node(&$mm, $exclude_parent = false )
 // }}}
 // {{{ delete
 
-function delete_node(&$mm, $exclude_parent = false )
+function delete_node(&$mm, $exclude_parent = false, $dont_copy_to_clipboard = false )
 {
-	if ($mm['active_node']==$mm['root']) $exclude_parent = true;
+	if ($mm['active_node']==$mm['root']) 
+		$exclude_parent = true;
 
-	copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent) );
+	if (!$dont_copy_to_clipboard)
+		copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent) );
 
 	push_change($mm);
 	$mm['modified'] = true;
@@ -2164,7 +2168,8 @@ function delete_node(&$mm, $exclude_parent = false )
 	build_map($mm);
 	display($mm);
 
-	message($mm, 'Item(s) are cut and placed into the clipboard.');
+	if (!$dont_copy_to_clipboard)
+		message($mm, 'Item(s) are cut and placed into the clipboard.');
 }
 
 
@@ -2600,6 +2605,7 @@ function monitor_key_presses(&$mm)
 
 			case 'd':			delete_node($mm); break;
 			case 'D':			delete_node($mm, true); break;
+			case del:			delete_node($mm, false, true); break;
 
 			case 'e':			edit_node($mm); break;
 			case 'E':			edit_node($mm, true); break;

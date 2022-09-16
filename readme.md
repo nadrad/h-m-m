@@ -16,6 +16,7 @@ Adding, removing, and editing nodes:
 * `Y` - yanks (copies) the descendants of the active node
 * `d` - deletes (cuts) the active node and its descendants
 * `D` - deletes (cuts) the descendants of the active node
+* `delete` - deletes the active node and its descendants without putting them in the clipboard 
 * `p` - pastes as descendants of the active node
 * `P` - pastes as siblings of the active node 
 * `ctrl+p` - appends the clipboard text at the end of the active node's title
