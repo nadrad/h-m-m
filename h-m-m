@@ -125,6 +125,7 @@ const insert_child			= 1;
 const ctrl_p				= "\020";
 const ctrl_c				= "\003";
 const ctrl_r				= "\022";
+const ctrl_f				= "\006";
 
 const arr_down				= "\033\133\102";
 const arr_right 			= "\033\133\103";
@@ -2659,7 +2660,10 @@ function monitor_key_presses(&$mm)
 
 			case '~':			go_to_root($mm); break;
 			case ' ':			toggle($mm); break;
+
 			case '/':			search($mm); break;
+			case '?':			search($mm); break;
+			case ctrl_f:		search($mm); break;
 
 			case "\n":			insert_node($mm, insert_sibling); break;
 			case "\t":			insert_node($mm, insert_child); break;

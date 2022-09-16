@@ -58,7 +58,7 @@ Collapsing and expanding:
 
 Search:
 
-* `/` - searches for a phrase
+* `/`, `?`, or `ctrl+f` - searches for a phrase
 * `n` - goes to the next search result
 * `N` - goes to the previous search result
 
