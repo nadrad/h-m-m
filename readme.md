@@ -21,6 +21,8 @@ Adding, removing, and editing nodes:
 * `ctrl+p` - appends the clipboard text at the end of the active node's title
 * `e`, `i`, or `a` - edits the active node
 * `E`, `I`, or `A` - edits the active node, ignoring the existing text
+* `u` - undo
+* `ctrl+r` - redo
 
 Relative navigating and moving:
 

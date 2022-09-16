@@ -16,6 +16,10 @@ $mm['active_node_color']	= "\033[38;5;0m\033[48;5;172m\033[1m";
 $mm['message_color']		= "\033[38;5;0m\033[48;5;141m\033[1m";
 $mm['question_color']		= "\033[38;5;168m";
 
+$mm['changes']				= [];
+$mm['change_active_node']	= [];
+$mm['change_index']			= 0;
+
 mb_regex_encoding("UTF-8");
 mb_internal_encoding("UTF-8");
 
@@ -120,6 +124,7 @@ const insert_child			= 1;
 
 const ctrl_p				= "\020";
 const ctrl_c				= "\003";
+const ctrl_r				= "\022";
 
 const arr_down				= "\033\133\102";
 const arr_right 			= "\033\133\103";
@@ -1009,6 +1014,8 @@ function push_node_down(&$mm, $id)
 {
 	if ($id==0)  return;
 
+	push_change($mm);
+
 	$mm['modified'] = true;
 
 	if (isset($mm['nodes'][$id+1]))
@@ -1042,7 +1049,6 @@ function push_node_down(&$mm, $id)
 
 function insert_node(&$mm, $type)
 {
-
 	if ($mm['active_node']==$mm['root'])
 		$type=insert_child;
 
@@ -1128,6 +1134,8 @@ function show_line(&$mm, $title, $cursor, $shift)
 
 function edit_node(&$mm, $rewrite = false)
 {
+	push_change($mm);
+
 	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
 	if ($mm['active_node']==0 && $title=='root') $title='';
 
@@ -1490,6 +1498,8 @@ function move_active_node_down(&$mm)
 {
 	if ($mm['active_node']==0) return;
 
+	push_change($mm);
+
 	$mm['modified'] = true;
 
 	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
@@ -1524,6 +1534,8 @@ function move_active_node_down(&$mm)
 function move_active_node_up(&$mm)
 {
 	if ($mm['active_node']==0) return;
+
+	push_change($mm);
 
 	$mm['modified'] = true;
 
@@ -1774,6 +1786,46 @@ function move_window(&$mm)
 
 
 // }}}
+// {{{ changes
+
+function push_change(&$mm)
+{
+	// flush any redo chain
+	while(count($mm['changes']) > $mm['change_index'])
+		array_pop($mm['changes']);
+
+	array_push($mm['changes'], $mm['nodes']);
+	array_push($mm['change_active_node'], $mm['active_node']);
+	$mm['change_index']++;
+}
+
+function undo(&$mm)
+{
+	if($mm['change_index'] == 0)
+		return;
+
+	$mm['nodes'] = $mm['changes'][$mm['change_index'] - 1];
+	$mm['active_node'] = $mm['change_active_node'][$mm['change_index'] - 1];
+	$mm['change_index']--;
+
+	build_map($mm);
+	display($mm);
+}
+
+function redo(&$mm)
+{
+	if(count($mm['changes']) == $mm['change_index'])
+		return;
+
+	$mm['nodes'] = $mm['changes'][$mm['change_index']];
+	$mm['active_node'] = $mm['change_active_node'][$mm['change_index']];
+	$mm['change_index']++;
+
+	build_map($mm);
+	display($mm);
+}
+
+// }}}
 // {{{ change active node
 
 function change_active_node(&$mm, $direction)
@@ -1944,6 +1996,8 @@ function paste_sub_tree(&$mm, $as_sibling )
 
 	if ($as_sibling && $mm['active_node']==$mm['root']) return;
 
+	push_change($mm);
+
 	$mm['modified'] = true;
 
 	if ($as_sibling)
@@ -2057,6 +2111,8 @@ function yank_node(&$mm, $exclude_parent = false )
 
 function delete_node(&$mm, $exclude_parent = false )
 {
+	push_change($mm);
+
 	if ($mm['active_node']==$mm['root']) $exclude_parent = true;
 
 	copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent) );
@@ -2542,12 +2598,15 @@ function monitor_key_presses(&$mm)
 			case 'q':			quit($mm); break;
 			case 'Q':			exit; break;
 
+			case ctrl_r:		redo($mm); break;
+
 			case 'r':			collapse_other_branches($mm); break;
 			case 'R':			collapse_inner($mm); break;
 
 			case 's':			save($mm); break;
 			case 'S':			save($mm, true); break;
 
+			case 'u':			undo($mm); break;
 			case 'U':			debug($mm['nodes']); break;
 
 			case 'v':			collapse_all($mm); break;
