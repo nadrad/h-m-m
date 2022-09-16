@@ -20,6 +20,9 @@ $mm['changes']				= [];
 $mm['change_active_node']	= [];
 $mm['change_index']			= 0;
 
+mb_regex_encoding("UTF-8");
+mb_internal_encoding("UTF-8");
+
 
 function load_settings(&$mm)
 {
@@ -100,6 +103,8 @@ const spacing_default		= 2;
 
 const conn_left_len			= 6;
 const conn_right_len		= 4;
+
+const BOM                   = "\xEF\xBB\xBF";
 
 $mm['conn_left']			= str_repeat('─', conn_left_len );
 $mm['conn_right']			= str_repeat('─', conn_right_len - 2 );
@@ -261,10 +266,12 @@ function put($x,$y,$t) { echo "\033[{$y};{$x}f{$t}"; }
 
 function mput(&$mm,$x,$y,$s)
 {
-	$mm['map'][round($y)]
-		= mb_substr( $mm['map'][round($y)], 0, $x)
+	$y = round($y);
+
+	$mm['map'][$y]
+		= mb_substr( $mm['map'][$y], 0, $x)
 		. $s
-		. mb_substr( $mm['map'][round($y)], $x + mb_strlen($s) );
+		. mb_substr( $mm['map'][$y], $x + mb_strlen($s) );
 }
 
 
@@ -302,14 +309,16 @@ function debug($nodes)
 function decode_tree($lines, $root_id, $start_id)
 {
 	// calculating the indentation shift and cleaning up the special characters
+
 	$indentation_shift = 9999999;
+
 	foreach ($lines as $lid=>$line)
 	{
 		$lines[$lid] =
 			str_replace
 			(
-				 [ "\t", "\n", "\r"]
-				,[ "  ", "  ", "  "]
+				 [ "\t", "\n", "\r", BOM ]
+				,[ "  ", "  ", "  ", "" ]
 				,$lines[$lid]
 			)
 		;
@@ -509,7 +518,7 @@ function calculate_x_and_lh(&$mm, $id)
 	}
 	else
 	{
-		$mm['nodes'][$id]['w']  = mb_strlen($node['title']);
+		$mm['nodes'][$id]['w']  = mb_strlen(trim($node['title']));
 		$mm['nodes'][$id]['lh'] = 1;
 	}
 
@@ -868,7 +877,7 @@ function add_content_to_the_map(&$mm, $id)
 		(
 			$mm,
 			$node['x'],
-			round($node['y']+$node['yo'])+$i,
+			$node['y']+$node['yo']+$i,
 			$lines[$i].' '
 		);
 
@@ -1094,16 +1103,30 @@ function insert_node(&$mm, $type)
 
 function show_line(&$mm, $title, $cursor, $shift)
 {
-	$output =
-		str_pad
-		(
-			substr($title,$shift,$mm['terminal_width']-1),
-			$mm['terminal_width']
-		)
-	;
+	$output  = mb_substr($title,$shift,$mm['terminal_width']-1);
+	$output .= str_repeat( ' ' ,$mm['terminal_width'] - mb_strlen($output) );
 
-	$output = substr_replace( $output, invert_off, $cursor-$shift  , 0);
-	$output = substr_replace( $output, invert_on,  $cursor-$shift-1, 0);
+	// showing the cursor
+	$output =
+		mb_substr
+		(
+			$output
+			,0
+			,$cursor-$shift-1
+		)
+		.invert_on
+		.mb_substr
+		(
+			$output
+			,$cursor-$shift-1
+			,1
+		)
+		.invert_off
+		.mb_substr
+		(
+			$output
+			,$cursor-$shift
+		);
 
 	put(0,$mm['terminal_height'],$mm['active_node_color'].$output);
 }
@@ -1117,7 +1140,7 @@ function edit_node(&$mm, $rewrite = false)
 	if ($mm['active_node']==0 && $title=='root') $title='';
 
 	$in = '';
-	$cursor = strlen($title)+1;
+	$cursor = mb_strlen($title)+1;
 	$shift = max( 0, $cursor - $mm['terminal_width'] );
 
 	show_line($mm, $title, $cursor, $shift);
@@ -1138,16 +1161,20 @@ function edit_node(&$mm, $rewrite = false)
 			}
 
 			// up arrow and home
-			elseif ($in=="\033\133\101" || $in=="\033\133\110")  $cursor = 1;
+			elseif ($in=="\033\133\101" || $in=="\033\133\110")
+				$cursor = 1;
 
 			// right arrow
-			elseif ($in=="\033\133\103")  $cursor = min( strlen($title)+1, $cursor+1);
+			elseif ($in=="\033\133\103")
+				$cursor = min( mb_strlen($title)+1, $cursor+1);
 
 			// down arrow and end
-			elseif ($in=="\033\133\102" || $in=="\033\133\106")  $cursor = strlen($title)+1;
+			elseif ($in=="\033\133\102" || $in=="\033\133\106")
+				$cursor = mb_strlen($title)+1;
 
 			// left arrow
-			elseif ($in=="\033\133\104")  $cursor = max(1, $cursor-1);
+			elseif ($in=="\033\133\104")
+				$cursor = max(1, $cursor-1);
 
 			// ctrl+left and shift+left
 			elseif ($in=="\033\133\061\073\065\104" || $in=="\033\133\061\073\062\104")
@@ -1158,8 +1185,8 @@ function edit_node(&$mm, $rewrite = false)
 						(
 							1,
 							(
-								strrpos($title,' ',$cursor-strlen($title)-3) !== false
-								? strrpos($title,' ',$cursor-strlen($title)-3) + 2
+								mb_strrpos($title,' ',$cursor-mb_strlen($title)-3) !== false
+								? mb_strrpos($title,' ',$cursor-mb_strlen($title)-3) + 2
 								: 1
 							)
 						);
@@ -1167,15 +1194,15 @@ function edit_node(&$mm, $rewrite = false)
 			// ctrl+right and shift+right
 			elseif ($in=="\033\133\061\073\065\103" || $in=="\033\133\061\073\062\103")
 				$cursor =
-					$cursor > strlen($title) -2
-					? strlen($title) + 1
+					$cursor > mb_strlen($title) -2
+					? mb_strlen($title) + 1
 					: min
 						(
-							strlen($title)+1,
+							mb_strlen($title)+1,
 							(
-								strpos($title,' ',$cursor+1) !== false
-								? strpos($title,' ',$cursor+1) + 2
-								: strlen($title) + 1
+								mb_strpos($title,' ',$cursor+1) !== false
+								? mb_strpos($title,' ',$cursor+1) + 2
+								: mb_strlen($title) + 1
 							)
 						);
 
@@ -1193,7 +1220,18 @@ function edit_node(&$mm, $rewrite = false)
 			{
 				if ($cursor>1)
 				{
-					$title = substr_replace($title, '',  $cursor-2, 1);
+					$title =
+						mb_substr
+						(
+							$title
+							,0
+							,$cursor-2
+						)
+						.mb_substr
+						(
+							$title
+							,$cursor-1
+						);
 					$cursor--;
 				}
 			}
@@ -1208,7 +1246,18 @@ function edit_node(&$mm, $rewrite = false)
 			// delete
 			elseif ($in=="\033\133\63\176")
 			{
-				$title = substr_replace($title, '',  $cursor-1, 1);
+				$title =
+					mb_substr
+					(
+						$title
+						,0
+						,$cursor-1
+					)
+					.mb_substr
+					(
+						$title
+						,$cursor
+					);
 			}
 
 			// enter
@@ -1223,7 +1272,7 @@ function edit_node(&$mm, $rewrite = false)
 				return;
 			}
 
-			// pasting
+			// ctrl+v
 			elseif ($in=="\026")
 			{
 				$content = 
@@ -1241,16 +1290,45 @@ function edit_node(&$mm, $rewrite = false)
 							)
 						)
 					);
-				$title = substr_replace($title, $content, $cursor-1, 0);
+
+				$title =
+					mb_substr
+					(
+						$title
+						,0
+						,$cursor-1
+					)
+					.$content
+					.mb_substr
+					(
+						$title
+						,$cursor-1
+					);
+
 				$cursor += mb_strlen($content);
 			}
 
 
 			// normal characters
-			elseif (strlen($in)==1)
+			else
 			{
 				if ($in=="\011") $in='  ';
-				$title = substr_replace($title, $in, $cursor-1, 0);
+
+				$title =
+					mb_substr
+					(
+						$title
+						,0
+						,$cursor-1
+					)
+					.$in
+					.mb_substr
+					(
+						$title
+						,$cursor-1
+					);
+
+				$title = str_replace(BOM,'',$title);
 				$cursor++;
 			}
 
@@ -1668,7 +1746,7 @@ function message(&$mm, $text)
 {
 	put
 	(
-		$mm['terminal_width'] - strlen($text) - 1,
+		$mm['terminal_width'] - mb_strlen($text) - 1,
 		$mm['terminal_height'],
 		$mm['message_color'].' '.$text.' '.reset_color
 	);
@@ -2000,7 +2078,7 @@ function copy_to_clipboard(&$mm, $text)
 
 function get_from_clipboard(&$mm)
 {
-	return shell_exec($mm['clipboard']['read']);
+	return str_replace(BOM,'',shell_exec($mm['clipboard']['read']));
 }
 
 
@@ -2393,8 +2471,6 @@ function display(&$mm, $force_center = false)
 
 		// styling the lines
 
-		mb_regex_encoding("UTF-8");
-		mb_internal_encoding("UTF-8");
 		$line =
 			mb_ereg_replace
 			(
@@ -2473,6 +2549,9 @@ function monitor_key_presses(&$mm)
 		switch ($in)
 		{
 
+			case 'a':			edit_node($mm); break;
+			case 'A':			edit_node($mm, true); break;
+
 			case 'b':			expand_all($mm); break;
 
 			case 'c':			{ center_active_node($mm); display($mm); } break;
@@ -2493,8 +2572,8 @@ function monitor_key_presses(&$mm)
 
 			case 'h':			change_active_node($mm, move_left); break;
 
-			case 'i':			collapse_other_branches($mm); break;
-			case 'I':			collapse_inner($mm); break;
+			case 'i':			edit_node($mm); break;
+			case 'I':			edit_node($mm, true); break;
 
 			case 'j':			change_active_node($mm, move_down); break;
 			case 'J':			move_active_node_down($mm); break;
@@ -2520,6 +2599,9 @@ function monitor_key_presses(&$mm)
 			case 'Q':			exit; break;
 
 			case ctrl_r:		redo($mm); break;
+
+			case 'r':			collapse_other_branches($mm); break;
+			case 'R':			collapse_inner($mm); break;
 
 			case 's':			save($mm); break;
 			case 'S':			save($mm, true); break;
