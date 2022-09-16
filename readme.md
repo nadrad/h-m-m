@@ -110,28 +110,33 @@ Most mind mapping applications use a similar format for copying and pasting. As 
 
 # Installing
 
-**h-m-m** is a single php file. You can download it from here, or clone it on your computer using git and add a scheduled job to update it once a week. 
+
+## Manual installation (Linux, Windows, and Mac)
+
+**h-m-m** is a single php file. You can download it from here, or clone it on your computer using git and add a scheduled job to update it once a day or week. 
+
+You also need to have the following installed for h-m-m to work:
+
+* php
+  * either php 8, or
+  * older versions of php along with the `mbstring` package (e.g., `php7.2-mbstring`)
+* `xclip`, `xsel`, or `wl-clipboard` in Linux. (Windows and Mac don't need it)
 
 After downloading or cloning, you can run `php h-m-m` in your terminal to run the program with a blank map or `php h-m-m filename` to open an existing file. If you don't already have a php interpreter installed, you would need to install it as well. Note: You don't need to set up a "web server" to run it because it's not a web application, but rather a terminal application that works like those written in Python, Bash, etc. 
  
 Optionally, you can make the file executable by running the `chmod +x h-m-m` in your terminal, and afterward, you can run it as `h-m-m filename` (assuming that **h-m-m** is in your path). 
 
-In Linux, you need to have `xclip`, `xsel`, or `wl-clipboard` installed as well.
+
+## Installation for Arch Linux
 
 In Arch Linux, you can use the `h-m-m-git` AUR package to install it.
 
+
 ## Installation script for Linux
 
-Download and execute the [install.sh](https://raw.githubusercontent.com/nadrad/h-m-m/main/install.sh) (right click, save as)
+You can download and execute [install.sh](https://raw.githubusercontent.com/nadrad/h-m-m/main/install.sh) (right click, then click on save as)
 
-The installer will download and copy `h-m-m` to `/usr/local/bin` and make it executable, so after install you just need to type `h-m-m` from anywhere to use it.
-
-
-# Troubleshooting
-
-If it doesn't work, you probably need to install `php7.2-mbstring` (e.g., `sudo apt install php7.2-mbstring` in Ubuntu). Replace `7.2` with the version of php installed on your system. Just in case, you can find the version number by running `php -v`.
-
-In general, upgrading to a newer version of php would help as well; at least 7.4. 
+The installer will download and copy `h-m-m` to `/usr/local/bin` and make it executable, so after installation you just need to type `h-m-m` from anywhere to use it.
 
 
 # Compatibility 
