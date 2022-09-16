@@ -19,6 +19,7 @@ $mm['question_color']		= "\033[38;5;168m";
 $mm['changes']				= [];
 $mm['change_active_node']	= [];
 $mm['change_index']			= 0;
+$mm['change_max_steps']		= 24;
 
 mb_regex_encoding("UTF-8");
 mb_internal_encoding("UTF-8");
@@ -48,6 +49,8 @@ function load_settings(&$mm)
 			case 'max_leaf_width':		$mm['max_leaf_width']		= max( round($value), width_min ); break;
 			case 'line_spacing':		$mm['line_spacing']			= max( round($value), 0 ); break;
 			case 'initial_depth':		$mm['initial_depth']		= max( round($value), 1 ); break;
+
+			case 'undo_steps':			$mm['change_max_steps']		= max( round($value), 0 ); break;
 
 			case 'active_node_color':	$mm['active_node_color']	= $value; break;
 			case 'message_color':		$mm['message_color']		= $value; break;
@@ -1021,7 +1024,6 @@ function push_node_down(&$mm, $id)
 	if ($id==0)  return;
 
 	push_change($mm);
-
 	$mm['modified'] = true;
 
 	if (isset($mm['nodes'][$id+1]))
@@ -1058,6 +1060,7 @@ function insert_node(&$mm, $type)
 	if ($mm['active_node']==$mm['root'])
 		$type=insert_child;
 
+	push_change($mm);
 	$mm['modified'] = true;
 
 	if ($type==insert_sibling)
@@ -1140,8 +1143,6 @@ function show_line(&$mm, $title, $cursor, $shift)
 
 function edit_node(&$mm, $rewrite = false)
 {
-	push_change($mm);
-
 	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
 	if ($mm['active_node']==0 && $title=='root') $title='';
 
@@ -1272,7 +1273,10 @@ function edit_node(&$mm, $rewrite = false)
 				$title = trim($title);
 				$mm['nodes'][ $mm['active_node'] ]['title'] = $title;
 				$original['nodes'][ $mm['active_node'] ]['title'] = $title;
+
+				push_change($mm);
 				$mm['modified'] = true;
+
 				build_map($mm);
 				display($mm);
 				return;
@@ -1505,7 +1509,6 @@ function move_active_node_down(&$mm)
 	if ($mm['active_node']==0) return;
 
 	push_change($mm);
-
 	$mm['modified'] = true;
 
 	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
@@ -1542,7 +1545,6 @@ function move_active_node_up(&$mm)
 	if ($mm['active_node']==0) return;
 
 	push_change($mm);
-
 	$mm['modified'] = true;
 
 	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
@@ -1798,7 +1800,18 @@ function push_change(&$mm)
 {
 	// flush any redo chain
 	while(count($mm['changes']) > $mm['change_index'])
+	{
 		array_pop($mm['changes']);
+		array_pop($mm['change_active_node']);
+	}
+
+	// removing the old history if it's getting bigger than the maximum
+	if (count($mm['changes']) >= $mm['change_max_steps'])
+	{
+		array_shift($mm['changes']);
+		array_shift($mm['change_active_node']);
+		$mm['change_index']--;
+	}
 
 	array_push($mm['changes'], $mm['nodes']);
 	array_push($mm['change_active_node'], $mm['active_node']);
@@ -2011,7 +2024,6 @@ function paste_sub_tree(&$mm, $as_sibling )
 	if ($as_sibling && $mm['active_node']==$mm['root']) return;
 
 	push_change($mm);
-
 	$mm['modified'] = true;
 
 	if ($as_sibling)
@@ -2132,12 +2144,11 @@ function yank_node(&$mm, $exclude_parent = false )
 
 function delete_node(&$mm, $exclude_parent = false )
 {
-	push_change($mm);
-
 	if ($mm['active_node']==$mm['root']) $exclude_parent = true;
 
 	copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent) );
 
+	push_change($mm);
 	$mm['modified'] = true;
 
 	delete_node_internal($mm, $mm['active_node'], $exclude_parent);

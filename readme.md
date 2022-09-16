@@ -84,6 +84,7 @@ You can create an `h-m-m.conf` file in the same directory as the application and
     message_color = "\033[38;5;0m\033[48;5;141m\033[1m"
     center_lock = false
     focus_lock = false
+    undo_steps = 24
 
 The colors are ASCII escape codes. 
 
