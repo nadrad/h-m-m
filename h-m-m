@@ -129,6 +129,7 @@ const ctrl_p				= "\020";
 const ctrl_c				= "\003";
 const ctrl_r				= "\022";
 const ctrl_f				= "\006";
+const ctrl_v				= "\026";
 
 const arr_down				= "\033\133\102";
 const arr_right 			= "\033\133\103";
@@ -1121,7 +1122,11 @@ function magic_readline(&$mm, $title)
 	while(true)
 	{
 		usleep(5000);
-		$in = fread(STDIN, 9);
+		$in = fread(STDIN, 66666);
+		// normally, the longest sequence we have is 13 bytes,
+		// but if ctrl+shift+v is used, the whole text will be passed!
+		// In other words, we don't receive a ctrl+shift+v input,
+		// but the actual content. Was that a confusing behavior? Of course!!!
 
 		if ($in != '')
 		{
@@ -1238,7 +1243,7 @@ function magic_readline(&$mm, $title)
 				return trim($title);
 
 			// ctrl+v
-			elseif ($in=="\026")
+			elseif ($in==ctrl_v)
 			{
 				$content = 
 					trim
@@ -1290,7 +1295,9 @@ function magic_readline(&$mm, $title)
 				;
 
 				$title = mb_ereg_replace("[\000-\037\177".BOM."]",'',$title);
-				$cursor++;
+				$cursor += mb_strlen($in);
+				// the input content can be longer than one character if
+				// the user uses ctrl+shift+v to paste.
 			}
 
 			// adjusting the position and shift
