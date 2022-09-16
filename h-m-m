@@ -315,11 +315,16 @@ function decode_tree($lines, $root_id, $start_id)
 	foreach ($lines as $lid=>$line)
 	{
 		$lines[$lid] =
-			str_replace
+			mb_ereg_replace
 			(
-				 [ "\t", "\n", "\r", BOM ]
-				,[ "  ", "  ", "  ", "" ]
-				,$lines[$lid]
+				"[\000-\040\177".BOM."]"
+				,''
+				,str_replace
+				(
+					 [ "\t", "\n", "\r" ]
+					,[ "  ", " ",  " " ]
+					,$lines[$lid]
+				)
 			)
 		;
 
@@ -1147,7 +1152,7 @@ function edit_node(&$mm, $rewrite = false)
 
 	while(true)
 	{
-		usleep(10000);
+		usleep(5000);
 		$in = fread(STDIN, 9);
 
 		if ($in != '')
@@ -1278,15 +1283,15 @@ function edit_node(&$mm, $rewrite = false)
 				$content = 
 					trim
 					(
-						str_replace
+						mb_ereg_replace
 						(
-							"\n",
-							" ",
-							str_replace
+							"[\000-\040\177".BOM."]"
+							,''
+							,str_replace
 							(
-								"\t",
-								"  ",
-								get_from_clipboard($mm)
+								["\n", "\r", "\t"]
+								,[" ",  "", "  " ]
+								,get_from_clipboard($mm)
 							)
 						)
 					);
@@ -1326,9 +1331,10 @@ function edit_node(&$mm, $rewrite = false)
 					(
 						$title
 						,$cursor-1
-					);
+					)
+				;
 
-				$title = str_replace(BOM,'',$title);
+				$title = mb_ereg_replace("[\000-\040\177".BOM."]",'',$title);
 				$cursor++;
 			}
 
