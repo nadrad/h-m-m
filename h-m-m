@@ -317,7 +317,7 @@ function decode_tree($lines, $root_id, $start_id)
 		$lines[$lid] =
 			mb_ereg_replace
 			(
-				"[\000-\040\177".BOM."]"
+				"[\000-\037\177".BOM."]"
 				,''
 				,str_replace
 				(
@@ -1329,7 +1329,7 @@ function edit_node(&$mm, $rewrite = false)
 					)
 				;
 
-				$title = mb_ereg_replace("[\000-\040\177".BOM."]",'',$title);
+				$title = mb_ereg_replace("[\000-\037\177".BOM."]",'',$title);
 				$cursor++;
 			}
 
@@ -2094,7 +2094,7 @@ function get_from_clipboard(&$mm)
 	return 
 		mb_ereg_replace
 		(
-			"[\000-\040\177".BOM."]"
+			"[\000-\037\177".BOM."]"
 			,''
 			,shell_exec($mm['clipboard']['read'])
 		)
