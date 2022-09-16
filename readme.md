@@ -111,7 +111,7 @@ Most mind mapping applications use a similar format for copying and pasting. As 
 # Installing
 
 
-## Manual installation (Linux, Windows, and Mac)
+## 1. Manual installation (Linux, Windows, and Mac)
 
 **h-m-m** is a single php file. You can download it from here, or clone it on your computer using git and add a scheduled job to update it once a day or week. 
 
@@ -127,16 +127,20 @@ After downloading or cloning, you can run `php h-m-m` in your terminal to run th
 Optionally, you can make the file executable by running the `chmod +x h-m-m` in your terminal, and afterward, you can run it as `h-m-m filename` (assuming that **h-m-m** is in your path). 
 
 
-## Installation for Arch Linux
+## 2. Installation for Arch Linux
 
 In Arch Linux, you can use the `h-m-m-git` AUR package to install it.
 
 
-## Installation script for Linux
+## 3. Installation script for Linux
 
-You can download and execute [install.sh](https://raw.githubusercontent.com/nadrad/h-m-m/main/install.sh) (right click, then click on save as)
+You can run the following command to install h-m-m:
 
-The installer will download and copy `h-m-m` to `/usr/local/bin` and make it executable, so after installation you just need to type `h-m-m` from anywhere to use it.
+	wget -q -O - 'https://raw.githubusercontent.com/nadrad/h-m-m/main/install.sh' | bash
+
+This command downloads and runs the install.sh script, which it turn downloads h-m-m, copies it to `/usr/local/bin`, checks the dependencies, and makes it executable. 
+
+After installing, you can run `h-m-m` from anywhere in your terminal to run the application with an empty map, or `h-m-m filename` to open an existing file.
 
 
 # Compatibility 
