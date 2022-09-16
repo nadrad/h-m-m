@@ -1108,44 +1108,10 @@ function insert_node(&$mm, $type)
 
 
 // }}}
-// {{{ edit node
+// {{{ magic readline!
 
-function show_line(&$mm, $title, $cursor, $shift)
+function magic_readline(&$mm, $title)
 {
-	$output  = mb_substr($title,$shift,$mm['terminal_width']-1);
-	$output .= str_repeat( ' ' ,$mm['terminal_width'] - mb_strlen($output) );
-
-	// showing the cursor
-	$output =
-		mb_substr
-		(
-			$output
-			,0
-			,$cursor-$shift-1
-		)
-		.invert_on
-		.mb_substr
-		(
-			$output
-			,$cursor-$shift-1
-			,1
-		)
-		.invert_off
-		.mb_substr
-		(
-			$output
-			,$cursor-$shift
-		);
-
-	put(0,$mm['terminal_height'],$mm['active_node_color'].$output);
-}
-
-
-function edit_node(&$mm, $rewrite = false)
-{
-	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
-	if ($mm['active_node']==0 && $title=='root') $title='';
-
 	$in = '';
 	$cursor = mb_strlen($title)+1;
 	$shift = max( 0, $cursor - $mm['terminal_width'] );
@@ -1164,7 +1130,7 @@ function edit_node(&$mm, $rewrite = false)
 			{
 				display($mm);
 				message($mm, 'Editing cancelled');
-				return;
+				return false;
 			}
 
 			// up arrow and home
@@ -1269,18 +1235,7 @@ function edit_node(&$mm, $rewrite = false)
 
 			// enter
 			elseif ($in=="\012")
-			{
-				$title = trim($title);
-				$mm['nodes'][ $mm['active_node'] ]['title'] = $title;
-				$original['nodes'][ $mm['active_node'] ]['title'] = $title;
-
-				push_change($mm);
-				$mm['modified'] = true;
-
-				build_map($mm);
-				display($mm);
-				return;
-			}
+				return trim($title);
 
 			// ctrl+v
 			elseif ($in=="\026")
@@ -1346,6 +1301,65 @@ function edit_node(&$mm, $rewrite = false)
 			show_line($mm, $title, $cursor, $shift);
 		}
 	}
+}
+
+
+function show_line(&$mm, $title, $cursor, $shift)
+{
+	$output  = mb_substr($title,$shift,$mm['terminal_width']-1);
+	$output .= str_repeat( ' ' ,$mm['terminal_width'] - mb_strlen($output) );
+
+	// showing the cursor
+	$output =
+		mb_substr
+		(
+			$output
+			,0
+			,$cursor-$shift-1
+		)
+		.invert_on
+		.mb_substr
+		(
+			$output
+			,$cursor-$shift-1
+			,1
+		)
+		.invert_off
+		.mb_substr
+		(
+			$output
+			,$cursor-$shift
+		);
+
+	put(0,$mm['terminal_height'],$mm['active_node_color'].$output);
+}
+
+
+
+// }}}
+// {{{ edit node
+
+function edit_node(&$mm, $rewrite = false)
+{
+	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
+	if ($mm['active_node']==0 && $title=='root') $title='';
+
+	$output = magic_readline($mm, $title);
+
+	if ($output === false)
+	{
+		display($mm);
+		message($mm, 'Editing cancelled');
+		return;
+	}
+
+	$mm['nodes'][ $mm['active_node'] ]['title'] = $output;
+
+	push_change($mm);
+	$mm['modified'] = true;
+
+	build_map($mm);
+	display($mm);
 }
 
 
@@ -1417,12 +1431,7 @@ function go_to_bottom(&$mm)
 
 function search(&$mm)
 {
-	put(0,$mm['terminal_height'],$mm['active_node_color'].str_repeat(' ',$mm['terminal_width']));
-	move(0,$mm['terminal_height']);
-
-	system("stty sane");
-	$mm['query'] = readline('Search for: ');
-	system('stty cbreak -echo -crterase intr undef');
+	$mm['query'] = magic_readline($mm,'');
 
 	if (empty($mm['query']))
 	{
@@ -1692,26 +1701,18 @@ function export_html_node(&$mm, $parent_id)
 
 function save(&$mm, $new_name = false)
 {
-	if (empty($mm['filename']))
-		$new_name = true;
-
-	if ($new_name)
+	if ($new_name || empty($mm['filename']))
 	{
-		$path = exec('pwd');
-		put(0,$mm['terminal_height'],$mm['active_node_color'].str_repeat(' ',$mm['terminal_width']));
-		put(0,$mm['terminal_height']," $path -- new path and file name: ");
+		$new_name = magic_readline($mm, empty($mm['filename']) ? exec('pwd') : $mm['filename']);
 
-		system("stty sane");
-		$mm['filename'] = trim(readline());
-		system('stty cbreak -echo');
-
-		if ($mm['filename']=='')
+		if ($new_name === false)
 		{
 			display($mm);
 			message($mm, 'Saving cancelled');
 			return;
 		}
 
+		$mm['filename'] = $new_name;
 		$ext = mb_substr( $mm['filename'], mb_strrpos($mm['filename'],'.') + 1);
 
 		if ($ext!='hmm')
