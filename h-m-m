@@ -2033,9 +2033,6 @@ function paste_sub_tree(&$mm, $as_sibling )
 
 	if ($as_sibling && $mm['active_node']==$mm['root']) return;
 
-	push_change($mm);
-	$mm['modified'] = true;
-
 	if ($as_sibling)
 		$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
 	else
@@ -2055,8 +2052,12 @@ function paste_sub_tree(&$mm, $as_sibling )
 		)
 	;
 
-	$mm['nodes'] += $st;
+	if ($st==[]) return;
 
+	push_change($mm);
+	$mm['modified'] = true;
+
+	$mm['nodes'] += $st;
 
 	// doing it like this, in case the sub-tree has more than
 	// one top-level element.
