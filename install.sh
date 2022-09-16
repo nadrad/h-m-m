@@ -47,7 +47,7 @@ fi
 echo -e "This script will install h-m-m on $DESTINATION_DIR and make it executable.\n"
 echo -e "Proceed (y/N)?"
 
-read a
+read a </dev/tty
 
 if [[ ! "$a" =~ ^(y|Y) ]] ;then
     echo -e "Installation cancelled."
@@ -59,7 +59,7 @@ if test -f "$DESTINATION_DIR/h-m-m"; then
     echo -e "The file $DESTINATION_DIR/h-m-m already exist.\n"
     echo -e "Overwrite (y/N)?"
 
-    read a
+    read a </dev/tty
 
     if [[ ! "$a" =~ ^(y|Y) ]] ;then
         echo -e "Installation cancelled."
