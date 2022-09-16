@@ -1417,7 +1417,7 @@ function search(&$mm)
 
 	system("stty sane");
 	$mm['query'] = readline('Search for: ');
-	system('stty cbreak -echo');
+	system('stty cbreak -echo -crterase intr undef');
 
 	if (empty($mm['query']))
 	{
@@ -1427,6 +1427,7 @@ function search(&$mm)
 
 	if (!next_search_result($mm))
 		previous_search_result($mm);
+
 }
 
 function previous_search_result(&$mm)
@@ -1454,7 +1455,10 @@ function previous_search_result(&$mm)
 		}
 
 	if ($nid<0)
+	{
+		display($mm);
 		return false;
+	}
 
 	$mm['active_node'] = $nid;
 	display($mm);
