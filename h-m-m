@@ -1688,7 +1688,7 @@ function export_html_node(&$mm, $parent_id)
 		$output =
 			"<details>"
 			."<summary>"
-			.$mm['nodes'][$parent_id]['title'] . ' (' . count($mm['nodes'][$parent_id]['children']) . ')'
+			.$mm['nodes'][$parent_id]['title']
 			."</summary>";
 
 		foreach ($mm['nodes'][$parent_id]['children'] as $cid)
