@@ -41,6 +41,8 @@ printf "Proceed (y/N)?"
 
 read -r a </dev/tty
 
+printf "\n"
+
 if ! printf "%s" "$a" | grep -q "^[yY]"; then
     printf "Installation cancelled.\n"
     exit 125
@@ -52,6 +54,8 @@ if test -f "$DESTINATION_DIR/h-m-m"; then
     printf "Overwrite (y/N)?"
 
     read -r a </dev/tty
+
+    printf "\n"
 
     if ! printf "%s" "$a" | grep -q "^[yY]"; then
         printf "Installation cancelled.\n"
