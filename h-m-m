@@ -1661,7 +1661,6 @@ function export_html(&$mm)
 
 	message($mm, 'Exported as '.$mm['filename'].'.html');
 	copy_to_clipboard($mm, $mm['filename'].'.html');
-
 }
 
 
@@ -1689,7 +1688,7 @@ function export_html_node(&$mm, $parent_id)
 		$output =
 			"<details>"
 			."<summary>"
-			.$mm['nodes'][$parent_id]['title']
+			.$mm['nodes'][$parent_id]['title'] . ' (' . count($mm['nodes'][$parent_id]['children']) . ')'
 			."</summary>";
 
 		foreach ($mm['nodes'][$parent_id]['children'] as $cid)
@@ -1865,7 +1864,13 @@ function change_active_node(&$mm, $direction)
 
 	if ($direction==move_right)
 	{
-		if ($node['is_leaf'] || ($node['collapsed'] ?? false) ) return;
+		if ($node['is_leaf']) return;
+
+		// auto-unfold node on right move
+		if ($node['collapsed'] ?? false) {
+			toggle($mm);
+			$node = $mm['nodes'][ $mm['active_node'] ];
+		}
 
 		$distance = [];
 		foreach ($node['children'] as $cid)
