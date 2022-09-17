@@ -148,15 +148,6 @@ Optionally, you can make the file executable by running the `chmod +x h-m-m` in 
 
 In Arch Linux, you can use the `h-m-m-git` AUR package to install it.
 
-It's also possible to execute `h-m-m` through docker (or podman), just run:
-
-```sh
-# Build the image
-docker build -t hmm .
-
-# Run it
-docker run --rm -it -v $(pwd):/app/ hmm
-```
 
 ## 3. Installation script for Linux
 
@@ -167,6 +158,19 @@ You can run the following command to install h-m-m:
 This command downloads and runs the install.sh script, which it turn downloads h-m-m, copies it to `/usr/local/bin`, checks the dependencies, and makes it executable. 
 
 After installing, you can run `h-m-m` from anywhere in your terminal to run the application with an empty map, or `h-m-m filename` to open an existing file.
+
+
+## 4. Installation with Docker
+
+It's also possible to execute `h-m-m` through docker (or podman):
+
+```sh
+# Build the image
+docker build -t hmm .
+
+# Run it
+docker run --rm -it -v $(pwd):/app/ hmm
+```
 
 
 # Compatibility 
