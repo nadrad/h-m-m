@@ -148,6 +148,15 @@ Optionally, you can make the file executable by running the `chmod +x h-m-m` in 
 
 In Arch Linux, you can use the `h-m-m-git` AUR package to install it.
 
+It's also possible to execute `h-m-m` through docker (or podman), just run:
+
+```sh
+# Build the image
+docker build -t hmm .
+
+# Run it
+docker run --rm -it -v $(pwd):/app/ hmm
+```
 
 ## 3. Installation script for Linux
 
