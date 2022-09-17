@@ -73,7 +73,7 @@ fi
 rm -f /tmp/h-m-m
 
 # Make the copied file executable
-if ! sudo chmod +x $DESTINATION_DIR/h-m-m; then
+if ! sudo chmod +x "$DESTINATION_DIR/h-m-m"; then
    printf "ERROR: Could not make the script %s/h-m-m executable.\n" "$DESTINATION_DIR"
    exit 1
 fi
