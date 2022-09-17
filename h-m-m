@@ -21,7 +21,6 @@ $mm['change_active_node']	= [];
 $mm['change_index']			= 0;
 $mm['change_max_steps']		= 24;
 
-mb_regex_encoding("UTF-8");
 mb_internal_encoding("UTF-8");
 
 
