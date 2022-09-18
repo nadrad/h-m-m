@@ -125,10 +125,12 @@ When you yank (copy) or delete (cut) a subtree, the data will be put into your c
 Most mind mapping applications use a similar format for copying and pasting. As a result, if you want to import a map from another application, you can probably select everything in that application, copy it, come to **h-m-m**, and paste it. The same usually works well when copying from HTML/PDF/Doc lists, spreadsheets (e.g., Calc and Excel), etc.
 
 
-# Installing
+# Installing 
+
+Note: A few issues should be solved before **h-m-m** can be run in Windows. Until then, Windows users can probably use *Windows Subsystem for Linux* to run it.
 
 
-## 1. Manual installation (Linux, Windows, and Mac)
+## 1. Manual installation 
 
 **h-m-m** is a single php file. You can download it from here, or clone it on your computer using git and add a scheduled job to update it once a day or week. 
 
@@ -178,6 +180,8 @@ docker run --rm -it -v $(pwd):/app/ hmm
 # Compatibility 
 
 I think the method I've used in this program to interact with the terminal emulator is general and standard enough to be cross-platform, but I've developed it in Linux and I don't have any other operating system to test it on. If you run into a problem in Windows or Mac, let me know, especially if you know how to fix it, and I'll try to make it work. 
+
+Update: There's an [open issue](https://github.com/nadrad/h-m-m/issues/29) for Windows, waiting for contributors!
 
 
 # Feedback
