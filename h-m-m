@@ -4,17 +4,18 @@
 
 $mm=[];
 
-$mm['max_parent_width']		= 25;
-$mm['max_leaf_width']		= 55;
-$mm['line_spacing']			= 1;
-$mm['center_lock']			= false;
-$mm['focus_lock']			= false;
-$mm['initial_depth']		= 1;
-$mm['show_logo']			= 0;
+$mm['max_parent_width'] = 25;
+$mm['max_leaf_width']   = 55;
+$mm['line_spacing']     = 1;
 
-$mm['active_node_color']	= "\033[38;5;0m\033[48;5;172m\033[1m";
-$mm['message_color']		= "\033[38;5;0m\033[48;5;141m\033[1m";
-$mm['question_color']		= "\033[38;5;168m";
+$mm['center_lock'] = false;
+$mm['focus_lock']  = false;
+
+$mm['initial_depth'] = 1;
+
+$mm['active_node_color'] = "\033[38;5;0m\033[48;5;172m\033[1m";
+$mm['message_color']     = "\033[38;5;0m\033[48;5;141m\033[1m";
+$mm['question_color']    = "\033[38;5;168m";
 
 $mm['changes']				= [];
 $mm['change_active_node']	= [];
@@ -1972,7 +1973,6 @@ function expand_all(&$mm)
 	foreach ($mm['nodes'] as $id=>$node)
 		$mm['nodes'][$id]['collapsed'] = false;
 
-	$mm['show_logo'] = 0;
 	build_map($mm);
 	center_active_node($mm);
 	display($mm);
@@ -2546,27 +2546,11 @@ function display(&$mm, $force_center = false)
 				,$line
 			);
 
-		// adding the logo
-
-		if ($mm['show_logo']>0)
-		{
-			if     ($y==2)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' ╭────────────╮    '.default_color;
-			elseif ($y==3)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │     ┏━ m   │    '.default_color;
-			elseif ($y==4)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │ h ━━┫      │    '.default_color;
-			elseif ($y==5)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' │     ┗━━━ m │    '.default_color;
-			elseif ($y==6)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. ' ╰────────────╯    '.default_color;
-			elseif ($y==7)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '                   '.default_color;
-			elseif ($y==8)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '       hackers     '.default_color;
-			elseif ($y==9)  $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '          mind     '.default_color;
-			elseif ($y==10) $line = mb_substr($line, 0, $mm['terminal_width']-19).logo_color. '           map     '.default_color;
-		}
-
 		// done!
 		$output .= $line;
 	}
 
 	echo reset_page.reset_color.$output;
-	$mm['show_logo']--;
 }
 
 
