@@ -1,7 +1,19 @@
 #!/usr/bin/env php
 <?php
-// {{{ settings
+/**
+ * h-m-m
+ *
+ * h-m-m (pronounced like the interjection "hmm") is a simple, fast, keyboard-centric terminal-based tool for working with mind maps.
+ *
+ * @version 1.0.0
+ * @author  Nader K. Rad <me@nader.pm>
+ * @link    https://github.com/nadrad/h-m-m
+ * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
+ */
 
+/**
+ * Settings
+ */
 $mm=[];
 
 $mm['max_parent_width']    = 25;
@@ -23,7 +35,13 @@ $mm['change_max_steps']    = 24;
 
 mb_internal_encoding("UTF-8");
 
-
+/**
+ * Load settings
+ *
+ * @param array $mm
+ *
+ * @return void
+ */
 function load_settings(&$mm)
 {
 	global $argv;
@@ -62,12 +80,11 @@ function load_settings(&$mm)
 	fclose($handle);
 }
 
-
-// }}}
-// {{{ constants and defaults
-
-// escape codes: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
-
+/**
+ * Constants and defaults
+ * 
+ * Escape codes: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+ */
 $mm['top_left_column']      = 0;
 $mm['top_left_row']         = 0;
 $mm['active_column']        = 0;
@@ -150,10 +167,11 @@ const line_off              = "\033[0m";
 const collapsed_symbol_on   = "\033[38;5;215m";
 const collapsed_symbol_off  = "\033[0m";
 
-
-// }}}
-// {{{ checking the requirements
-
+/**
+ * Checking the requirements
+ *
+ * @return bool
+ */
 function check_required_extensions(): bool
 {
 	if (!function_exists('mb_strlen')) 
@@ -166,7 +184,13 @@ function check_required_extensions(): bool
 	return true;
 }
 
-
+/**
+ * Check the available clipboard tool
+ *
+ * @param array $mm
+ *
+ * @return void
+ */
 function check_the_available_clipboard_tool(&$mm)
 {
 	if (PHP_OS_FAMILY === "Windows")
@@ -219,10 +243,11 @@ function check_the_available_clipboard_tool(&$mm)
 
 }
 
-
-// }}}
-// {{{ alternative screen
-
+/**
+ * Alternative screen
+ *
+ * @return void
+ */
 function shutdown()
 {
 	clear();
@@ -233,7 +258,11 @@ function shutdown()
 if (false === check_required_extensions()) 
 	return 1;
 
-
+/**
+ * Setup screen
+ *
+ * @return void
+ */
 function set_up_screen()
 {
 	// https://www.computerhope.com/unix/ustty.htm
@@ -248,12 +277,44 @@ function set_up_screen()
 	echo "\033[?25l\033[?9;1000;1001;1002;1003;1004;1007;1005;1006;1015;1016l";
 }
 
-
+/**
+ * Clear
+ *
+ * @return void
+ */
 function clear()       { echo "\033[2J"; }
+
+/**
+ * Move
+ *
+ * @param int $x
+ * @param int $y
+ *
+ * @return void
+ */
 function move($x,$y)   { echo "\033[{$y};{$x}f"; }
+
+/**
+ * Put
+ *
+ * @param int $x
+ * @param int $y
+ * @param int $t
+ *
+ * @return void
+ */
 function put($x,$y,$t) { echo "\033[{$y};{$x}f{$t}"; }
 
-
+/**
+ * mput
+ *
+ * @param array $mm
+ * @param int $x
+ * @param int $y
+ * @param string $s
+ *
+ * @return void
+ */
 function mput(&$mm,$x,$y,$s)
 {
 	$y = round($y);
@@ -264,10 +325,13 @@ function mput(&$mm,$x,$y,$s)
 		. mb_substr( $mm['map'][$y], $x + mb_strlen($s) );
 }
 
-
-// }}}
-// {{{ debug
-
+/**
+ * Debug
+ *
+ * @param array $nodes
+ *
+ * @return void
+ */
 function debug($nodes)
 {
 	echo " id   pr    x    w    y   yo    h   lh  clh     title\n";
@@ -291,10 +355,15 @@ function debug($nodes)
 	echo " id   pr    x    w    y   yo    h   lh  clh     title\n";
 }
 
-
-// }}}
-// {{{ decode tree
-
+/**
+ * Decode tree
+ *
+ * @param array $lines
+ * @param int $root_id
+ * @param int $start_id
+ *
+ * @return array
+ */
 function decode_tree($lines, $root_id, $start_id)
 {
 	// calculating the indentation shift and cleaning up the special characters
@@ -406,10 +475,13 @@ function decode_tree($lines, $root_id, $start_id)
 	return($nodes);
 }
 
-
-// }}}
-// {{{ load_file
-
+/**
+ * Load file
+ *
+ * @param array $mm
+ *
+ * @return void
+ */
 function load_file(&$mm)
 {
 	global $argv;
@@ -471,10 +543,14 @@ function load_file(&$mm)
 		$mm['active_node']=2;
 }
 
-
-// }}}
-// {{{ calculate w, x, lh, and clh
-
+/**
+ * Calculate w, x, lh, and clh
+ *
+ * @param array $mm
+ * @param int $id
+ *
+ * @return void
+ */
 function calculate_x_and_lh(&$mm, $id)
 {
 	$node = $mm['nodes'][$id];
@@ -534,10 +610,13 @@ function calculate_x_and_lh(&$mm, $id)
 	}
 }
 
-
-// }}}
-// {{{ calculate h
-
+/**
+ * Calculate h
+ *
+ * @param array $mm
+ *
+ * @return void
+ */
 function calculate_h(&$mm)
 {
 	$unfinished = true;
@@ -585,10 +664,13 @@ function calculate_h(&$mm)
 	}
 }
 
-
-// }}}
-// {{{ calculate y and yo
-
+/**
+ * Calculate y and yo
+ *
+ * @param array $mm
+ *
+ * @return void
+ */
 function calculate_y(&$mm)
 {
 	$mm['map_top']    = 0;
@@ -599,6 +681,14 @@ function calculate_y(&$mm)
 	calculate_children_y($mm, 0);
 }
 
+/**
+ * Calculate children y
+ *
+ * @param array $mm
+ * @param int $pid
+ *
+ * @return void
+ */
 function calculate_children_y(&$mm,$pid)
 {
 	$y = $mm['nodes'][$pid]['y'];
@@ -633,10 +723,15 @@ function calculate_children_y(&$mm,$pid)
 		}
 }
 
-
-// }}}
-// {{{ calculate top-down height shift
-
+/**
+ * Calculate top-down height shift
+ *
+ * @param array $mm
+ * @param int $id
+ * @param int $shift
+ *
+ * @return void
+ */
 function calculate_height_shift(&$mm, $id, $shift = 0)
 {
 	$mm['nodes'][$id]['yo'] += $shift;
@@ -647,10 +742,14 @@ function calculate_height_shift(&$mm, $id, $shift = 0)
 			calculate_height_shift($mm, $cid, $shift);
 }
 
-
-// }}}
-// {{{ draw connections on the map
-
+/**
+ * Draw connections on the map
+ *
+ * @param array $mm
+ * @param int $id
+ *
+ * @return void
+ */
 function draw_connections(&$mm, $id)
 {
 	$node = $mm['nodes'][$id];
@@ -832,10 +931,14 @@ function draw_connections(&$mm, $id)
 		draw_connections($mm, $cid);
 }
 
-
-// }}}
-// {{{ add content to the map
-
+/**
+ * Add content to the map
+ *
+ * @param array $mm
+ * @param int $id
+ *
+ * @return void
+ */
 function add_content_to_the_map(&$mm, $id)
 {
 	$node = $mm['nodes'][$id];
@@ -875,10 +978,13 @@ function add_content_to_the_map(&$mm, $id)
 			add_content_to_the_map($mm,$cid);
 }
 
-
-// }}}
-// {{{ build map
-
+/**
+ * Build map
+ *
+ * @param array $mm
+ *
+ * @return void
+ */
 function build_map(&$mm)
 {
 	// resetting the global values
@@ -926,10 +1032,13 @@ function build_map(&$mm)
 
 }
 
-
-// }}}
-// {{{ toggle
-
+/**
+ * Toggle
+ *
+ * @param array $mm
+ *
+ * @return void
+ */
 function toggle(&$mm)
 {
 	if ($mm['nodes'][ $mm['active_node'] ]['is_leaf'])
@@ -942,10 +1051,14 @@ function toggle(&$mm)
 	display($mm);
 }
 
-
-// }}}
-// {{{ spacing adjuster
-
+/**
+ * Spacing adjuster
+ *
+ * @param array $mm
+ * @param int $task
+ *
+ * @return void
+ */
 function adjust_spacing(&$mm, $task)
 {
 	if ($task==spacing_wider)     $mm['line_spacing']++;
@@ -958,10 +1071,14 @@ function adjust_spacing(&$mm, $task)
 	message($mm,'Spacing: '.$mm['line_spacing']);
 }
 
-
-// }}}
-// {{{ width adjuster
-
+/**
+ * Width adjuster
+ *
+ * @param array $mm
+ * @param int $task
+ *
+ * @return void
+ */
 function adjust_width(&$mm, $task)
 {
 	if ($task==width_wider)
@@ -990,10 +1107,14 @@ function adjust_width(&$mm, $task)
 	message($mm,'Width: '.$mm['max_parent_width'].' / '.$mm['max_leaf_width']);
 }
 
-
-// }}}
-// {{{ move nodes
-
+/**
+ * Move nodes
+ *
+ * @param array $mm
+ * @param int $id
+ * 
+ * @return void
+ */
 function push_node_down(&$mm, $id)
 {
 	if ($id==0)  return;
@@ -1024,11 +1145,15 @@ function push_node_down(&$mm, $id)
 	foreach($mm['nodes'][$id+1]['children'] as $cid=>$cdata)
 		$mm['nodes'][$cid]['parent'] = $id+1;
 }
-
-
-// }}}
-// {{{ insert node
-
+ 
+/**
+ * Insert node
+ *
+ * @param array $mm
+ * @param int $type
+ * 
+ * @return void
+ */
 function insert_node(&$mm, $type)
 {
 	if ($mm['active_node']==$mm['root'])
@@ -1079,10 +1204,14 @@ function insert_node(&$mm, $type)
 	edit_node($mm);
 }
 
-
-// }}}
-// {{{ magic readline!
-
+/**
+ * Magic readline!
+ *
+ * @param array $mm
+ * @param string $title
+ * 
+ * @return string|bool
+ */
 function magic_readline(&$mm, $title)
 {
 	$in = '';
@@ -1282,7 +1411,16 @@ function magic_readline(&$mm, $title)
 	}
 }
 
-
+/**
+ * Show line
+ *
+ * @param array $mm
+ * @param string $title
+ * @param int $cursor
+ * @param int $shift
+ * 
+ * @return void
+ */
 function show_line(&$mm, $title, $cursor, $shift)
 {
 	$output  = mb_substr($title,$shift,$mm['terminal_width']-1);
@@ -1313,10 +1451,14 @@ function show_line(&$mm, $title, $cursor, $shift)
 	put(0,$mm['terminal_height'],$mm['active_node_color'].$output);
 }
 
-
-// }}}
-// {{{ edit node
-
+/**
+ * Edit node
+ *
+ * @param array $mm
+ * @param bool $rewrite
+ * 
+ * @return void
+ */
 function edit_node(&$mm, $rewrite = false)
 {
 	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
@@ -1340,10 +1482,14 @@ function edit_node(&$mm, $rewrite = false)
 	display($mm);
 }
 
-
-// }}}
-// {{{ center active node
-
+/**
+ * Center active node
+ *
+ * @param array $mm
+ * @param bool $only_vertically
+ * 
+ * @return void
+ */
 function center_active_node(&$mm, $only_vertically = false)
 {
 	$node = $mm['nodes'][ $mm['active_node'] ];
@@ -1357,17 +1503,26 @@ function center_active_node(&$mm, $only_vertically = false)
 	$mm['win_top'] = round( $midy - $mm['terminal_height']/2 );
 }
 
-
-// }}}
-// {{{ goto's
-
+/**
+ * Goto's
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function go_to_root(&$mm)
 {
 	$mm['active_node']=$mm['root'];
 	display($mm, true);
 }
 
-
+/**
+ * Goto top
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function go_to_top(&$mm)
 {
 	$yid = 0;
@@ -1384,7 +1539,13 @@ function go_to_top(&$mm)
 	display($mm, true);
 }
 
-
+/**
+ * Goto bottom
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function go_to_bottom(&$mm)
 {
 	$yid = 0;
@@ -1401,10 +1562,13 @@ function go_to_bottom(&$mm)
 	display($mm, true);
 }
 
-
-// }}}
-// {{{ search
-
+/**
+ * Search
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function search(&$mm)
 {
 	$mm['query'] = magic_readline($mm,'');
@@ -1419,7 +1583,13 @@ function search(&$mm)
 		previous_search_result($mm);
 }
 
-
+/**
+ * Previous search result
+ *
+ * @param array $mm
+ * 
+ * @return void|bool
+ */
 function previous_search_result(&$mm)
 {
 	$cy
@@ -1454,7 +1624,13 @@ function previous_search_result(&$mm)
 	display($mm);
 }
 
-
+/**
+ * Next search result
+ *
+ * @param array $mm
+ * 
+ * @return void|bool
+ */
 function next_search_result(&$mm)
 {
 	$cy
@@ -1486,10 +1662,13 @@ function next_search_result(&$mm)
 	display($mm);
 }
 
-
-// }}}
-// {{{ move active node
-
+/**
+ * Move active node
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function move_active_node_down(&$mm)
 {
 	if ($mm['active_node']==0) return;
@@ -1525,7 +1704,13 @@ function move_active_node_down(&$mm)
 	display($mm);
 }
 
-
+/**
+ * Move active node up
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function move_active_node_up(&$mm)
 {
 	if ($mm['active_node']==0) return;
@@ -1562,10 +1747,13 @@ function move_active_node_up(&$mm)
 	display($mm);
 }
 
-
-// }}}
-// {{{ export html
-
+/**
+ * Export html
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function export_html(&$mm)
 {
 	if (empty($mm['filename']))
@@ -1629,7 +1817,14 @@ function export_html(&$mm)
 	copy_to_clipboard($mm, $mm['filename'].'.html');
 }
 
-
+/**
+ * Export html node
+ *
+ * @param array $mm
+ * @param int $parent_id
+ * 
+ * @return string
+ */
 function export_html_node(&$mm, $parent_id)
 {
 	if ($mm['nodes'][$parent_id]['children']==[])
@@ -1667,10 +1862,14 @@ function export_html_node(&$mm, $parent_id)
 	return $output;
 }
 
-
-// }}}
-// {{{ save
-
+/**
+ * Save
+ *
+ * @param array $mm
+ * @param string|bool $new_name
+ * 
+ * @return void
+ */
 function save(&$mm, $new_name = false)
 {
 	if ($new_name || empty($mm['filename']))
@@ -1718,10 +1917,14 @@ function save(&$mm, $new_name = false)
 	message($mm, 'Saved '.$mm['filename']);
 }
 
-
-// }}}
-// {{{ message
-
+/**
+ * Message
+ *
+ * @param array $mm
+ * @param string $text
+ * 
+ * @return void
+ */
 function message(&$mm, $text)
 {
 	put
@@ -1734,20 +1937,26 @@ function message(&$mm, $text)
 	usleep(200000);
 }
 
-
-// }}}
-// {{{ quit
-
+/**
+ * Quit
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function quit(&$mm)
 {
 	if (($mm['modified'] ?? false) === false) shutdown();
 	message($mm, "You have unsaved changes. Save them, or use shift+Q to quit without saving.");
 }
 
-
-// }}}
-// {{{ move_window
-
+/**
+ * Move window
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function move_window(&$mm)
 {
 	$node = $mm['nodes'][ $mm['active_node'] ];
@@ -1764,10 +1973,13 @@ function move_window(&$mm)
 	$mm['win_top']  = max( $mm['win_top'],  $y2 - $mm['terminal_height']);
 }
 
-
-// }}}
-// {{{ changes
-
+/**
+ * Changes
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function push_change(&$mm)
 {
 	// flush any redo chain
@@ -1790,7 +2002,13 @@ function push_change(&$mm)
 	$mm['change_index']++;
 }
 
-
+/**
+ * Undo
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function undo(&$mm)
 {
 	if($mm['change_index'] == 0)
@@ -1804,7 +2022,13 @@ function undo(&$mm)
 	display($mm);
 }
 
-
+/**
+ * Redo
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function redo(&$mm)
 {
 	if(count($mm['changes']) == $mm['change_index'])
@@ -1818,10 +2042,14 @@ function redo(&$mm)
 	display($mm);
 }
 
-
-// }}}
-// {{{ change active node
-
+/**
+ * Change active node
+ *
+ * @param array $mm
+ * @param int $direction
+ * 
+ * @return void
+ */
 function change_active_node(&$mm, $direction)
 {
 	$node = $mm['nodes'][ $mm['active_node'] ];
@@ -1929,10 +2157,14 @@ function change_active_node(&$mm, $direction)
 	return;
 }
 
-
-// }}}
-// {{{ expand
-
+/**
+ * Expand
+ *
+ * @param array $mm
+ * @param int $id
+ * 
+ * @return void
+ */
 function expand(&$mm, $id)
 {
 	$mm['nodes'][$id]['collapsed'] = false;
@@ -1941,7 +2173,13 @@ function expand(&$mm, $id)
 		expand($mm, $cid);
 }
 
-
+/**
+ * Expand all
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function expand_all(&$mm)
 {
 	foreach ($mm['nodes'] as $id=>$node)
@@ -1952,10 +2190,16 @@ function expand_all(&$mm)
 	display($mm);
 }
 
-
-// }}}
-// {{{ encode tree
-
+/**
+ * Encode tree
+ *
+ * @param array $mm
+ * @param int $id
+ * @param bool|int $exclude_parent
+ * @param int $base
+ * 
+ * @return string
+ */
 function encode_tree(&$mm, $id, $exclude_parent = false, $base = 0)
 {
 	if (!$exclude_parent)
@@ -1969,10 +2213,13 @@ function encode_tree(&$mm, $id, $exclude_parent = false, $base = 0)
 	return $output;
 }
 
-
-// }}}
-// {{{ append
-
+/**
+ * Append
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function append(&$mm)
 {
 	$mm['nodes'][ $mm['active_node'] ]['title'] .= 
@@ -1989,10 +2236,14 @@ function append(&$mm)
 	display($mm);
 }
 
-
-// }}}
-// {{{ paste sub-tree
-
+/**
+ * Paste sub-tree
+ *
+ * @param array $mm
+ * @param bool $as_sibling
+ * 
+ * @return void
+ */
 function paste_sub_tree(&$mm, $as_sibling )
 {
 	if ($as_sibling && $mm['active_node']==$mm['root']) return;
@@ -2061,10 +2312,14 @@ function paste_sub_tree(&$mm, $as_sibling )
 	display($mm);
 }
 
-
-// }}}
-// {{{ clipboard
-
+/**
+ * Clipboard
+ *
+ * @param array $mm
+ * @param string $text
+ * 
+ * @return void
+ */
 function copy_to_clipboard(&$mm, $text)
 {
 	$clip = popen($mm['clipboard']['write'],'wb');
@@ -2074,7 +2329,13 @@ function copy_to_clipboard(&$mm, $text)
 	pclose($clip);
 }
 
-
+/**
+ * Get from clipboard
+ *
+ * @param array $mm
+ * 
+ * @return string
+ */
 function get_from_clipboard(&$mm)
 {
 	return 
@@ -2087,10 +2348,13 @@ function get_from_clipboard(&$mm)
 	;
 }
 
-
-// }}}
-// {{{ load empty map
-
+/**
+ * Load empty map
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function load_empty_map(&$mm)
 {
 	if (isset($mm['nodes']))  unset($mm['nodes']);
@@ -2102,20 +2366,29 @@ function load_empty_map(&$mm)
 	$mm['root']=1;
 }
 
-
-// }}}
-// {{{ yank
-
+/**
+ * Yank
+ *
+ * @param array $mm
+ * @param bool $exclude_parent
+ * 
+ * @return void
+ */
 function yank_node(&$mm, $exclude_parent = false )
 {
 	copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent));
 	message($mm, 'Item(s) are copied to the clipboard.');
 }
 
-
-// }}}
-// {{{ delete
-
+/**
+ * Delete
+ *
+ * @param array $mm
+ * @param bool $exclude_parent
+ * @param bool $dont_copy_to_clipboard
+ * 
+ * @return void
+ */
 function delete_node(&$mm, $exclude_parent = false, $dont_copy_to_clipboard = false )
 {
 	if ($mm['active_node']==$mm['root']) 
@@ -2136,7 +2409,15 @@ function delete_node(&$mm, $exclude_parent = false, $dont_copy_to_clipboard = fa
 		message($mm, 'Item(s) are cut and placed into the clipboard.');
 }
 
-
+/**
+ * Delete node internal
+ *
+ * @param array $mm
+ * @param int $active_node
+ * @param bool $exclude_parent
+ * 
+ * @return void
+ */
 function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 {
 	// taking a shorter approach if it's for the whole tree
@@ -2195,7 +2476,14 @@ function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 	}
 }
 
-
+/**
+ * Delete children
+ *
+ * @param array $mm
+ * @param int $id
+ * 
+ * @return void
+ */
 function delete_children(&$mm,$id)
 {
 	foreach (($mm['nodes'][$id]['children'] ?? []) as $cid)
@@ -2205,10 +2493,13 @@ function delete_children(&$mm,$id)
 	}
 }
 
-
-// }}}
-// {{{ focus
-
+/**
+ * Toggle focus
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function toggle_focus(&$mm)
 {
 	$mm['focus_lock'] = !$mm['focus_lock'];
@@ -2219,14 +2510,27 @@ function toggle_focus(&$mm)
 	display($mm);
 }
 
-
+/**
+ * Focus
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function focus(&$mm)
 {
 	collapse_siblings($mm, $mm['active_node']);
 	expand_siblings($mm, $mm['active_node']);
 }
 
-
+/**
+ * Collapse siblings
+ *
+ * @param array $mm
+ * @param int $id
+ * 
+ * @return void
+ */
 function collapse_siblings(&$mm, $id)
 {
 	if ($id <= $mm['root']) return;
@@ -2240,7 +2544,14 @@ function collapse_siblings(&$mm, $id)
 	collapse_siblings($mm, $parent_id);
 }
 
-
+/**
+ * Expand siblings
+ *
+ * @param array $mm
+ * @param int $id
+ * 
+ * @return void
+ */
 function expand_siblings(&$mm, $id)
 {
 	if ($mm['nodes'][$id]['is_leaf']) return;
@@ -2250,10 +2561,13 @@ function expand_siblings(&$mm, $id)
 		expand_siblings($mm, $cid);
 }
 
-
-// }}}
-// {{{ collapse
-
+/**
+ * Collapse other branches
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function collapse_other_branches(&$mm)
 {
 	if ($mm['active_node'] == $mm['root'])
@@ -2270,7 +2584,13 @@ function collapse_other_branches(&$mm)
 	display($mm);
 }
 
-
+/**
+ * Collapse inner
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function collapse_inner(&$mm)
 {
 	foreach ($mm['nodes'][ $mm['active_node'] ]['children'] as $cid)
@@ -2283,7 +2603,14 @@ function collapse_inner(&$mm)
 	display($mm);
 }
 
-
+/**
+ * Find branch
+ *
+ * @param array $mm
+ * @param int $cid
+ * 
+ * @return int
+ */
 function find_branch(&$mm, $cid)
 {
 	if ($mm['nodes'][$cid]['parent'] == $mm['root'])
@@ -2292,7 +2619,13 @@ function find_branch(&$mm, $cid)
 		return find_branch($mm, $mm['nodes'][$cid]['parent']);
 }
 
-
+/**
+ * Collapse all
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function collapse_all(&$mm)
 {
 	foreach ($mm['nodes'] as $id=>$node)
@@ -2306,7 +2639,15 @@ function collapse_all(&$mm)
 	display($mm);
 }
 
-
+/**
+ * Collapse
+ *
+ * @param array $mm
+ * @param int $id
+ * @param int $keep
+ * 
+ * @return void
+ */
 function collapse(&$mm, $id, $keep)
 {
 	if ($mm['nodes'][$id]['is_leaf']) return;
@@ -2321,7 +2662,15 @@ function collapse(&$mm, $id, $keep)
 	}
 }
 
-
+/**
+ * Collapse level
+ *
+ * @param array $mm
+ * @param int $level
+ * @param bool $no_display
+ * 
+ * @return void
+ */
 function collapse_level(&$mm, $level, $no_display = false)
 {
 	collapse($mm, $mm['root'], $level);
@@ -2349,10 +2698,14 @@ function collapse_level(&$mm, $level, $no_display = false)
 	display($mm);
 }
 
-
-// }}}
-// {{{ display
-
+/**
+ * Display
+ *
+ * @param array $mm
+ * @param bool $force_center
+ * 
+ * @return void
+ */
 function display(&$mm, $force_center = false)
 {
 	if ($mm['focus_lock'])
@@ -2516,10 +2869,13 @@ function display(&$mm, $force_center = false)
 	echo reset_page.reset_color.$output;
 }
 
-
-// }}}
-// {{{ monitor key presses
-
+/**
+ * Monitor key presses
+ *
+ * @param array $mm
+ * 
+ * @return void
+ */
 function monitor_key_presses(&$mm)
 {
 	stream_set_blocking(STDIN,false);
@@ -2640,9 +2996,9 @@ function monitor_key_presses(&$mm)
 	}
 }
 
-// }}}
-// {{{ main
-
+/**
+ * Main
+ */
 check_the_available_clipboard_tool($mm);
 
 set_up_screen();
@@ -2657,6 +3013,3 @@ build_map($mm);
 center_active_node($mm);
 display($mm);
 monitor_key_presses($mm);
-
-// }}}
-
