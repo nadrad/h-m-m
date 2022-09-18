@@ -151,7 +151,6 @@ const collapsed_symbol_on   = "\033[38;5;215m";
 const collapsed_symbol_off  = "\033[0m";
 
 
-
 // }}}
 // {{{ checking the requirements
 
@@ -221,7 +220,6 @@ function check_the_available_clipboard_tool(&$mm)
 }
 
 
-
 // }}}
 // {{{ alternative screen
 
@@ -265,7 +263,6 @@ function mput(&$mm,$x,$y,$s)
 		. $s
 		. mb_substr( $mm['map'][$y], $x + mb_strlen($s) );
 }
-
 
 
 // }}}
@@ -475,10 +472,8 @@ function load_file(&$mm)
 }
 
 
-
 // }}}
 // {{{ calculate w, x, lh, and clh
-
 
 function calculate_x_and_lh(&$mm, $id)
 {
@@ -537,7 +532,6 @@ function calculate_x_and_lh(&$mm, $id)
 		calculate_x_and_lh($mm, $cid);
 		$mm['nodes'][$id]['clh'] += $mm['nodes'][$cid]['clh'];
 	}
-
 }
 
 
@@ -592,8 +586,6 @@ function calculate_h(&$mm)
 }
 
 
-
-
 // }}}
 // {{{ calculate y and yo
 
@@ -641,6 +633,7 @@ function calculate_children_y(&$mm,$pid)
 		}
 }
 
+
 // }}}
 // {{{ calculate top-down height shift
 
@@ -653,7 +646,6 @@ function calculate_height_shift(&$mm, $id, $shift = 0)
 		if (!$mm['nodes'][$id]['collapsed'])
 			calculate_height_shift($mm, $cid, $shift);
 }
-
 
 
 // }}}
@@ -884,7 +876,6 @@ function add_content_to_the_map(&$mm, $id)
 }
 
 
-
 // }}}
 // {{{ build map
 
@@ -936,8 +927,6 @@ function build_map(&$mm)
 }
 
 
-
-
 // }}}
 // {{{ toggle
 
@@ -952,7 +941,6 @@ function toggle(&$mm)
 	build_map($mm);
 	display($mm);
 }
-
 
 
 // }}}
@@ -1003,7 +991,6 @@ function adjust_width(&$mm, $task)
 }
 
 
-
 // }}}
 // {{{ move nodes
 
@@ -1037,7 +1024,6 @@ function push_node_down(&$mm, $id)
 	foreach($mm['nodes'][$id+1]['children'] as $cid=>$cdata)
 		$mm['nodes'][$cid]['parent'] = $id+1;
 }
-
 
 
 // }}}
@@ -1092,7 +1078,6 @@ function insert_node(&$mm, $type)
 	$mm['nodes'][ $mm['active_node'] ]['title']='';
 	edit_node($mm);
 }
-
 
 
 // }}}
@@ -1329,7 +1314,6 @@ function show_line(&$mm, $title, $cursor, $shift)
 }
 
 
-
 // }}}
 // {{{ edit node
 
@@ -1355,7 +1339,6 @@ function edit_node(&$mm, $rewrite = false)
 	build_map($mm);
 	display($mm);
 }
-
 
 
 // }}}
@@ -1419,7 +1402,6 @@ function go_to_bottom(&$mm)
 }
 
 
-
 // }}}
 // {{{ search
 
@@ -1435,8 +1417,8 @@ function search(&$mm)
 
 	if (!next_search_result($mm))
 		previous_search_result($mm);
-
 }
+
 
 function previous_search_result(&$mm)
 {
@@ -1471,6 +1453,7 @@ function previous_search_result(&$mm)
 	$mm['active_node'] = $nid;
 	display($mm);
 }
+
 
 function next_search_result(&$mm)
 {
@@ -1580,13 +1563,11 @@ function move_active_node_up(&$mm)
 }
 
 
-
 // }}}
 // {{{ export html
 
 function export_html(&$mm)
 {
-
 	if (empty($mm['filename']))
 	{
 		message($mm, "Can't export the map when it doesn't have a file name yet. Save it first.");
@@ -1600,7 +1581,6 @@ function export_html(&$mm)
 		message($mm, 'ERROR! Could not save the file');
 		return;
 	}
-
 
 	fwrite
 	(
@@ -1688,7 +1668,6 @@ function export_html_node(&$mm, $parent_id)
 }
 
 
-
 // }}}
 // {{{ save
 
@@ -1738,7 +1717,6 @@ function save(&$mm, $new_name = false)
 	display($mm);
 	message($mm, 'Saved '.$mm['filename']);
 }
-
 
 
 // }}}
@@ -1812,6 +1790,7 @@ function push_change(&$mm)
 	$mm['change_index']++;
 }
 
+
 function undo(&$mm)
 {
 	if($mm['change_index'] == 0)
@@ -1825,6 +1804,7 @@ function undo(&$mm)
 	display($mm);
 }
 
+
 function redo(&$mm)
 {
 	if(count($mm['changes']) == $mm['change_index'])
@@ -1837,6 +1817,7 @@ function redo(&$mm)
 	build_map($mm);
 	display($mm);
 }
+
 
 // }}}
 // {{{ change active node
@@ -1880,7 +1861,6 @@ function change_active_node(&$mm, $direction)
 		return;
 	}
 
-
 	// no other movement applies to the root element
 	if ( $mm['active_node']==0 ) return;
 
@@ -1893,7 +1873,6 @@ function change_active_node(&$mm, $direction)
 		display($mm);
 		return;
 	}
-
 
 	// for up and down, we'll try to move between siblings first,
 	// considering that their order is set based on their list
@@ -1919,7 +1898,6 @@ function change_active_node(&$mm, $direction)
 				display($mm);
 				return;
 			}
-
 
 	// if it's not possible to move up or down between siblings,
 	// we'll measure distance and move to the nearest node.
@@ -1950,7 +1928,6 @@ function change_active_node(&$mm, $direction)
 	display($mm);
 	return;
 }
-
 
 
 // }}}
@@ -2013,13 +1990,11 @@ function append(&$mm)
 }
 
 
-
 // }}}
 // {{{ paste sub-tree
 
 function paste_sub_tree(&$mm, $as_sibling )
 {
-
 	if ($as_sibling && $mm['active_node']==$mm['root']) return;
 
 	if ($as_sibling)
@@ -2055,7 +2030,6 @@ function paste_sub_tree(&$mm, $as_sibling )
 		if ($cdata['parent'] == $parent_id)
 			$mm['nodes'][ $parent_id ]['children'][] = $cid;
 
-
 	// rearranging the items only if they are pasted as siblings
 	// (for pasting as children, it makes sense to have them
 	// at the end)
@@ -2081,13 +2055,11 @@ function paste_sub_tree(&$mm, $as_sibling )
 		$mm['nodes'][ $parent_id ]['children'] = $children;
 	}
 
-
 	$mm['active_node'] = $new_id;
 
 	build_map($mm);
 	display($mm);
 }
-
 
 
 // }}}
@@ -2101,6 +2073,7 @@ function copy_to_clipboard(&$mm, $text)
 	fwrite($clip,$text);
 	pclose($clip);
 }
+
 
 function get_from_clipboard(&$mm)
 {
@@ -2139,6 +2112,7 @@ function yank_node(&$mm, $exclude_parent = false )
 	message($mm, 'Item(s) are copied to the clipboard.');
 }
 
+
 // }}}
 // {{{ delete
 
@@ -2165,7 +2139,6 @@ function delete_node(&$mm, $exclude_parent = false, $dont_copy_to_clipboard = fa
 
 function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 {
-
 	// taking a shorter approach if it's for the whole tree
 
 	if ($active_node==$mm['root'] && !$exclude_parent)
@@ -2175,7 +2148,6 @@ function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 		return;
 	}
 
-
 	// if it's for a sub-tree, then...
 
 	delete_children($mm, $active_node);
@@ -2184,11 +2156,9 @@ function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 	{
 		$mm['nodes'][ $active_node ]['is_leaf'] = true;
 		$mm['nodes'][ $active_node ]['children'] = [];
-
 	}
 	else
 	{
-
 		$parent_id = $mm['nodes'][ $active_node ]['parent'];
 
 		$previous_sibling = 0;
@@ -2242,18 +2212,20 @@ function delete_children(&$mm,$id)
 function toggle_focus(&$mm)
 {
 	$mm['focus_lock'] = !$mm['focus_lock'];
-	
+
 	message($mm, $mm['focus_lock'] ? 'Focus locked' : 'Focus unlocked');
 
 	build_map($mm);
 	display($mm);
 }
 
+
 function focus(&$mm)
 {
 	collapse_siblings($mm, $mm['active_node']);
 	expand_siblings($mm, $mm['active_node']);
 }
+
 
 function collapse_siblings(&$mm, $id)
 {
@@ -2277,7 +2249,6 @@ function expand_siblings(&$mm, $id)
 	foreach ($mm['nodes'][$id]['children'] as $cid)
 		expand_siblings($mm, $cid);
 }
-
 
 
 // }}}
@@ -2348,9 +2319,7 @@ function collapse(&$mm, $id, $keep)
 		foreach ($mm['nodes'][$id]['children'] as $cid)
 			collapse($mm, $cid, $keep-1);
 	}
-
 }
-
 
 
 function collapse_level(&$mm, $level, $no_display = false)
@@ -2381,7 +2350,6 @@ function collapse_level(&$mm, $level, $no_display = false)
 }
 
 
-
 // }}}
 // {{{ display
 
@@ -2402,7 +2370,6 @@ function display(&$mm, $force_center = false)
 	$mm['terminal_height'] = exec('tput lines');
 
 	$blank = str_repeat(' ', $mm['terminal_width']);
-
 
 	// calculating the coordinates of the active node
 
@@ -2437,7 +2404,6 @@ function display(&$mm, $force_center = false)
 		= $mm['nodes'][ $mm['active_node'] ]['lh']
 		+ $y1
 	;
-
 
 	// building the output
 
@@ -2551,7 +2517,6 @@ function display(&$mm, $force_center = false)
 }
 
 
-
 // }}}
 // {{{ monitor key presses
 
@@ -2567,7 +2532,6 @@ function monitor_key_presses(&$mm)
 
 		switch ($in)
 		{
-
 			case 'a':       edit_node($mm); break;
 			case 'A':       edit_node($mm, true); break;
 
@@ -2666,9 +2630,9 @@ function monitor_key_presses(&$mm)
 
 			case "\n":      insert_node($mm, insert_sibling); break;
 			case "\t":      insert_node($mm, insert_child); break;
-
 		}
 
+		// uncomment the following to discover the escape codes:
 		// move(1,1);
 		// for ($i=0; $i<strlen($in); $i++)
 		//   echo base_convert(ord($in[$i]),10,8).' ';
@@ -2694,5 +2658,5 @@ center_active_node($mm);
 display($mm);
 monitor_key_presses($mm);
 
-
 // }}}
+
