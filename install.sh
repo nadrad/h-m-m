@@ -6,13 +6,13 @@ DESTINATION_DIR=/usr/local/bin
 
 # Test if /usr/local/bin exists. If not fallback to /usr/bin
 if [ ! -d "$DESTINATION_DIR" ]; then
-    DESTINATION_DIR="/usr/bin"
+    DESTINATION_DIR=/usr/bin
 fi
 
 # If h-m-m doesn't exist in the same directory as this script, tries to download from github repository
 if [ ! -f "$HMM_PATH" ]; then
     if [ "$(curl --write-out '%{http_code}' --silent https://raw.githubusercontent.com/nadrad/h-m-m/main/h-m-m --output /tmp/h-m-m)" = "200" ]; then
-        HMM_PATH="/tmp/h-m-m"
+        HMM_PATH=/tmp/h-m-m
     else
         printf "ERROR: Could not download h-m-m\n"
         exit 1
@@ -73,9 +73,7 @@ fi
 rm -f /tmp/h-m-m
 
 # Make the copied file executable
-sudo chmod +x $DESTINATION_DIR/h-m-m
-
-if ! sudo chmod +x $DESTINATION_DIR/h-m-m; then
+if ! sudo chmod +x "$DESTINATION_DIR/h-m-m"; then
    printf "ERROR: Could not make the script %s/h-m-m executable.\n" "$DESTINATION_DIR"
    exit 1
 fi
