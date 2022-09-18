@@ -4,23 +4,22 @@
 
 $mm=[];
 
-$mm['max_parent_width'] = 25;
-$mm['max_leaf_width']   = 55;
-$mm['line_spacing']     = 1;
+$mm['max_parent_width']    = 25;
+$mm['max_leaf_width']      = 55;
+$mm['line_spacing']        = 1;
+$mm['initial_depth']       = 1;
 
-$mm['center_lock'] = false;
-$mm['focus_lock']  = false;
+$mm['center_lock']         = false;
+$mm['focus_lock']          = false;
 
-$mm['initial_depth'] = 1;
+$mm['active_node_color']   = "\033[38;5;0m\033[48;5;172m\033[1m";
+$mm['message_color']       = "\033[38;5;0m\033[48;5;141m\033[1m";
+$mm['question_color']      = "\033[38;5;168m";
 
-$mm['active_node_color'] = "\033[38;5;0m\033[48;5;172m\033[1m";
-$mm['message_color']     = "\033[38;5;0m\033[48;5;141m\033[1m";
-$mm['question_color']    = "\033[38;5;168m";
-
-$mm['changes']				= [];
-$mm['change_active_node']	= [];
-$mm['change_index']			= 0;
-$mm['change_max_steps']		= 24;
+$mm['changes']             = [];
+$mm['change_active_node']  = [];
+$mm['change_index']        = 0;
+$mm['change_max_steps']    = 24;
 
 mb_internal_encoding("UTF-8");
 
@@ -45,18 +44,18 @@ function load_settings(&$mm)
 
 		switch ($setting)
 		{
-			case 'max_parent_width':	$mm['max_parent_width']		= max( round($value), width_min ); break;
-			case 'max_leaf_width':		$mm['max_leaf_width']		= max( round($value), width_min ); break;
-			case 'line_spacing':		$mm['line_spacing']			= max( round($value), 0 ); break;
-			case 'initial_depth':		$mm['initial_depth']		= max( round($value), 1 ); break;
+			case 'max_parent_width':  $mm['max_parent_width']  = max( round($value), width_min ); break;
+			case 'max_leaf_width':    $mm['max_leaf_width']    = max( round($value), width_min ); break;
+			case 'line_spacing':      $mm['line_spacing']      = max( round($value), 0 ); break;
+			case 'initial_depth':     $mm['initial_depth']     = max( round($value), 1 ); break;
 
-			case 'undo_steps':			$mm['change_max_steps']		= max( round($value), 0 ); break;
+			case 'undo_steps':        $mm['change_max_steps']  = max( round($value), 0 ); break;
 
-			case 'active_node_color':	$mm['active_node_color']	= $value; break;
-			case 'message_color':		$mm['message_color']		= $value; break;
+			case 'active_node_color': $mm['active_node_color'] = $value; break;
+			case 'message_color':     $mm['message_color']     = $value; break;
 
-			case 'center_lock':			$mm['center_lock']			= (bool)($value); break;
-			case 'focus_lock':			$mm['focus_lock']			= (bool)($value); break;
+			case 'center_lock':       $mm['center_lock']       = (bool)($value); break;
+			case 'focus_lock':        $mm['focus_lock']        = (bool)($value); break;
 		}
 	}
 
@@ -69,89 +68,87 @@ function load_settings(&$mm)
 
 // escape codes: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 
-$mm['top_left_column']		= 0;
-$mm['top_left_row']			= 0;
-$mm['active_column']		= 0;
-$mm['active_row']			= 0;
+$mm['top_left_column']      = 0;
+$mm['top_left_row']         = 0;
+$mm['active_column']        = 0;
+$mm['active_row']           = 0;
 
-$mm['terminal_width']		= exec('tput cols');
-$mm['terminal_height']		= exec('tput lines');
+$mm['terminal_width']       = exec('tput cols');
+$mm['terminal_height']      = exec('tput lines');
 
-$mm['win_left']				= 0;
-$mm['win_top']				= 0;
+$mm['win_left']             = 0;
+$mm['win_top']              = 0;
 
-$mm['root']					= 2;
+$mm['root']                 = 2;
 
-const logo_color			= "\033[38;5;222m";
-const default_color			= "\033[0m";
+const default_color         = "\033[0m";
+const min_indentation       = 2;
+const width_tolerance       = 1.3;
+const width_min             = 15;
+const width_change_factor   = 1.2;
+const max_width_padding     = 30;
 
-const min_indentation		= 2;
-const width_tolerance		= 1.3;
-const width_min				= 15;
-const width_change_factor	= 1.2;
-const max_width_padding		= 30;
+const default_leaf_width    = 55;
+const default_parent_width  = 25;
 
-const default_leaf_width	= 55;
-const default_parent_width	= 25;
+const default_spacing       = 1;
 
-const default_spacing		= 1;
+const width_wider           = 0;
+const width_narrower        = 1;
+const width_default         = 2;
 
-const width_wider			= 0;
-const width_narrower		= 1;
-const width_default			= 2;
+const spacing_wider         = 0;
+const spacing_narrower      = 1;
+const spacing_default       = 2;
 
-const spacing_wider			= 0;
-const spacing_narrower		= 1;
-const spacing_default		= 2;
-
-const conn_left_len			= 6;
-const conn_right_len		= 4;
+const conn_left_len         = 6;
+const conn_right_len        = 4;
 
 const BOM                   = "\xEF\xBB\xBF";
 
-$mm['conn_left']			= str_repeat('─', conn_left_len );
-$mm['conn_right']			= str_repeat('─', conn_right_len - 2 );
-$mm['conn_single']			= str_repeat('─', conn_left_len + conn_right_len - 1 );
+$mm['conn_left']            = str_repeat('─', conn_left_len );
+$mm['conn_right']           = str_repeat('─', conn_right_len - 2 );
+$mm['conn_single']          = str_repeat('─', conn_left_len + conn_right_len - 1 );
 
-const vertical_offset		= 4;
+const vertical_offset       = 4;
 
-const move_up				= 0;
-const move_down				= 1;
-const move_left				= 2;
-const move_right			= 3;
+const move_up               = 0;
+const move_down             = 1;
+const move_left             = 2;
+const move_right            = 3;
 
-const left_padding			= 1;
+const left_padding          = 1;
 
-const insert_sibling		= 0;
-const insert_child			= 1;
+const insert_sibling        = 0;
+const insert_child          = 1;
 
-const ctrl_p				= "\020";
-const ctrl_c				= "\003";
-const ctrl_r				= "\022";
-const ctrl_f				= "\006";
-const ctrl_v				= "\026";
+const ctrl_p                = "\020";
+const ctrl_c                = "\003";
+const ctrl_r                = "\022";
+const ctrl_f                = "\006";
+const ctrl_v                = "\026";
 
-const arr_down				= "\033\133\102";
-const arr_right 			= "\033\133\103";
-const arr_up				= "\033\133\101";
-const arr_left				= "\033\133\104";
+const arr_down              = "\033\133\102";
+const arr_right             = "\033\133\103";
+const arr_up                = "\033\133\101";
+const arr_left              = "\033\133\104";
 
-const del					= "\033\133\063\176";
+const del                   = "\033\133\063\176";
 
-const reset_page			= "\033[2J\033[0;0f";
-const reset_color			= "\033[0m";
+const reset_page            = "\033[2J\033[0;0f";
+const reset_color           = "\033[0m";
 
-const invert_on				= "\033[7m";
-const invert_off			= "\033[27m";
+const invert_on             = "\033[7m";
+const invert_off            = "\033[27m";
 
-const dim_on				= "\033[2m";
-const dim_off				= "\033[22m";
+const dim_on                = "\033[2m";
+const dim_off               = "\033[22m";
 
-const line_on				= "\033[0m\033[38;5;95m";
-const line_off				= "\033[0m";
+const line_on               = "\033[0m\033[38;5;95m";
+const line_off              = "\033[0m";
 
-const collapsed_symbol_on	= "\033[38;5;215m";
-const collapsed_symbol_off	= "\033[0m";
+const collapsed_symbol_on   = "\033[38;5;215m";
+const collapsed_symbol_off  = "\033[0m";
 
 
 
@@ -1615,7 +1612,7 @@ function export_html(&$mm)
 		.$mm['nodes'][ $mm['root'] ]['title']
 		.'</title>'
 		.'<meta charset="UTF-8">'
-    	.'<meta name=viewport content="width=device-width,initial-scale=1,user-scalable=yes">'
+		.'<meta name=viewport content="width=device-width,initial-scale=1,user-scalable=yes">'
 		.'<style>'
 		.'body { background-color: #222; color: #ddd; font-family: monospace; padding: 0; font-size: 16px; }'
 		.'#root {margin:10px 0}'
@@ -2571,104 +2568,104 @@ function monitor_key_presses(&$mm)
 		switch ($in)
 		{
 
-			case 'a':			edit_node($mm); break;
-			case 'A':			edit_node($mm, true); break;
+			case 'a':       edit_node($mm); break;
+			case 'A':       edit_node($mm, true); break;
 
-			case 'b':			expand_all($mm); break;
+			case 'b':       expand_all($mm); break;
 
-			case 'c':			{ center_active_node($mm); display($mm); } break;
-			case 'C':			{ $mm['center_lock'] = !$mm['center_lock']; display($mm); } break;
-			case ctrl_c:		quit($mm); break;
+			case 'c':       { center_active_node($mm); display($mm); } break;
+			case 'C':       { $mm['center_lock'] = !$mm['center_lock']; display($mm); } break;
+			case ctrl_c:    quit($mm); break;
 
-			case 'd':			delete_node($mm); break;
-			case 'D':			delete_node($mm, true); break;
-			case del:			delete_node($mm, false, true); break;
+			case 'd':       delete_node($mm); break;
+			case 'D':       delete_node($mm, true); break;
+			case del:       delete_node($mm, false, true); break;
 
-			case 'e':			edit_node($mm); break;
-			case 'E':			edit_node($mm, true); break;
+			case 'e':       edit_node($mm); break;
+			case 'E':       edit_node($mm, true); break;
 
-			case 'f':			{ focus($mm); build_map($mm); display($mm,true); } break;
-			case 'F':			toggle_focus($mm); break;
+			case 'f':       { focus($mm); build_map($mm); display($mm,true); } break;
+			case 'F':       toggle_focus($mm); break;
 
-			case 'g':			go_to_top($mm); break;
-			case 'G':			go_to_bottom($mm); break;
+			case 'g':       go_to_top($mm); break;
+			case 'G':       go_to_bottom($mm); break;
 
-			case 'h':			change_active_node($mm, move_left); break;
+			case 'h':       change_active_node($mm, move_left); break;
 
-			case 'i':			edit_node($mm); break;
-			case 'I':			edit_node($mm, true); break;
+			case 'i':       edit_node($mm); break;
+			case 'I':       edit_node($mm, true); break;
 
-			case 'j':			change_active_node($mm, move_down); break;
-			case 'J':			move_active_node_down($mm); break;
+			case 'j':       change_active_node($mm, move_down); break;
+			case 'J':       move_active_node_down($mm); break;
 
-			case 'k':			change_active_node($mm, move_up); break;
-			case 'K':			move_active_node_up($mm); break;
+			case 'k':       change_active_node($mm, move_up); break;
+			case 'K':       move_active_node_up($mm); break;
 
-			case 'l':			change_active_node($mm, move_right); break;
+			case 'l':       change_active_node($mm, move_right); break;
 
-			case 'm':			go_to_root($mm); break;
+			case 'm':       go_to_root($mm); break;
 
-			case 'n':			next_search_result($mm); break;
-			case 'N':			previous_search_result($mm); break;
+			case 'n':       next_search_result($mm); break;
+			case 'N':       previous_search_result($mm); break;
 
-			case 'o':			insert_node($mm, insert_sibling); break;
-			case 'O':			insert_node($mm, insert_child); break;
+			case 'o':       insert_node($mm, insert_sibling); break;
+			case 'O':       insert_node($mm, insert_child); break;
 
-			case 'p':			paste_sub_tree($mm, false); break;
-			case 'P':			paste_sub_tree($mm, true); break;
-			case ctrl_p:		append($mm); break;
+			case 'p':       paste_sub_tree($mm, false); break;
+			case 'P':       paste_sub_tree($mm, true); break;
+			case ctrl_p:    append($mm); break;
 
-			case 'q':			quit($mm); break;
-			case 'Q':			shutdown(); break;
+			case 'q':       quit($mm); break;
+			case 'Q':       shutdown(); break;
 
-			case ctrl_r:		redo($mm); break;
+			case ctrl_r:    redo($mm); break;
 
-			case 'r':			collapse_other_branches($mm); break;
-			case 'R':			collapse_inner($mm); break;
+			case 'r':       collapse_other_branches($mm); break;
+			case 'R':       collapse_inner($mm); break;
 
-			case 's':			save($mm); break;
-			case 'S':			save($mm, true); break;
+			case 's':       save($mm); break;
+			case 'S':       save($mm, true); break;
 
-			case 'u':			undo($mm); break;
-			case 'U':			debug($mm['nodes']); break;
+			case 'u':       undo($mm); break;
+			case 'U':       debug($mm['nodes']); break;
 
-			case 'v':			collapse_all($mm); break;
+			case 'v':       collapse_all($mm); break;
 
-			case 'w':			adjust_width($mm, width_wider); break;
-			case 'W':			adjust_width($mm, width_narrower); break;
+			case 'w':       adjust_width($mm, width_wider); break;
+			case 'W':       adjust_width($mm, width_narrower); break;
 
-			case 'x':			export_html($mm); break;
+			case 'x':       export_html($mm); break;
 
-			case 'y':			yank_node($mm); break;
-			case 'Y':			yank_node($mm, true); break;
+			case 'y':       yank_node($mm); break;
+			case 'Y':       yank_node($mm, true); break;
 
-			case 'Z':			adjust_spacing($mm, spacing_wider); break;
-			case 'z':			adjust_spacing($mm, spacing_narrower); break;
+			case 'Z':       adjust_spacing($mm, spacing_wider); break;
+			case 'z':       adjust_spacing($mm, spacing_narrower); break;
 
-			case arr_down:		change_active_node($mm, move_down); break;
-			case arr_right:		change_active_node($mm, move_right); break;
-			case arr_up:		change_active_node($mm, move_up); break;
-			case arr_left:		change_active_node($mm, move_left); break;
+			case arr_down:  change_active_node($mm, move_down); break;
+			case arr_right: change_active_node($mm, move_right); break;
+			case arr_up:    change_active_node($mm, move_up); break;
+			case arr_left:  change_active_node($mm, move_left); break;
 
-			case '1':			collapse_level($mm, 1); break;
-			case '2':			collapse_level($mm, 2); break;
-			case '3':			collapse_level($mm, 3); break;
-			case '4':			collapse_level($mm, 4); break;
-			case '5':			collapse_level($mm, 5); break;
-			case '6':			collapse_level($mm, 6); break;
-			case '7':			collapse_level($mm, 7); break;
-			case '8':			collapse_level($mm, 8); break;
-			case '9':			collapse_level($mm, 9); break;
+			case '1':       collapse_level($mm, 1); break;
+			case '2':       collapse_level($mm, 2); break;
+			case '3':       collapse_level($mm, 3); break;
+			case '4':       collapse_level($mm, 4); break;
+			case '5':       collapse_level($mm, 5); break;
+			case '6':       collapse_level($mm, 6); break;
+			case '7':       collapse_level($mm, 7); break;
+			case '8':       collapse_level($mm, 8); break;
+			case '9':       collapse_level($mm, 9); break;
 
-			case '~':			go_to_root($mm); break;
-			case ' ':			toggle($mm); break;
+			case '~':       go_to_root($mm); break;
+			case ' ':       toggle($mm); break;
 
-			case '/':			search($mm); break;
-			case '?':			search($mm); break;
-			case ctrl_f:		search($mm); break;
+			case '/':       search($mm); break;
+			case '?':       search($mm); break;
+			case ctrl_f:    search($mm); break;
 
-			case "\n":			insert_node($mm, insert_sibling); break;
-			case "\t":			insert_node($mm, insert_child); break;
+			case "\n":      insert_node($mm, insert_sibling); break;
+			case "\t":      insert_node($mm, insert_child); break;
 
 		}
 
