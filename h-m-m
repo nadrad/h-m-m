@@ -159,13 +159,6 @@ const collapsed_symbol_off	= "\033[0m";
 
 function check_required_extensions(): bool
 {
-	if (!function_exists('pcntl_signal')) 
-	{
-		echo 'Required extension pcntl is not enabled; please check your php installation!';
-		echo PHP_EOL;
-		return false;
-	}
-
 	if (!function_exists('mb_strlen')) 
 	{
 		echo 'Required extension mbstring is not enabled; please check your php installation!';
@@ -202,7 +195,7 @@ function check_the_available_clipboard_tool(&$mm)
 	if (trim($tool)==='')
 	{
 		echo "Can't find your clipboard tool! I expected to find xclip, xsel, or wl-clipboard.\n";
-		exit;
+		shutdown();
 	}
 
 	switch ($tool)
@@ -224,7 +217,7 @@ function check_the_available_clipboard_tool(&$mm)
 
 		default:
 			echo "I can't find your clipboard tool!\n";
-			exit;
+			shutdown();
 	}
 
 }
@@ -243,11 +236,6 @@ function shutdown()
 
 if (false === check_required_extensions()) 
 	return 1;
-
-register_shutdown_function("shutdown");
-declare(ticks = 1);
-pcntl_signal(SIGINT,"shutdown");
-
 
 
 function set_up_screen()
@@ -1776,7 +1764,7 @@ function message(&$mm, $text)
 
 function quit(&$mm)
 {
-	if (($mm['modified'] ?? false) === false) exit;
+	if (($mm['modified'] ?? false) === false) shutdown();
 	message($mm, "You have unsaved changes. Save them, or use shift+Q to quit without saving.");
 }
 
@@ -2647,7 +2635,7 @@ function monitor_key_presses(&$mm)
 			case ctrl_p:		append($mm); break;
 
 			case 'q':			quit($mm); break;
-			case 'Q':			exit; break;
+			case 'Q':			shutdown(); break;
 
 			case ctrl_r:		redo($mm); break;
 

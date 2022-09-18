@@ -8,7 +8,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
   libonig-dev xclip xsel wl-clipboard
 
-RUN docker-php-ext-install pcntl mbstring
+RUN docker-php-ext-install mbstring
 
 RUN chmod +x h-m-m
 
