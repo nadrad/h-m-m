@@ -58,8 +58,8 @@ $conf =
 		:
 		(
 			PHP_OS_FAMILY === 'Darwin'
-			? getenv('HOME').'/Library/Preferences/h-m-m/config'
-			: getenv('HOME').'/.config/h-m-m/config'
+			? getenv('HOME').'/Library/Preferences/h-m-m/h-m-m.conf'
+			: getenv('HOME').'/.config/h-m-m/h-m-m.conf'
 		)
 	)
 ;
@@ -73,7 +73,7 @@ if (file_exists($conf))
 		{
 			if (empty(trim($line))) continue;
 			$c = explode('=',trim($line));
-			$mm['config'][ trim($c[0] ?? 'NA') ] = trim($c[1] ?? 'NA');
+			$mm['config'][ str_replace('-','_',trim($c[0] ?? 'NA')) ] = trim($c[1] ?? 'NA');
 		}
 		fclose($handle);
 	}
@@ -86,13 +86,12 @@ $mm['env']=[];
 $e = getenv();
 foreach ($e as $k=>$v)
 	if (substr($k,0,4)=='hmm_')
-		$mm['env'][substr($k,4)] = $v ?? '';
+		$mm['env'][str_replace('-','_',substr($k,4))] = $v ?? '';
 
 
 // and now, the settings!
 // arguments > environment variables > config file > default
 
-config($mm, 'max_parent_node_width', 25);
 config($mm, 'max_parent_node_width', 25);
 config($mm, 'max_leaf_node_width',   55);
 config($mm, 'line_spacing',          1);

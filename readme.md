@@ -90,19 +90,32 @@ In the text editor:
 
 # Configuration 
 
-You can create an `h-m-m.conf` file in the same directory as the application and use it to change some or all of the following default values:
+The following are the settings in h-m-m:
 
     max_parent_node_width = 25
     max_leaf_node_width = 55
     line_spacing = 1
     initial_depth = 1
+	center_lock = false
+	focus_lock = false
+	max_undo_steps = 24
     active_node_color = "\033[38;5;0m\033[48;5;172m\033[1m"
     message_color = "\033[38;5;0m\033[48;5;141m\033[1m"
-    center_lock = false
-    focus_lock = false
-    undo_steps = 24
 
 The colors are ASCII escape codes. 
+
+You have 3 different ways of setting those values: 
+
+1. Pass them as arguments when running the program; e.g., `h-m-m --focus-lock=true --line-spacing=0 filename`
+1. Set them as environment variables with `hmm_` as prefix; e.g., `hmm_line_spacing=0`
+1. Store them in a config file. You can pass the location of the config file when running the application like `h-m-m --config=/path/file`, or use the default location:
+   * Linux: ~/.config/h-m-m/h-m-m.conf
+   * Mac: ~/Library/Preferences/h-m-m/h-m-m.conf
+   * Windows: an h-m-m.conf file in the same directory as the script
+
+Both underscores and dashes are accepted for the setting keys.
+
+When multiple values exists, the highest priority goes to the command line arguments and the lowest to the config file. 
 
 
 # Data format
@@ -151,7 +164,7 @@ Optionally, you can make the file executable by running the `chmod +x h-m-m` in 
 In Arch Linux, you can use the `h-m-m-git` AUR package to install it.
 
 
-## 3. Installation script for Linux
+## 3. Installation script for Linux (and Mac?)
 
 You can run the following command to install h-m-m:
 
@@ -162,6 +175,8 @@ wget -q -O - 'https://raw.githubusercontent.com/nadrad/h-m-m/main/install.sh' | 
 This command downloads and runs the install.sh script, which it turn downloads h-m-m, copies it to `/usr/local/bin`, checks the dependencies, and makes it executable. 
 
 After installing, you can run `h-m-m` from anywhere in your terminal to run the application with an empty map, or `h-m-m filename` to open an existing file.
+
+Note: It probably works in a Mac, but I'm not completely sure; so, [let me know](https://github.com/nadrad/h-m-m/issues/27).
 
 
 ## 4. Installation with Docker
