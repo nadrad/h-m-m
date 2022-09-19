@@ -92,8 +92,8 @@ In the text editor:
 
 You can create an `h-m-m.conf` file in the same directory as the application and use it to change some or all of the following default values:
 
-    max_parent_width = 25
-    max_leaf_width = 55
+    max_parent_node_width = 25
+    max_leaf_node_width = 55
     line_spacing = 1
     initial_depth = 1
     active_node_color = "\033[38;5;0m\033[48;5;172m\033[1m"

@@ -1,110 +1,137 @@
 #!/usr/bin/env php
 <?php
-// {{{ settings
 
-$mm=[];
+/**
+ * h-m-m
+ *
+ * h-m-m (pronounced like the interjection "hmm") is a simple, fast, keyboard-centric terminal-based tool for working with mind maps.
+ *
+ * @author  Nader K. Rad <me@nader.pm>
+ * @link    https://github.com/nadrad/h-m-m
+ * @license https://www.gnu.org/licenses/gpl-3.0.en.html GPLv3
+ */
 
-$mm['max_parent_width']    = 25;
-$mm['max_leaf_width']      = 55;
-$mm['line_spacing']        = 1;
-$mm['initial_depth']       = 1;
 
-$mm['center_lock']         = false;
-$mm['focus_lock']          = false;
-
-$mm['active_node_color']   = "\033[38;5;0m\033[48;5;172m\033[1m";
-$mm['message_color']       = "\033[38;5;0m\033[48;5;141m\033[1m";
-$mm['question_color']      = "\033[38;5;168m";
-
-$mm['changes']             = [];
-$mm['change_active_node']  = [];
-$mm['change_index']        = 0;
-$mm['change_max_steps']    = 24;
+// {{{ settings and defaults
 
 mb_internal_encoding("UTF-8");
 
 
-function load_settings(&$mm)
-{
-	global $argv;
+// $mm, short for "mind map", is an array that contains the
+// 'nodes' array, as well as the other settings and parameters
+// required for building and showing a mind map.
+//
+// escape codes for colors:
+// https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
 
-	$conf = $argv[0].'.conf';
-	if (!file_exists($conf))  return;
+$mm=[];
 
-	$handle = fopen($conf, "r");
-	if (!$handle)  return;
 
-	while (($line = fgets($handle)) !== false)
+// parsing the command line arguments
+
+$mm['arguments'] = [];
+$alen = count($argv);
+
+for ( $i = 1 ; $i < $alen ; $i++ )
+	if (substr($argv[$i],0,2) == '--')
 	{
-		if (empty(trim($line))) continue;
-
-		$elements = explode('=',trim($line));
-		$setting = trim($elements[0] ?? '');
-		$value = trim($elements[1] ?? '');
-
-		switch ($setting)
-		{
-			case 'max_parent_width':  $mm['max_parent_width']  = max( round($value), width_min ); break;
-			case 'max_leaf_width':    $mm['max_leaf_width']    = max( round($value), width_min ); break;
-			case 'line_spacing':      $mm['line_spacing']      = max( round($value), 0 ); break;
-			case 'initial_depth':     $mm['initial_depth']     = max( round($value), 1 ); break;
-
-			case 'undo_steps':        $mm['change_max_steps']  = max( round($value), 0 ); break;
-
-			case 'active_node_color': $mm['active_node_color'] = $value; break;
-			case 'message_color':     $mm['message_color']     = $value; break;
-
-			case 'center_lock':       $mm['center_lock']       = (bool)($value); break;
-			case 'focus_lock':        $mm['focus_lock']        = (bool)($value); break;
-		}
+		$a = explode('=', substr($argv[$i],2));
+		$mm['arguments'][ str_replace('-','_',$a[0]) ] = ( $a[1] ?? true );
 	}
+	elseif (isset($mm['arguments']['filename']))
+	{
+		echo "Invalid arguments: more than one filename!\n";
+		exit(1);
+	}
+	else
+		$mm['arguments']['filename'] = $argv[$i];
 
-	fclose($handle);
+
+// parsing the config file
+
+$conf =
+	$mm['arguments']['config']
+	??
+	(
+		PHP_OS_FAMILY === 'Windows'
+		? $argv[0].'.conf'
+		:
+		(
+			PHP_OS_FAMILY === 'Darwin'
+			? getenv('HOME').'/Library/Preferences/h-m-m/config'
+			: getenv('HOME').'/.config/h-m-m/config'
+		)
+	)
+;
+
+if (file_exists($conf))
+{
+	$handle = fopen($conf, "r");
+	if ($handle)
+	{
+		while (($line = fgets($handle)) !== false)
+		{
+			if (empty(trim($line))) continue;
+			$c = explode('=',trim($line));
+			$mm['config'][ trim($c[0] ?? 'NA') ] = trim($c[1] ?? 'NA');
+		}
+		fclose($handle);
+	}
 }
 
 
-// }}}
-// {{{ constants and defaults
+// parsing the environment variables
 
-// escape codes: https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+$mm['env']=[];
+$e = getenv();
+foreach ($e as $k=>$v)
+	if (substr($k,0,4)=='hmm_')
+		$mm['env'][substr($k,4)] = $v ?? '';
+
+
+// and now, the settings!
+// arguments > environment variables > config file > default
+
+config($mm, 'max_parent_node_width', 25);
+config($mm, 'max_parent_node_width', 25);
+config($mm, 'max_leaf_node_width',   55);
+config($mm, 'line_spacing',          1);
+
+config($mm, 'initial_depth',         1);
+config($mm, 'center_lock',           false);
+config($mm, 'focus_lock',            false);
+
+config($mm, 'max_undo_steps',        24);
+
+config($mm, 'active_node_color',     "\033[38;5;0m\033[48;5;172m\033[1m");
+config($mm, 'message_color',         "\033[38;5;0m\033[48;5;141m\033[1m");
+config($mm, 'doubt_color',           "\033[38;5;168m");
+
+
+$mm['changes']              = [];
+$mm['change_active_node']   = [];
+$mm['change_index']         = 0;
 
 $mm['top_left_column']      = 0;
 $mm['top_left_row']         = 0;
-$mm['active_column']        = 0;
-$mm['active_row']           = 0;
 
-$mm['terminal_width']       = exec('tput cols');
-$mm['terminal_height']      = exec('tput lines');
+$mm['terminal_width']       = (int)exec('tput cols');
+$mm['terminal_height']      = (int)exec('tput lines');
 
-$mm['win_left']             = 0;
-$mm['win_top']              = 0;
+$mm['viewport_left']        = 0;
+$mm['viewport_top']         = 0;
 
-$mm['root']                 = 2;
+$mm['root_id']              = 2;
 
-const default_color         = "\033[0m";
 const min_indentation       = 2;
 const width_tolerance       = 1.3;
 const width_min             = 15;
 const width_change_factor   = 1.2;
 const max_width_padding     = 30;
-
-const default_leaf_width    = 55;
-const default_parent_width  = 25;
-
-const default_spacing       = 1;
-
-const width_wider           = 0;
-const width_narrower        = 1;
-const width_default         = 2;
-
-const spacing_wider         = 0;
-const spacing_narrower      = 1;
-const spacing_default       = 2;
+const left_padding          = 1;
 
 const conn_left_len         = 6;
 const conn_right_len        = 4;
-
-const BOM                   = "\xEF\xBB\xBF";
 
 $mm['conn_left']            = str_repeat('─', conn_left_len );
 $mm['conn_right']           = str_repeat('─', conn_right_len - 2 );
@@ -112,15 +139,9 @@ $mm['conn_single']          = str_repeat('─', conn_left_len + conn_right_len -
 
 const vertical_offset       = 4;
 
-const move_up               = 0;
-const move_down             = 1;
-const move_left             = 2;
-const move_right            = 3;
-
-const left_padding          = 1;
-
-const insert_sibling        = 0;
-const insert_child          = 1;
+const BOM                   = "\xEF\xBB\xBF";
+const default_color         = "\033[0m";
+const clear_screen          = "\033[2J";
 
 const ctrl_p                = "\020";
 const ctrl_c                = "\003";
@@ -150,20 +171,31 @@ const line_off              = "\033[0m";
 const collapsed_symbol_on   = "\033[38;5;215m";
 const collapsed_symbol_off  = "\033[0m";
 
+const insert_sibling        = 0;
+const insert_child          = 1;
+
+
+function config(&$mm, $key, $default)
+{
+	$mm[$key] =
+		   $mm['arguments'][$key]
+		?? $mm['env'][$key]
+		?? $mm['config'][$key]
+		?? $default;
+}
+
 
 // }}}
 // {{{ checking the requirements
 
-function check_required_extensions(): bool
+function check_required_extensions()
 {
-	if (!function_exists('mb_strlen')) 
+	if (!function_exists('mb_strlen'))
 	{
 		echo 'Required extension mbstring is not enabled; please check your php installation!';
 		echo PHP_EOL;
-		return false;
+		exit(1);
 	}
-
-	return true;
 }
 
 
@@ -176,7 +208,7 @@ function check_the_available_clipboard_tool(&$mm)
 		return;
 	}
 
-	if (PHP_OS_FAMILY === "Darwin") 
+	if (PHP_OS_FAMILY === "Darwin")
 	{
 		$mm['clipboard']['write'] = "pbcopy";
 		$mm['clipboard']['read']  = 'pbpaste';
@@ -221,81 +253,38 @@ function check_the_available_clipboard_tool(&$mm)
 
 
 // }}}
-// {{{ alternative screen
+// {{{ alternative screen buffer
+
+function enable_alternate_screen()
+{
+	// https://www.ibm.com/docs/en/aix/7.1?topic=s-stty-command
+	system('stty cbreak -echo -crterase intr undef');
+
+	echo 
+		 "\033[?1049h" // enabling the alternate screen buffer
+		."\033[?25l" // disabling the text cursor
+		."\033[?9;1000;1001;1002;1003;1004;1007;1005;1006;1015;1016l" // disabling the mouse
+		.clear_screen
+	;
+}
+
 
 function shutdown()
 {
-	clear();
-	system("tput rmcup && tput cnorm && stty sane");
+	echo 
+		clear_screen
+		."\033[?1049l" // enabling the default screen buffer
+		."\033[?25h" // enabling the text cursor
+	;
+	system("stty sane");
 	exit;
 }
 
-if (false === check_required_extensions()) 
-	return 1;
-
-
-function set_up_screen()
-{
-	// https://www.computerhope.com/unix/ustty.htm
-	// https://www.ibm.com/docs/en/aix/7.1?topic=s-stty-command
-
-	// system('stty cbreak -echo ');                              // testing
-	system('stty cbreak -echo -crterase intr undef && tput smcup');      // production
-
-	// the first code disables the text cursor and the second one gets rid of the mouse!
-	// https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-Mouse-Tracking
-	// 'l' disables and 'h' enables
-	echo "\033[?25l\033[?9;1000;1001;1002;1003;1004;1007;1005;1006;1015;1016l";
-}
-
-
-function clear()       { echo "\033[2J"; }
-function move($x,$y)   { echo "\033[{$y};{$x}f"; }
-function put($x,$y,$t) { echo "\033[{$y};{$x}f{$t}"; }
-
-
-function mput(&$mm,$x,$y,$s)
-{
-	$y = round($y);
-
-	$mm['map'][$y]
-		= mb_substr( $mm['map'][$y], 0, $x)
-		. $s
-		. mb_substr( $mm['map'][$y], $x + mb_strlen($s) );
-}
-
 
 // }}}
-// {{{ debug
+// {{{ list to map converter
 
-function debug($nodes)
-{
-	echo " id   pr    x    w    y   yo    h   lh  clh     title\n";
-	$i = 0;
-	foreach ($nodes as $id=>$data)
-		echo
-			 ($i++ % 4 == 0 ? "\n" : '')
-			.str_pad($id,3,' ',STR_PAD_LEFT)
-			.str_pad($data['parent'],5,' ',STR_PAD_LEFT)
-			.str_pad($data['x']   ?? 'x',5,' ',STR_PAD_LEFT)
-			.str_pad($data['w']   ?? 'x',5,' ',STR_PAD_LEFT)
-			.str_pad($data['y']   ?? 'x',5,' ',STR_PAD_LEFT)
-			.str_pad($data['yo']  ?? 'x',5,' ',STR_PAD_LEFT)
-			.str_pad($data['h']   ?? 'x',5,' ',STR_PAD_LEFT)
-			.str_pad($data['lh']  ?? 'x',5,' ',STR_PAD_LEFT)
-			.str_pad($data['clh'] ?? 'x',5,' ',STR_PAD_LEFT)
-			.'     '
-			.substr($data['title'],0,70)
-			."\n"
-		;
-	echo " id   pr    x    w    y   yo    h   lh  clh     title\n";
-}
-
-
-// }}}
-// {{{ decode tree
-
-function decode_tree($lines, $root_id, $start_id)
+function list_to_map($lines, $root_id, $start_id)
 {
 	// calculating the indentation shift and cleaning up the special characters
 
@@ -310,8 +299,8 @@ function decode_tree($lines, $root_id, $start_id)
 				,''
 				,str_replace
 				(
-					 [ "\t", "\n", "\r" ]
-					,[ "  ", " ",  " " ]
+					 [ "\t", "\n" ]
+					,[ "  ", " "  ]
 					,$lines[$lid]
 				)
 			)
@@ -408,7 +397,24 @@ function decode_tree($lines, $root_id, $start_id)
 
 
 // }}}
-// {{{ load_file
+// {{{ map to list converter
+
+function map_to_list(&$mm, $id, $exclude_parent = false, $base = 0)
+{
+	if (!$exclude_parent)
+		$output = str_repeat("\t",$base).$mm['nodes'][$id]['title']."\n";
+	else
+		$output = '';
+
+	foreach ($mm['nodes'][$id]['children'] as $cid)
+		$output .= map_to_list($mm, $cid, false, $base+1-$exclude_parent);
+
+	return $output;
+}
+
+
+// }}}
+// {{{ load file
 
 function load_file(&$mm)
 {
@@ -433,7 +439,7 @@ function load_file(&$mm)
 	// starting from 2 instead of 1, in case the files doesn't have
 	// a single root and we have to inject one. leaving "1" empty
 	// won't cause any problems.
-	$new_nodes = decode_tree($lines, 0, 2);
+	$new_nodes = list_to_map($lines, 0, 2);
 
 
 	// checking to see how many first-level nodes we have
@@ -448,7 +454,7 @@ function load_file(&$mm)
 
 	if (count($first_level_nodes)>1)
 	{
-		$mm['root'] = 1;
+		$mm['root_id'] = 1;
 
 		$mm['nodes'][1]['parent']   = 0;
 		$mm['nodes'][1]['title']    = 'root';
@@ -494,8 +500,8 @@ function calculate_x_and_lh(&$mm, $id)
 	;
 
 	$max_width
-		=  ($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_leaf_width']
-		+ !($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_parent_width'];
+		=  ($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_leaf_node_width']
+		+ !($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_parent_node_width'];
 
 	if ( mb_strlen($node['title']) > width_tolerance * $max_width )
 	{
@@ -549,7 +555,7 @@ function calculate_h(&$mm)
 
 			if ($node['is_leaf'] || ($node['collapsed'] ?? false))
 
-				$mm['nodes'][$id]['h'] 
+				$mm['nodes'][$id]['h']
 					= $mm['line_spacing']
 					+ $mm['nodes'][$id]['lh']
 				;
@@ -571,14 +577,14 @@ function calculate_h(&$mm)
 				if ($unready)
 					$unfinished = true;
 				else
-					$mm['nodes'][$id]['h'] 
+					$mm['nodes'][$id]['h']
 						= max
-						( 
+						(
 							  $h
-							, $node['lh'] 
-							+ $mm['line_spacing'] 
+							, $node['lh']
+							+ $mm['line_spacing']
 						)
-						+ ($mm['nodes'][$id]['parent'] == $mm['root'])
+						+ ($mm['nodes'][$id]['parent'] == $mm['root_id'])
 						* $mm['line_spacing'];
 					;
 			}
@@ -661,7 +667,7 @@ function draw_connections(&$mm, $id)
 	// if the node is collapsed
 	if ($node['collapsed'] ?? false)
 	{
-		mput
+		mmput
 		(
 			 $mm
 			,$node['x'] + $node['w']+1
@@ -680,7 +686,7 @@ function draw_connections(&$mm, $id)
 		$y1  = round( $node['y']  + $node['yo']  ) + round( ($node['lh'] ) / 2 - 0.6 );
 		$y2  = round( $child['y'] + $child['yo'] ) + round( ($child['lh']) / 2 - 0.6 );
 
-		mput
+		mmput
 		(
 			 $mm
 			,$child['x'] - conn_left_len - conn_right_len
@@ -691,7 +697,7 @@ function draw_connections(&$mm, $id)
 		if (abs(min($y1,$y2)-$y2)>0)
 		{
 			for ($yy=min($y1,$y2); $yy<max($y1,$y2); $yy++)
-				mput
+				mmput
 				(
 					 $mm
 					,$child['x'] - 2
@@ -699,7 +705,7 @@ function draw_connections(&$mm, $id)
 					,'│'
 				);
 
-			mput
+			mmput
 			(
 				$mm
 				,$child['x'] - 2
@@ -707,7 +713,7 @@ function draw_connections(&$mm, $id)
 				,( $y2 > $y1 ? '╰' : '╭' )
 			);
 
-			mput
+			mmput
 			(
 				 $mm
 				,$child['x'] - 2
@@ -743,7 +749,7 @@ function draw_connections(&$mm, $id)
 
 	$middle  = round($node['y']+$node['yo']) + round($node['lh']/2-0.6);
 
-	mput
+	mmput
 	(
 		 $mm
 		,$mm['nodes'][$top_child]['x'] - conn_left_len - conn_right_len
@@ -752,7 +758,7 @@ function draw_connections(&$mm, $id)
 	);
 
 	for ( $i = $top ; $i < $bottom ; $i++ )
-		mput
+		mmput
 		(
 			 $mm
 			,$mm['nodes'][$top_child]['x'] - conn_right_len
@@ -760,7 +766,7 @@ function draw_connections(&$mm, $id)
 			,'│'
 		);
 
-	mput
+	mmput
 	(
 		 $mm
 		,$mm['nodes'][$top_child]['x'] - conn_right_len
@@ -769,7 +775,7 @@ function draw_connections(&$mm, $id)
 		.$mm['conn_right']
 	);
 
-	mput
+	mmput
 	(
 		 $mm
 		,$mm['nodes'][$top_child]['x']-conn_right_len
@@ -781,7 +787,7 @@ function draw_connections(&$mm, $id)
 	if (count($node['children'])>2)
 		foreach ($node['children'] as $cid)
 			if ($cid!=$top_child && $cid!=$bottom_child)
-				mput
+				mmput
 				(
 					 $mm
 					,$mm['nodes'][$cid]['x']-conn_right_len
@@ -802,7 +808,7 @@ function draw_connections(&$mm, $id)
 		);
 
 	if ($existing_char=='│')
-		mput
+		mmput
 		(
 			 $mm
 			,$mm['nodes'][$top_child]['x'] - conn_right_len
@@ -811,7 +817,7 @@ function draw_connections(&$mm, $id)
 		);
 
 	if ($existing_char=='╭')
-		mput
+		mmput
 		(
 			 $mm
 			,$mm['nodes'][$top_child]['x'] - conn_right_len
@@ -820,7 +826,7 @@ function draw_connections(&$mm, $id)
 		);
 
 	if ($existing_char=='├')
-		mput
+		mmput
 		(
 			 $mm
 			,$mm['nodes'][$top_child]['x'] - conn_right_len
@@ -841,8 +847,8 @@ function add_content_to_the_map(&$mm, $id)
 	$node = $mm['nodes'][$id];
 
 	$max_width
-		=  ($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_leaf_width']
-		+ !($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_parent_width']
+		=  ($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_leaf_node_width']
+		+ !($node['is_leaf'] || ($node['collapsed'] ?? false)) * $mm['max_parent_node_width']
 	;
 
 	if ( mb_strlen($node['title']) > width_tolerance * $max_width)
@@ -862,7 +868,7 @@ function add_content_to_the_map(&$mm, $id)
 
 	$num_lines = count($lines);
 	for ( $i=0 ; $i<$num_lines ; $i++ )
-		mput
+		mmput
 		(
 			$mm,
 			$node['x'],
@@ -908,10 +914,10 @@ function build_map(&$mm)
 	$mm['map_bottom']=0;
 
 	// calculating the new coordinates
-	calculate_x_and_lh($mm,$mm['root']);
+	calculate_x_and_lh($mm,$mm['root_id']);
 	calculate_h($mm);
 	calculate_y($mm);
-	calculate_height_shift($mm, $mm['root']);
+	calculate_height_shift($mm, $mm['root_id']);
 
 	// resetting the map, 2/2
 	$height = max($mm['map_bottom'],$mm['terminal_height']);
@@ -921,16 +927,16 @@ function build_map(&$mm)
 		$mm['map'][$i] = $blank;
 
 	// building the new map
-	draw_connections($mm, $mm['root']);
-	add_content_to_the_map($mm, $mm['root']);
+	draw_connections($mm, $mm['root_id']);
+	add_content_to_the_map($mm, $mm['root_id']);
 
 }
 
 
 // }}}
-// {{{ toggle
+// {{{ toggle node
 
-function toggle(&$mm)
+function toggle_node(&$mm)
 {
 	if ($mm['nodes'][ $mm['active_node'] ]['is_leaf'])
 		$mm['active_node'] = $mm['nodes'][ $mm['active_node'] ]['parent'];
@@ -944,13 +950,11 @@ function toggle(&$mm)
 
 
 // }}}
-// {{{ spacing adjuster
+// {{{ change line spacing
 
-function adjust_spacing(&$mm, $task)
+function change_line_spacing(&$mm, $amount)
 {
-	if ($task==spacing_wider)     $mm['line_spacing']++;
-	if ($task==spacing_narrower)  $mm['line_spacing'] = max(0, $mm['line_spacing']-1);
-	if ($task==spacing_default)   $mm['line_spacing'] = default_spacing;
+	$mm['line_spacing'] = max(0, $mm['line_spacing'] + $amount);
 
 	build_map($mm);
 	center_active_node($mm);
@@ -960,39 +964,25 @@ function adjust_spacing(&$mm, $task)
 
 
 // }}}
-// {{{ width adjuster
+// {{{ change max node width
 
-function adjust_width(&$mm, $task)
+function change_max_node_width(&$mm, $amount)
 {
-	if ($task==width_wider)
-	{
-		$mx = $mm['terminal_width'] - max_width_padding;
-		$mm['max_parent_width'] = round(min($mx, max( width_min, $mm['max_parent_width'] * width_change_factor )));
-		$mm['max_leaf_width']   = round(min($mx, max( width_min, $mm['max_leaf_width']   * width_change_factor )));
-	}
+	$mx = $mm['terminal_width'] - max_width_padding;
 
-	if ($task==width_narrower)
-	{
-		$mm['max_parent_width'] = round(max( width_min, $mm['max_parent_width'] / width_change_factor ));
-		$mm['max_leaf_width']   = round(max( width_min, $mm['max_leaf_width']   / width_change_factor ));
-	}
-
-	if ($task==width_default)
-	{
-		$mm['max_parent_width'] = default_parent_width;
-		$mm['max_leaf_width']   = default_leaf_width;
-	}
+	$mm['max_parent_node_width'] = round(min($mx, max( width_min, $mm['max_parent_node_width'] * $amount )));
+	$mm['max_leaf_node_width']   = round(min($mx, max( width_min, $mm['max_leaf_node_width']   * $amount )));
 
 	build_map($mm);
 	center_active_node($mm);
 	display($mm);
 
-	message($mm,'Width: '.$mm['max_parent_width'].' / '.$mm['max_leaf_width']);
+	message($mm,'Width: '.$mm['max_parent_node_width'].' / '.$mm['max_leaf_node_width']);
 }
 
 
 // }}}
-// {{{ move nodes
+// {{{ push node down
 
 function push_node_down(&$mm, $id)
 {
@@ -1029,9 +1019,9 @@ function push_node_down(&$mm, $id)
 // }}}
 // {{{ insert node
 
-function insert_node(&$mm, $type)
+function insert_new_node(&$mm, $type)
 {
-	if ($mm['active_node']==$mm['root'])
+	if ($mm['active_node']==$mm['root_id'])
 		$type=insert_child;
 
 	push_change($mm);
@@ -1217,7 +1207,7 @@ function magic_readline(&$mm, $title)
 			// ctrl+v
 			elseif ($in==ctrl_v)
 			{
-				$content = 
+				$content =
 					trim
 					(
 						str_replace
@@ -1310,7 +1300,13 @@ function show_line(&$mm, $title, $cursor, $shift)
 			,$cursor-$shift
 		);
 
-	put(0,$mm['terminal_height'],$mm['active_node_color'].$output);
+	echo
+		"\033["
+		.$mm['terminal_height'] //y
+		.";0f" // 0 -> x
+		.$mm['active_node_color']
+		.$output
+	;
 }
 
 
@@ -1320,7 +1316,7 @@ function show_line(&$mm, $title, $cursor, $shift)
 function edit_node(&$mm, $rewrite = false)
 {
 	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
-	if ($mm['active_node']==0 && $title=='root') $title='';
+	if ($mm['active_node']==$mm['root_id'] && $title=='root') $title='';
 
 	$output = magic_readline($mm, $title);
 
@@ -1352,9 +1348,9 @@ function center_active_node(&$mm, $only_vertically = false)
 	$midy = $node['lh']/2 + $node['y'] + $node['yo'];
 
 	if (!$only_vertically)
-		$mm['win_left'] = max(0, round( $midx - $mm['terminal_width']/2 ) );
+		$mm['viewport_left'] = max(0, round( $midx - $mm['terminal_width']/2 ) );
 
-	$mm['win_top'] = round( $midy - $mm['terminal_height']/2 );
+	$mm['viewport_top'] = round( $midy - $mm['terminal_height']/2 );
 }
 
 
@@ -1363,7 +1359,7 @@ function center_active_node(&$mm, $only_vertically = false)
 
 function go_to_root(&$mm)
 {
-	$mm['active_node']=$mm['root'];
+	$mm['active_node']=$mm['root_id'];
 	display($mm, true);
 }
 
@@ -1589,7 +1585,7 @@ function export_html(&$mm)
 		.'<html lang=en>'
 		.'<head>'
 		.'<title>'
-		.$mm['nodes'][ $mm['root'] ]['title']
+		.$mm['nodes'][ $mm['root_id'] ]['title']
 		.'</title>'
 		.'<meta charset="UTF-8">'
 		.'<meta name=viewport content="width=device-width,initial-scale=1,user-scalable=yes">'
@@ -1611,12 +1607,12 @@ function export_html(&$mm)
 		.'</head>'
 		.'<body>'
 		.'<div id=map>'
-		.export_html_node($mm, $mm['root'])
+		.export_html_node($mm, $mm['root_id'])
 		.'</div>'
 		.'<details id=source>'
 		.'<summary>This is a limited, read-only version of a mind-map created in h-m-m | view source!</summary>'
 		.'<pre>'
-		.encode_tree($mm,$mm['root'])
+		.map_to_list($mm,$mm['root_id'])
 		.'</pre>'
 		.'</details>'
 		.'</body>'
@@ -1639,9 +1635,9 @@ function export_html_node(&$mm, $parent_id)
 			.$mm['nodes'][$parent_id]['title']
 			."</p>";
 	}
-	elseif ($parent_id==$mm['root'])
+	elseif ($parent_id==$mm['root_id'])
 	{
-		$output = 
+		$output =
 			"<div id=root>"
 			.$mm['nodes'][$parent_id]['title']
 			."</div>";
@@ -1711,7 +1707,7 @@ function save(&$mm, $new_name = false)
 		return;
 	}
 
-	fwrite($file, encode_tree($mm, $mm['root']));
+	fwrite($file, map_to_list($mm, $mm['root_id']));
 	fclose($file);
 
 	display($mm);
@@ -1724,12 +1720,18 @@ function save(&$mm, $new_name = false)
 
 function message(&$mm, $text)
 {
-	put
-	(
-		$mm['terminal_width'] - mb_strlen($text) - 1,
-		$mm['terminal_height'],
-		$mm['message_color'].' '.$text.' '.reset_color
-	);
+	echo
+		"\033["
+		.$mm['terminal_height'] // y
+		.";"
+		.$mm['terminal_width'] - mb_strlen($text) - 1 //x
+		."f"
+		.$mm['message_color']
+		.' '
+		.$text
+		.' '
+		.reset_color
+	;
 
 	usleep(200000);
 }
@@ -1757,11 +1759,11 @@ function move_window(&$mm)
 	$y1 = max(0, $node['y'] + $node['yo'] - vertical_offset);
 	$y2 = $y1 + $node['lh'] + vertical_offset*2;
 
-	$mm['win_left'] = min( $mm['win_left'], $x1);
-	$mm['win_left'] = max( $mm['win_left'], $x2 - $mm['terminal_width']);
+	$mm['viewport_left'] = min( $mm['viewport_left'], $x1);
+	$mm['viewport_left'] = max( $mm['viewport_left'], $x2 - $mm['terminal_width']);
 
-	$mm['win_top']  = min( $mm['win_top'],  $y1);
-	$mm['win_top']  = max( $mm['win_top'],  $y2 - $mm['terminal_height']);
+	$mm['viewport_top']  = min( $mm['viewport_top'],  $y1);
+	$mm['viewport_top']  = max( $mm['viewport_top'],  $y2 - $mm['terminal_height']);
 }
 
 
@@ -1778,7 +1780,7 @@ function push_change(&$mm)
 	}
 
 	// removing the old history if it's getting bigger than the maximum
-	if (count($mm['changes']) >= $mm['change_max_steps'])
+	if (count($mm['changes']) >= $mm['max_undo_steps'])
 	{
 		array_shift($mm['changes']);
 		array_shift($mm['change_active_node']);
@@ -1822,20 +1824,20 @@ function redo(&$mm)
 // }}}
 // {{{ change active node
 
-function change_active_node(&$mm, $direction)
+function change_active_node(&$mm, $x, $y)
 {
 	$node = $mm['nodes'][ $mm['active_node'] ];
 
 	// we go to the child that is closest to the parent node;
 	// i.e., closest to the middle.
 
-	if ($direction==move_right)
+	if ($x > 0)
 	{
 		if ($node['is_leaf']) return;
 
 		// auto-unfold node on right move
 		if ($node['collapsed'] ?? false) {
-			toggle($mm);
+			toggle_node($mm);
 			$node = $mm['nodes'][ $mm['active_node'] ];
 		}
 
@@ -1866,9 +1868,9 @@ function change_active_node(&$mm, $direction)
 
 
 	// it can't be easier than moving to the left!
-	if ($direction==move_left)
+	if ($x < 0)
 	{
-		if ($mm['active_node']==$mm['root']) return;
+		if ($mm['active_node']==$mm['root_id']) return;
 		$mm['active_node'] = $node['parent'];
 		display($mm);
 		return;
@@ -1878,7 +1880,7 @@ function change_active_node(&$mm, $direction)
 	// considering that their order is set based on their list
 	// in the parent item.
 
-	if ($direction==move_up)
+	if ($y < 0)
 	{
 		$rchildren = array_reverse($mm['nodes'][ $node['parent'] ]['children']);
 		foreach ($rchildren as $cid)
@@ -1890,7 +1892,7 @@ function change_active_node(&$mm, $direction)
 			}
 	}
 
-	if ($direction==move_down)
+	if ($y > 0)
 		foreach ($mm['nodes'][ $node['parent'] ]['children'] as $cid)
 			if ($mm['nodes'][$cid]['y']+$mm['nodes'][$cid]['yo'] > $node['y']+$node['yo'])
 			{
@@ -1913,7 +1915,7 @@ function change_active_node(&$mm, $direction)
 		if ($id != $mm['active_node'] && $nd['y']!=-1)
 		{
 			$dy = $nd['y'] + $nd['yo'] + $nd['lh']/2 - $node['y'] - $node['yo'] - $node['lh']/2;
-			if ( ($direction==move_down && $dy>0) || ($direction==move_up && $dy<0) )
+			if ( ($y>0 && $dy>0) || ($y<0 && $dy<0) )
 			{
 				$dx = $nd['x'] + $nd['w']/2 - $node['x'] - $node['w']/2;
 				$distance[$id] = pow($dy*15,2) + pow($dx,2);
@@ -1954,28 +1956,11 @@ function expand_all(&$mm)
 
 
 // }}}
-// {{{ encode tree
-
-function encode_tree(&$mm, $id, $exclude_parent = false, $base = 0)
-{
-	if (!$exclude_parent)
-		$output = str_repeat("\t",$base).$mm['nodes'][$id]['title']."\n";
-	else
-		$output = '';
-
-	foreach ($mm['nodes'][$id]['children'] as $cid)
-		$output .= encode_tree($mm, $cid, false, $base+1-$exclude_parent);
-
-	return $output;
-}
-
-
-// }}}
 // {{{ append
 
 function append(&$mm)
 {
-	$mm['nodes'][ $mm['active_node'] ]['title'] .= 
+	$mm['nodes'][ $mm['active_node'] ]['title'] .=
 		' '
 		.str_replace
 		(
@@ -1995,7 +1980,7 @@ function append(&$mm)
 
 function paste_sub_tree(&$mm, $as_sibling )
 {
-	if ($as_sibling && $mm['active_node']==$mm['root']) return;
+	if ($as_sibling && $mm['active_node']==$mm['root_id']) return;
 
 	if ($as_sibling)
 		$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
@@ -2008,7 +1993,7 @@ function paste_sub_tree(&$mm, $as_sibling )
 	$new_id = 1 + max(array_keys($mm['nodes']));
 
 	$st =
-		decode_tree
+		list_to_map
 		(
 			explode("\n",get_from_clipboard($mm)),
 			$parent_id,
@@ -2077,7 +2062,7 @@ function copy_to_clipboard(&$mm, $text)
 
 function get_from_clipboard(&$mm)
 {
-	return 
+	return
 		mb_ereg_replace
 		(
 			"[\000-\010\013-\037\177]|".BOM
@@ -2099,7 +2084,7 @@ function load_empty_map(&$mm)
 	$mm['nodes'][1] = [ 'title'=>'root', 'is_leaf'=>true,  'children'=>[],  'collapsed'=>false, 'parent'=>0 ];
 
 	$mm['active_node']=1;
-	$mm['root']=1;
+	$mm['root_id']=1;
 }
 
 
@@ -2108,7 +2093,7 @@ function load_empty_map(&$mm)
 
 function yank_node(&$mm, $exclude_parent = false )
 {
-	copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent));
+	copy_to_clipboard($mm, map_to_list($mm, $mm['active_node'], $exclude_parent));
 	message($mm, 'Item(s) are copied to the clipboard.');
 }
 
@@ -2118,11 +2103,11 @@ function yank_node(&$mm, $exclude_parent = false )
 
 function delete_node(&$mm, $exclude_parent = false, $dont_copy_to_clipboard = false )
 {
-	if ($mm['active_node']==$mm['root']) 
+	if ($mm['active_node']==$mm['root_id'])
 		$exclude_parent = true;
 
 	if (!$dont_copy_to_clipboard)
-		copy_to_clipboard($mm, encode_tree($mm, $mm['active_node'], $exclude_parent) );
+		copy_to_clipboard($mm, map_to_list($mm, $mm['active_node'], $exclude_parent) );
 
 	push_change($mm);
 	$mm['modified'] = true;
@@ -2141,7 +2126,7 @@ function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 {
 	// taking a shorter approach if it's for the whole tree
 
-	if ($active_node==$mm['root'] && !$exclude_parent)
+	if ($active_node==$mm['root_id'] && !$exclude_parent)
 	{
 		load_empty_map($mm);
 		display($mm, true);
@@ -2229,7 +2214,7 @@ function focus(&$mm)
 
 function collapse_siblings(&$mm, $id)
 {
-	if ($id <= $mm['root']) return;
+	if ($id <= $mm['root_id']) return;
 
 	$parent_id = $mm['nodes'][$id]['parent'];
 
@@ -2256,12 +2241,12 @@ function expand_siblings(&$mm, $id)
 
 function collapse_other_branches(&$mm)
 {
-	if ($mm['active_node'] == $mm['root'])
+	if ($mm['active_node'] == $mm['root_id'])
 		return;
 
 	$branch = find_branch($mm, $mm['active_node']);
 
-	foreach ($mm['nodes'][ $mm['root'] ]['children'] as $bid)
+	foreach ($mm['nodes'][ $mm['root_id'] ]['children'] as $bid)
 		if ($bid != $branch)
 			$mm['nodes'][$bid]['collapsed'] = true;
 
@@ -2286,7 +2271,7 @@ function collapse_inner(&$mm)
 
 function find_branch(&$mm, $cid)
 {
-	if ($mm['nodes'][$cid]['parent'] == $mm['root'])
+	if ($mm['nodes'][$cid]['parent'] == $mm['root_id'])
 		return $cid;
 	else
 		return find_branch($mm, $mm['nodes'][$cid]['parent']);
@@ -2296,10 +2281,10 @@ function find_branch(&$mm, $cid)
 function collapse_all(&$mm)
 {
 	foreach ($mm['nodes'] as $id=>$node)
-		if (!$node['is_leaf'] && $id!=0 && $id!=$mm['root'])
+		if (!$node['is_leaf'] && $id!=0 && $id!=$mm['root_id'])
 			$mm['nodes'][$id]['collapsed'] = true;
 
-	$mm['active_node'] = $mm['root'];
+	$mm['active_node'] = $mm['root_id'];
 
 	build_map($mm);
 	center_active_node($mm);
@@ -2324,11 +2309,11 @@ function collapse(&$mm, $id, $keep)
 
 function collapse_level(&$mm, $level, $no_display = false)
 {
-	collapse($mm, $mm['root'], $level);
+	collapse($mm, $mm['root_id'], $level);
 
 	$id_collapsed = [];
 	$current = $mm['active_node'];
-	while ($current != $mm['root'])
+	while ($current != $mm['root_id'])
 	{
 		$id_collapsed[$current] = $mm['nodes'][$current]['collapsed'];
 		$current = $mm['nodes'][$current]['parent'];
@@ -2366,8 +2351,8 @@ function display(&$mm, $force_center = false)
 	else
 		move_window($mm);
 
-	$mm['terminal_width']  = exec('tput cols');
-	$mm['terminal_height'] = exec('tput lines');
+	$mm['terminal_width']  = (int)exec('tput cols');
+	$mm['terminal_height'] = (int)exec('tput lines');
 
 	$blank = str_repeat(' ', $mm['terminal_width']);
 
@@ -2379,11 +2364,11 @@ function display(&$mm, $force_center = false)
 			 0
 			,$mm['nodes'][ $mm['active_node'] ]['x']
 			-1
-			-$mm['win_left']
+			-$mm['viewport_left']
 		)
 	;
 
-	$x2 
+	$x2
 		= $mm['nodes'][ $mm['active_node'] ]['w']
 		+ $x1
 		+ 2
@@ -2396,11 +2381,11 @@ function display(&$mm, $force_center = false)
 			  0
 			, $mm['nodes'][ $mm['active_node'] ]['y']
 			+ $mm['nodes'][ $mm['active_node'] ]['yo']
-			- $mm['win_top']
+			- $mm['viewport_top']
 		)
 	;
 
-	$y2 
+	$y2
 		= $mm['nodes'][ $mm['active_node'] ]['lh']
 		+ $y1
 	;
@@ -2411,11 +2396,11 @@ function display(&$mm, $force_center = false)
 
 	for ( $y = 0 ; $y < $mm['terminal_height'] ; $y++ )
 	{
-		if (isset($mm['map'][$y+$mm['win_top']]))
+		if (isset($mm['map'][$y+$mm['viewport_top']]))
 			$line =
 				mb_substr(
-					$mm['map'][$y+$mm['win_top']],
-					$mm['win_left'],
+					$mm['map'][$y+$mm['viewport_top']],
+					$mm['viewport_left'],
 					$mm['terminal_width']
 				)
 			;
@@ -2483,17 +2468,17 @@ function display(&$mm, $force_center = false)
 
 		// styling "???"
 
-		$line = 
+		$line =
 			str_replace
 			(
 				 '???'
-				,$mm['question_color'].'???'.default_color
+				,$mm['doubt_color'].'???'.default_color
 				,$line
 			);
 
 		// dimming {meta}s
 
-		$line = 
+		$line =
 			str_replace
 			(
 				'{'
@@ -2501,7 +2486,7 @@ function display(&$mm, $force_center = false)
 				,$line
 			);
 
-		$line = 
+		$line =
 			str_replace
 			(
 				 '}'
@@ -2514,6 +2499,17 @@ function display(&$mm, $force_center = false)
 	}
 
 	echo reset_page.reset_color.$output;
+}
+
+
+function mmput(&$mm,$x,$y,$s)
+{
+	$y = round($y);
+
+	$mm['map'][$y]
+		= mb_substr( $mm['map'][$y], 0, $x)
+		. $s
+		. mb_substr( $mm['map'][$y], $x + mb_strlen($s) );
 }
 
 
@@ -2554,26 +2550,26 @@ function monitor_key_presses(&$mm)
 			case 'g':       go_to_top($mm); break;
 			case 'G':       go_to_bottom($mm); break;
 
-			case 'h':       change_active_node($mm, move_left); break;
+			case 'h':       change_active_node($mm, -1,0); break;
 
 			case 'i':       edit_node($mm); break;
 			case 'I':       edit_node($mm, true); break;
 
-			case 'j':       change_active_node($mm, move_down); break;
+			case 'j':       change_active_node($mm, 0,1); break;
 			case 'J':       move_active_node_down($mm); break;
 
-			case 'k':       change_active_node($mm, move_up); break;
+			case 'k':       change_active_node($mm, 0,-1); break;
 			case 'K':       move_active_node_up($mm); break;
 
-			case 'l':       change_active_node($mm, move_right); break;
+			case 'l':       change_active_node($mm, 1,0); break;
 
 			case 'm':       go_to_root($mm); break;
 
 			case 'n':       next_search_result($mm); break;
 			case 'N':       previous_search_result($mm); break;
 
-			case 'o':       insert_node($mm, insert_sibling); break;
-			case 'O':       insert_node($mm, insert_child); break;
+			case 'o':       insert_new_node($mm, insert_sibling); break;
+			case 'O':       insert_new_node($mm, insert_child); break;
 
 			case 'p':       paste_sub_tree($mm, false); break;
 			case 'P':       paste_sub_tree($mm, true); break;
@@ -2591,25 +2587,24 @@ function monitor_key_presses(&$mm)
 			case 'S':       save($mm, true); break;
 
 			case 'u':       undo($mm); break;
-			case 'U':       debug($mm['nodes']); break;
 
 			case 'v':       collapse_all($mm); break;
 
-			case 'w':       adjust_width($mm, width_wider); break;
-			case 'W':       adjust_width($mm, width_narrower); break;
+			case 'w':       change_max_node_width($mm, width_change_factor);   break;
+			case 'W':       change_max_node_width($mm, 1/width_change_factor); break;
 
 			case 'x':       export_html($mm); break;
 
 			case 'y':       yank_node($mm); break;
 			case 'Y':       yank_node($mm, true); break;
 
-			case 'Z':       adjust_spacing($mm, spacing_wider); break;
-			case 'z':       adjust_spacing($mm, spacing_narrower); break;
+			case 'Z':       change_line_spacing($mm, +1); break;
+			case 'z':       change_line_spacing($mm, -1); break;
 
-			case arr_down:  change_active_node($mm, move_down); break;
-			case arr_right: change_active_node($mm, move_right); break;
-			case arr_up:    change_active_node($mm, move_up); break;
-			case arr_left:  change_active_node($mm, move_left); break;
+			case arr_down:  change_active_node($mm,  0,+1); break;
+			case arr_right: change_active_node($mm, +1, 0); break;
+			case arr_up:    change_active_node($mm,  0,-1); break;
+			case arr_left:  change_active_node($mm, -1, 0); break;
 
 			case '1':       collapse_level($mm, 1); break;
 			case '2':       collapse_level($mm, 2); break;
@@ -2622,18 +2617,18 @@ function monitor_key_presses(&$mm)
 			case '9':       collapse_level($mm, 9); break;
 
 			case '~':       go_to_root($mm); break;
-			case ' ':       toggle($mm); break;
+			case ' ':       toggle_node($mm); break;
 
 			case '/':       search($mm); break;
 			case '?':       search($mm); break;
 			case ctrl_f:    search($mm); break;
 
-			case "\n":      insert_node($mm, insert_sibling); break;
-			case "\t":      insert_node($mm, insert_child); break;
+			case "\n":      insert_new_node($mm, insert_sibling); break;
+			case "\t":      insert_new_node($mm, insert_child); break;
 		}
 
 		// uncomment the following to discover the escape codes:
-		// move(1,1);
+		// mecho "\033[1;1f";
 		// for ($i=0; $i<strlen($in); $i++)
 		//   echo base_convert(ord($in[$i]),10,8).' ';
 		// echo '                    ';
@@ -2643,11 +2638,10 @@ function monitor_key_presses(&$mm)
 // }}}
 // {{{ main
 
+check_required_extensions();
 check_the_available_clipboard_tool($mm);
 
-set_up_screen();
-load_settings($mm);
-clear();
+enable_alternate_screen();
 load_file($mm);
 
 collapse_all($mm);
