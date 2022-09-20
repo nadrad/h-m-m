@@ -40,7 +40,7 @@ for ( $i = 1 ; $i < $alen ; $i++ )
 	}
 	elseif (isset($mm['arguments']['filename']))
 	{
-		echo "Invalid arguments: more than one filename!\n";
+		echo "Invalid arguments: more than one filename!".PHP_EOL;
 		exit(1);
 	}
 	else
@@ -191,8 +191,7 @@ function check_required_extensions()
 {
 	if (!function_exists('mb_strlen'))
 	{
-		echo 'Required extension mbstring is not enabled; please check your php installation!';
-		echo PHP_EOL;
+		echo 'Required extension mbstring is not enabled; please check your php installation!'.PHP_EOL;
 		exit(1);
 	}
 }
@@ -222,7 +221,7 @@ function check_the_available_clipboard_tool(&$mm)
 
 	if (trim($tool)==='')
 	{
-		echo "Can't find your clipboard tool! I expected to find xclip, xsel, or wl-clipboard.\n";
+		echo "Can't find your clipboard tool! I expected to find xclip, xsel, or wl-clipboard.".PHP_EOL;
 		exit(1);
 	}
 
@@ -244,7 +243,7 @@ function check_the_available_clipboard_tool(&$mm)
 			break;
 
 		default:
-			echo "I can't find your clipboard tool!\n";
+			echo "I can't find your clipboard tool!".PHP_EOL;
 			exit(1);
 	}
 
@@ -401,7 +400,7 @@ function list_to_map($lines, $root_id, $start_id)
 function map_to_list(&$mm, $id, $exclude_parent = false, $base = 0)
 {
 	if (!$exclude_parent)
-		$output = str_repeat("\t",$base).$mm['nodes'][$id]['title']."\n";
+		$output = str_repeat("\t",$base).$mm['nodes'][$id]['title'].PHP_EOL;
 	else
 		$output = '';
 
@@ -504,7 +503,7 @@ function calculate_x_and_lh(&$mm, $id)
 
 	if ( mb_strlen($node['title']) > width_tolerance * $max_width )
 	{
-		$lines = explode("\n" ,wordwrap($node['title'] ,$max_width));
+		$lines = explode(PHP_EOL ,wordwrap($node['title'] ,$max_width, PHP_EOL));
 
 		$mm['nodes'][$id]['w'] = 0;
 		foreach ($lines as $line)
@@ -854,11 +853,12 @@ function add_content_to_the_map(&$mm, $id)
 		$lines =
 			explode
 			(
-				"\n",
+				PHP_EOL,
 				wordwrap
 				(
-					$node['title'],
-					$max_width
+					$node['title']
+					,$max_width
+					,PHP_EOL
 				)
 			)
 		;
@@ -1999,6 +1999,8 @@ function paste_sub_tree(&$mm, $as_sibling )
 
 	$new_id = 1 + max(array_keys($mm['nodes']));
 
+	// \n instead of PHP_EOL, just to be sure.
+	// existing \r's will be removed later.
 	$st =
 		list_to_map
 		(
