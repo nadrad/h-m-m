@@ -1670,7 +1670,15 @@ function save(&$mm, $new_name = false)
 {
 	if ($new_name || empty($mm['filename']))
 	{
-		$new_name = magic_readline($mm, empty($mm['filename']) ? exec('pwd') : $mm['filename']);
+		$path = getenv('PWD');
+
+		if (substr($path,-1,1) != '/')
+			$path .= '/';
+
+		if (empty($mm['filename']) && $mm['nodes'][ $mm['root_id'] ]['title'] != 'root')
+			$path .= preg_replace('/[^a-zA-Z0-9]/','-',$mm['nodes'][ $mm['root_id'] ]['title']);
+
+		$new_name = magic_readline($mm, $path. ( $mm['filename'] ?? '') );
 
 		if ($new_name === false)
 		{
@@ -2077,10 +2085,28 @@ function get_from_clipboard(&$mm)
 
 function load_empty_map(&$mm)
 {
-	if (isset($mm['nodes']))  unset($mm['nodes']);
+	if (isset($mm['nodes']))
+		unset($mm['nodes']);
 
-	$mm['nodes'][0] = [ 'title'=>'X',    'is_leaf'=>false, 'children'=>[1], 'collapsed'=>false, 'parent'=>-1 ];
-	$mm['nodes'][1] = [ 'title'=>'root', 'is_leaf'=>true,  'children'=>[],  'collapsed'=>false, 'parent'=>0 ];
+	$mm['nodes'][0] =
+		[
+			'title'=>'X'
+			,'is_leaf'=>false
+			,'children'=>[1]
+			,'collapsed'=>false
+			,'parent'=>-1
+		]
+	;
+
+	$mm['nodes'][1] =
+		[
+			'title'=> basename( $mm['filename'] ?? 'root' )
+			,'is_leaf'=>true
+			,'children'=>[]
+			,'collapsed'=>false
+			,'parent'=>0
+		]
+	;
 
 	$mm['active_node']=1;
 	$mm['root_id']=1;
