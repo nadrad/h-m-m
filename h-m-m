@@ -223,7 +223,7 @@ function check_the_available_clipboard_tool(&$mm)
 	if (trim($tool)==='')
 	{
 		echo "Can't find your clipboard tool! I expected to find xclip, xsel, or wl-clipboard.\n";
-		shutdown();
+		exit(1);
 	}
 
 	switch ($tool)
@@ -245,7 +245,7 @@ function check_the_available_clipboard_tool(&$mm)
 
 		default:
 			echo "I can't find your clipboard tool!\n";
-			shutdown();
+			exit(1);
 	}
 
 }
