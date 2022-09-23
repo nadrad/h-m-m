@@ -1726,11 +1726,14 @@ function save(&$mm, $new_name = false)
 
 function message(&$mm, $text)
 {
+	$mm['terminal_width']  = (int)exec('tput cols');
+	$mm['terminal_height'] = (int)exec('tput lines');
+
 	echo
 		"\033["
 		.$mm['terminal_height'] // y
 		.";"
-		.$mm['terminal_width'] - mb_strlen($text) - 1 //x
+		.max(0,$mm['terminal_width'] - mb_strlen($text) - 1) //x
 		."f"
 		.$mm['message_color']
 		.' '
