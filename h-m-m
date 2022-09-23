@@ -1804,9 +1804,9 @@ function undo(&$mm)
 	if($mm['change_index'] == 0)
 		return;
 
-	$mm['nodes'] = $mm['changes'][$mm['change_index'] - 1];
-	$mm['active_node'] = $mm['change_active_node'][$mm['change_index'] - 1];
 	$mm['change_index']--;
+	$mm['nodes'] = $mm['changes'][$mm['change_index']];
+	$mm['active_node'] = $mm['change_active_node'][$mm['change_index']];
 
 	build_map($mm);
 	display($mm);
