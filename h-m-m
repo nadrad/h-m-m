@@ -1314,7 +1314,16 @@ function show_line(&$mm, $title, $cursor, $shift)
 function edit_node(&$mm, $rewrite = false)
 {
 	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
-	if ($mm['active_node']==$mm['root_id'] && $title=='root') $title='';
+
+	if 
+	(
+		(
+			$mm['active_node']==$mm['root_id'] 
+			&& $title=='root'
+		)
+		or $title=='NEW'
+	)
+		$title='';
 
 	$output = magic_readline($mm, $title);
 
