@@ -1148,9 +1148,26 @@ function magic_readline(&$mm, $title)
 			// ctrl+backspace
 			elseif ($in=="\010")
 			{
-				$from = max(0, mb_strrpos($title, ' ', max(0,min(1,$cursor-mb_strlen($title)-3))));
-				$title = mb_substr($title, 0, $from) . mb_substr($title,$cursor-1);
-				$cursor = $from+1;
+				$from = 
+					max
+					(
+						0
+						,mb_strrpos
+						(
+							$title
+							,' '
+							,max
+							(
+								-mb_strlen($title)
+								,$cursor-mb_strlen($title)-3
+							)
+						)
+					)
+				;
+				$title = 
+					 mb_substr($title, 0, $from + ($from>0) )
+					.mb_substr($title, $cursor-1);
+				$cursor = $from+1+($from>0);
 			}
 
 			// backspace
@@ -1318,7 +1335,7 @@ function edit_node(&$mm, $rewrite = false)
 	if 
 	(
 		(
-			$mm['active_node']==$mm['root_id'] 
+			$mm['active_node']==$mm['root_id']
 			&& $title=='root'
 		)
 		or $title=='NEW'
