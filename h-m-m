@@ -1166,7 +1166,8 @@ function magic_readline(&$mm, $title)
 				;
 				$title = 
 					 mb_substr($title, 0, $from + ($from>0) )
-					.mb_substr($title, $cursor-1);
+					.mb_substr($title, $cursor-1)
+				;
 				$cursor = $from+1+($from>0);
 			}
 
@@ -1194,8 +1195,25 @@ function magic_readline(&$mm, $title)
 			// ctrl+delete
 			elseif ($in=="\033\133\63\073\065\176")
 			{
-				$title  = '';
-				$cursor = 1;
+				$len = mb_strlen($title);
+				$from = 
+					mb_strpos
+					(
+						$title
+						,' '
+						,min
+						(
+							$cursor+1
+							,$len
+						)
+					)
+				;
+				if ($from===false)
+					$from=$len;
+				$title = 
+					 mb_substr($title, 0, $cursor-1)
+					.mb_substr($title, $from+1 )
+				;
 			}
 
 			// delete
