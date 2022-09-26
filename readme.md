@@ -101,6 +101,10 @@ The following are the settings in h-m-m:
 	max_undo_steps = 24
     active_node_color = "\033[38;5;0m\033[48;5;172m\033[1m"
     message_color = "\033[38;5;0m\033[48;5;141m\033[1m"
+	clipboard = os
+	clipboard_file = /tmp/h-m-m
+	clipboard_in_command = ""
+	clipboard_out_command = ""
 
 The colors are ASCII escape codes. 
 
@@ -116,6 +120,16 @@ You have 3 different ways of setting those values:
 Both underscores and dashes are accepted for the setting keys.
 
 When multiple values exists, the highest priority goes to the command line arguments and the lowest to the config file. 
+
+
+# Clipboard
+
+The normal `os` clipboard works fine for most users, but some users may need other options:
+
+* `os` uses the global clipboard via xclip and similar tools.
+* `internal` uses an internal variable as the clipboard (won't exchange text with external applications).
+* `file` uses `/tmp/h-m-m` by default, or aother file set by the `clipboard_file=/path/filename` setting as the clipboard.
+* `command` uses `clipboard_in_command="command %text%"` to send content to a shell command and `clipboard_out_command="command"` to read content.
 
 
 # Data format

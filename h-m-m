@@ -36,7 +36,7 @@ for ( $i = 1 ; $i < $alen ; $i++ )
 	if (substr($argv[$i],0,2) == '--')
 	{
 		$a = explode('=', substr($argv[$i],2));
-		$mm['arguments'][ str_replace('-','_',$a[0]) ] = ( $a[1] ?? true );
+		$mm['arguments'][ str_replace('-','_',$a[0]) ] = trim( $a[1] ?? true, '"' );
 	}
 	elseif (isset($mm['arguments']['filename']))
 	{
@@ -105,6 +105,13 @@ config($mm, 'max_undo_steps',        24);
 config($mm, 'active_node_color',     "\033[38;5;0m\033[48;5;172m\033[1m");
 config($mm, 'message_color',         "\033[38;5;0m\033[48;5;141m\033[1m");
 config($mm, 'doubt_color',           "\033[38;5;168m");
+
+config($mm, 'clipboard',             "os");
+config($mm, 'clipboard_file',        "/tmp/h-m-m");
+config($mm, 'clipboard_in_command',  "");
+config($mm, 'clipboard_out_command', "");
+
+$clipboard                  = '';
 
 
 $mm['changes']              = [];
@@ -199,17 +206,24 @@ function check_required_extensions()
 
 function check_the_available_clipboard_tool(&$mm)
 {
+
+	if ($mm['clipboard'] == 'file' && !file_exists($mm['clipboard_file']))
+		file_put_contents($mm['clipboard_file'],'');
+
+	if ($mm['clipboard'] != 'os')
+		return;
+
 	if (PHP_OS_FAMILY === "Windows")
 	{
-		$mm['clipboard']['write'] = "clip";
-		$mm['clipboard']['read']  = 'powershell -sta "add-type -as System.Windows.Forms; [windows.forms.clipboard]::GetText()"';
+		$mm['os_clipboard']['write'] = "clip";
+		$mm['os_clipboard']['read']  = 'powershell -sta "add-type -as System.Windows.Forms; [windows.forms.clipboard]::GetText()"';
 		return;
 	}
 
 	if (PHP_OS_FAMILY === "Darwin")
 	{
-		$mm['clipboard']['write'] = "pbcopy";
-		$mm['clipboard']['read']  = 'pbpaste';
+		$mm['os_clipboard']['write'] = "pbcopy";
+		$mm['os_clipboard']['read']  = 'pbpaste';
 		return;
 	}
 
@@ -228,18 +242,18 @@ function check_the_available_clipboard_tool(&$mm)
 	switch ($tool)
 	{
 		case 'xclip':
-			$mm['clipboard']['write'] = 'xclip -selection clipboard';
-			$mm['clipboard']['read']  = 'xclip -out -selection clipboard';
+			$mm['os_clipboard']['write'] = 'xclip -selection clipboard';
+			$mm['os_clipboard']['read']  = 'xclip -out -selection clipboard';
 			break;
 
 		case 'xsel':
-			$mm['clipboard']['write'] = 'xsel --clipboard';
-			$mm['clipboard']['read']  = 'xsel --clipboard';
+			$mm['os_clipboard']['write'] = 'xsel --clipboard';
+			$mm['os_clipboard']['read']  = 'xsel --clipboard';
 			break;
 
 		case 'wl-copy':
-			$mm['clipboard']['write'] = 'wl-copy';
-			$mm['clipboard']['read']  = 'wl-paste';
+			$mm['os_clipboard']['write'] = 'wl-copy';
+			$mm['os_clipboard']['read']  = 'wl-paste';
 			break;
 
 		default:
@@ -1217,7 +1231,7 @@ function magic_readline(&$mm, $title)
 			}
 
 			// delete
-			elseif ($in=="\033\133\63\176")
+			elseif ($in=="\033\133\063\176")
 			{
 				$title =
 					mb_substr
@@ -2107,22 +2121,47 @@ function paste_sub_tree(&$mm, $as_sibling )
 
 function copy_to_clipboard(&$mm, $text)
 {
-	$clip = popen($mm['clipboard']['write'],'wb');
-	if (!isset($clip)) return;
-
-	fwrite($clip,$text);
-	pclose($clip);
+	switch ($mm['clipboard'])
+	{
+		case 'os':
+			$clip = popen($mm['os_clipboard']['write'],'wb');
+			if (!isset($clip)) return;
+			fwrite($clip,$text);
+			pclose($clip);
+			break;
+		case 'internal':
+			$GLOBALS['clipboard'] = $text;
+			break;
+		case 'file':
+			file_put_contents($mm['clipboard_file'],$text);
+			break;
+		case 'command':
+			shell_exec(str_replace('%text%', '"'.$text.'"', $mm['clipboard_in_command']));
+			break;
+	}
 }
 
 
 function get_from_clipboard(&$mm)
 {
+
+	$text = 'clipboard unavailable!';
+
+	switch ($mm['clipboard'])
+	{
+		case 'os':       $text = shell_exec($mm['os_clipboard']['read']);  break;
+		case 'internal': $text = $GLOBALS['clipboard'];                    break;
+		case 'file':     $text = file_get_contents($mm['clipboard_file']); break;
+		case 'command':  $text = shell_exec($mm['clipboard_out_command']); break;
+		default:         $text = "The clipboard type you've set is invalid!";
+	}
+
 	return
 		mb_ereg_replace
 		(
 			"[\000-\010\013-\037\177]|".BOM
 			,''
-			,shell_exec($mm['clipboard']['read'])
+			,$text
 		)
 	;
 }
