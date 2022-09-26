@@ -126,10 +126,10 @@ When multiple values exists, the highest priority goes to the command line argum
 
 The normal `os` clipboard works fine for most users, but some users may need other options:
 
-* `os` uses the global clipboard via xclip and similar tools.
-* `internal` uses an internal variable as the clipboard (won't exchange text with external applications).
-* `file` uses `/tmp/h-m-m` by default, or aother file set by the `clipboard_file=/path/filename` setting as the clipboard.
-* `command` uses `clipboard_in_command="command %text%"` to send content to a shell command and `clipboard_out_command="command"` to read content.
+* `--clipboard=os` uses the global clipboard via xclip and similar tools.
+* `--clipboard=internal` uses an internal variable as the clipboard (won't exchange text with external applications).
+* `--clipboard=file` uses `/tmp/h-m-m` by default, or aother file set by the `--clipboard_file=/path/filename` setting as the clipboard.
+* `--clipboard=command` uses `--clipboard_in_command="command %text%"` to send content to a shell command and `--clipboard_out_command="command"` to read content.
 
 
 # Data format
