@@ -4,11 +4,6 @@ HMM_PATH=$(dirname "$0")/h-m-m
 MINIMUM_REQUIREMENTS="MINIMUM REQUIREMENTS: PHP 7+ and one of these three must exist on PATH: xclip, xsel or wl-clipboard."
 DESTINATION_DIR=/usr/local/bin
 
-# Detect if user is using a Mac
-if [[ $OSTYPE == '^darwin' ]];then
-    MINIMUM_REQUIREMENTS="MINIMUM REQUIREMENTS: PHP 7+ and one of these three must exist on. PATH: brew, xclip, xsel."    
-fi
-
 # Test if /usr/local/bin exists. If not fallback to /usr/bin
 if [ ! -d "$DESTINATION_DIR" ]; then
     DESTINATION_DIR=/usr/bin
@@ -33,37 +28,10 @@ if ! command -v php > /dev/null 2>&1;then
     exit 1
 fi
 
-# Test if xclip, xsel or wl-clipboard are on PATH
-if ! command -v xclip > /dev/null 2>&1 && ! command -v xsel > /dev/null 2>&1 && ! command -v wl-clipboard > /dev/null 2>&1 ;then
-    # Detect if user has homebrew installed
-    if [[ $OSTYPE == "darwin"* ]]; then
-        if command -v brew > /dev/null 2>&1; then
-            printf "Homebrew is detected on this Mac. Would you like the script to install xclip, and xsel?\n"
-            printf "Proceed (y/N)?"
-            read -r a </dev/tty
-
-            printf "\n"
-
-            if ! printf "%s" "$a" | grep -q "^[yY]"; then
-                printf "Installation cancelled.\n"
-                exit 125
-            fi
-
-            if ! brew install xclip; then
-                printf "ERROR: Error using homebrew to install xclip!\n"
-                exit 1
-            fi
-            
-            if ! brew install xsel; then
-                printf "ERROR: Error using homebrew to install xsel!"
-                exit 1
-            fi
-        else
-            printf "ERROR: brew, xclip, xsel or wl-clipboard must exist on PATH. Installation cancelled.\n";
-            printf "%s\n" "$MINIMUM_REQUIREMENTS"
-            exit 1
-        fi
-    else
+# Check if the system is a Mac
+if [[ $OSTYPE != darwin* ]];then
+    # Test if xclip, xsel or wl-clipboard are on PATH
+    if ! command -v xclip > /dev/null 2>&1 && ! command -v xsel > /dev/null 2>&1 && ! command -v wl-clipboard > /dev/null 2>&1 ;then
         printf "ERROR: xclip, xsel or wl-clipboard must exist on PATH. Installation cancelled.\n";
         printf "%s\n" "$MINIMUM_REQUIREMENTS"
         exit 1
@@ -103,6 +71,9 @@ if ! sudo cp "$HMM_PATH" "$DESTINATION_DIR/h-m-m"; then
    printf "ERROR: Could not copy h-m-m to %s\n" "$DESTINATION_DIR"
    exit 1
 fi
+
+# Ensure that the program is runnable by users other than root
+sudo chmod 755 "$DESTINATION_DIR/h-m-m"
 
 # Delete temporary file, if exists.
 rm -f /tmp/h-m-m
