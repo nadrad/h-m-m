@@ -106,6 +106,8 @@ config($mm, 'active_node_color',     "\033[38;5;0m\033[48;5;172m\033[1m");
 config($mm, 'message_color',         "\033[38;5;0m\033[48;5;141m\033[1m");
 config($mm, 'doubt_color',           "\033[38;5;168m");
 
+config($mm, 'post_export_command',   "");
+
 config($mm, 'clipboard',             "os");
 config($mm, 'clipboard_file',        "/tmp/h-m-m");
 config($mm, 'clipboard_in_command',  "");
@@ -1679,6 +1681,15 @@ function export_html(&$mm)
 
 	message($mm, 'Exported as '.$mm['filename'].'.html');
 	copy_to_clipboard($mm, $mm['filename'].'.html');
+	$filename = getenv('PWD').'/'.basename($mm['filename']).'.html';
+
+	if ($mm['post_export_command']!='')
+	{
+		message($mm, 'Running the "'.$mm['post_export_command'].'" command');
+		exec(str_replace('%filename%', $filename, $mm['post_export_command']), $output, $result);
+		display($mm);
+		message($mm, 'Post-export command ended ('.$result.')');
+	}
 }
 
 

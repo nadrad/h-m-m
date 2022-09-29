@@ -105,6 +105,7 @@ The following are the settings in h-m-m:
 	clipboard_file = /tmp/h-m-m
 	clipboard_in_command = ""
 	clipboard_out_command = ""
+	post_export_command = ""
 
 The colors are ASCII escape codes. 
 
@@ -128,8 +129,13 @@ The normal `os` clipboard works fine for most users, but some users may need oth
 
 * `--clipboard=os` uses the global clipboard via xclip and similar tools.
 * `--clipboard=internal` uses an internal variable as the clipboard (won't exchange text with external applications).
-* `--clipboard=file` uses `/tmp/h-m-m` by default, or aother file set by the `--clipboard_file=/path/filename` setting as the clipboard.
+* `--clipboard=file` uses `/tmp/h-m-m` by default, or another file set by the `--clipboard_file=/path/filename` setting as the clipboard.
 * `--clipboard=command` uses `--clipboard_in_command="command %text%"` to send content to a shell command and `--clipboard_out_command="command"` to read content.
+
+
+# Exporting
+
+You can export an HTML version of the map using the `x` key binding. This is useful for sending the file to someone who may not have h-m-m or a similar mind mapping application. To make the process easier, you can set a sell command to run after exporting the map; e.g., upload it to a server and copy the link to clipboard: `--post-export-command="upload.sh %filename% &>/dev/null"`.
 
 
 # Data format
