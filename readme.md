@@ -22,6 +22,7 @@ Adding, removing, and editing nodes:
 * `Ctrl+p` - appends the clipboard text at the end of the active node's title
 * `e`, `i`, or `a` - edits the active node
 * `E`, `I`, or `A` - edits the active node, ignoring the existing text
+* `t` - toggles '✓ ', '✗ ', and '' at the beginning of the title
 * `u` - undo
 * `Ctrl+r` - redo
 

@@ -949,6 +949,25 @@ function build_map(&$mm)
 
 
 // }}}
+// {{{ toggle symbol
+
+function toggle_symbol(&$mm)
+{
+	$chr = mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],0,2);
+	if ($chr=='✓ ')
+		$mm['nodes'][ $mm['active_node'] ]['title'] = '✗ '.mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],2);
+	elseif ($chr=='✗ ')
+		$mm['nodes'][ $mm['active_node'] ]['title'] = mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],2);
+	else
+		$mm['nodes'][ $mm['active_node'] ]['title'] = '✓ '.$mm['nodes'][ $mm['active_node'] ]['title'];
+
+	$mm['modified'] = true;
+	build_map($mm);
+	display($mm);
+}
+
+
+// }}}
 // {{{ toggle node
 
 function toggle_node(&$mm)
@@ -2708,6 +2727,8 @@ function monitor_key_presses(&$mm)
 
 			case 's':       save($mm); break;
 			case 'S':       save($mm, true); break;
+
+			case 't':       toggle_symbol($mm); break;
 
 			case 'u':       undo($mm); break;
 
