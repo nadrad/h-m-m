@@ -954,6 +954,34 @@ function build_map(&$mm)
 
 
 // }}}
+// {{{ toggle numbers
+
+function toggle_numbers(&$mm)
+{
+	if ($mm['active_node'] <= $mm['root'])
+		return;
+
+	$ordered= false;
+	$i=1;
+	foreach ($mm['nodes'][ $mm['nodes'][$mm['active_node']]['parent'] ]['children'] as $cid)
+		$ordered = $ordered || mb_ereg('^\d+\.',$mm['nodes'][$cid]['title']);
+
+	$i=1;
+	foreach ($mm['nodes'][ $mm['nodes'][$mm['active_node']]['parent'] ]['children'] as $cid)
+		if ($ordered)
+			$mm['nodes'][$cid]['title'] = mb_ereg_replace('^\d+\. *','',$mm['nodes'][$cid]['title']);
+		else
+			$mm['nodes'][$cid]['title'] = ($i++).'. '.$mm['nodes'][$cid]['title'];
+
+	$mm['modified'] = true;
+	build_map($mm);
+	display($mm);
+}
+
+
+
+
+// }}}
 // {{{ toggle symbol
 
 function toggle_symbol(&$mm)
@@ -2734,6 +2762,7 @@ function monitor_key_presses(&$mm)
 			case 'S':       save($mm, true); break;
 
 			case 't':       toggle_symbol($mm); break;
+			case '#':       toggle_numbers($mm); break;
 
 			case 'u':       undo($mm); break;
 

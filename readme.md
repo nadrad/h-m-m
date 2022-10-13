@@ -23,6 +23,7 @@ Adding, removing, and editing nodes:
 * `e`, `i`, or `a` - edits the active node
 * `E`, `I`, or `A` - edits the active node, ignoring the existing text
 * `t` - toggles '✓ ', '✗ ', and '' at the beginning of the title
+* `#` - adds or removes sequential numbers at the beginning of the titles of a node and its siblings
 * `u` - undo
 * `Ctrl+r` - redo
 
