@@ -455,6 +455,11 @@ function load_file(&$mm)
 	// won't cause any problems.
 	$new_nodes = list_to_map($lines, 0, 2);
 
+	if (empty($new_nodes))
+	{
+		load_empty_map($mm);
+		return;
+	}
 
 	// checking to see how many first-level nodes we have
 	$first_level_nodes = [];
