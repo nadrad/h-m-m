@@ -1091,9 +1091,6 @@ function insert_new_node(&$mm, $type)
 	if ($mm['active_node']==$mm['root_id'])
 		$type=insert_child;
 
-	push_change($mm);
-	$mm['modified'] = true;
-
 	if ($type==insert_sibling)
 		$parent_id  = $mm['nodes'][ $mm['active_node'] ]['parent'];
 	else
@@ -1132,6 +1129,9 @@ function insert_new_node(&$mm, $type)
 	build_map($mm);
 	display($mm);
 
+	push_change($mm);
+	$mm['modified'] = true;
+
 	$mm['nodes'][ $mm['active_node'] ]['title']='';
 	edit_node($mm);
 }
@@ -1163,7 +1163,6 @@ function magic_readline(&$mm, $title)
 			if ($in=="\033")
 			{
 				display($mm);
-				message($mm, 'Editing cancelled');
 				return false;
 			}
 
@@ -1418,7 +1417,7 @@ function edit_node(&$mm, $rewrite = false)
 {
 	$title = $rewrite ? '' : $mm['nodes'][ $mm['active_node'] ]['title'];
 
-	if 
+	if
 	(
 		(
 			$mm['active_node']==$mm['root_id']
@@ -1426,9 +1425,27 @@ function edit_node(&$mm, $rewrite = false)
 		)
 		or $title=='NEW'
 	)
-		$title='';
+		$title = '';
 
 	$output = magic_readline($mm, $title);
+
+	if
+	(
+		(
+			$output === false
+			or $output === ''
+		)
+		&& $title === ''
+		&& $mm['nodes'][ $mm['active_node'] ]['is_leaf']
+	)
+	{
+		delete_node($mm, false, true);
+		push_change($mm);
+		$mm['modified'] = true;
+		build_map($mm);
+		display($mm);
+		return;
+	}
 
 	if ($output === false)
 	{
