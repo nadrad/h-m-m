@@ -1356,6 +1356,7 @@ function magic_readline(&$mm, $title)
 					)
 				;
 
+				$title = str_replace(["\n","\r","\t"],[" ","","  "],$title);
 				$title = mb_ereg_replace("[\000-\010\013-\037\177]|".BOM,'',$title);
 				$cursor += mb_strlen($in);
 				// the input content can be longer than one character if
