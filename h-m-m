@@ -1435,7 +1435,7 @@ function edit_node(&$mm, $rewrite = false)
 			$output === false
 			or $output === ''
 		)
-		&& $title === ''
+		&& $mm['nodes'][ $mm['active_node'] ]['title'] === ''
 		&& $mm['nodes'][ $mm['active_node'] ]['is_leaf']
 	)
 	{
