@@ -183,6 +183,7 @@ const insert_sibling        = 0;
 const insert_child          = 1;
 
 
+
 function config(&$mm, $key, $default)
 {
 	$mm[$key] =
@@ -440,9 +441,9 @@ function load_file(&$mm)
 		return;
 	}
 
-	$mm['filename']=$argv[1];
-
-	if (!file_exists($argv[1]))
+	if (isset($mm['arguments']['filename']))
+		$mm['filename'] = $mm['arguments']['filename'];
+	else
 	{
 		load_empty_map($mm);
 		return;
