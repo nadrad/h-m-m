@@ -115,6 +115,19 @@ config($mm, 'clipboard_file',        "/tmp/h-m-m");
 config($mm, 'clipboard_in_command',  "");
 config($mm, 'clipboard_out_command', "");
 
+
+if (isset($mm['arguments']['debug_config']))
+{
+	echo "1. the config arguments:\n";
+	print_r($mm['arguments']);
+	echo "2. the environment variables:\n";
+	print_r($mm['env']);
+	echo "3. the config file:\n";
+	print_r($mm['config']);
+	exit;
+}
+
+
 $clipboard                  = '';
 
 
