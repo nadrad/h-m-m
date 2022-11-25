@@ -78,6 +78,8 @@ if (file_exists($conf))
 		fclose($handle);
 	}
 }
+elseif (isset($mm['arguments']['config']))
+	die("ERROR: the custom config file ($conf) doesn't exit!\n");
 
 
 // parsing the environment variables
