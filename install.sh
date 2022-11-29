@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 HMM_PATH=$(dirname "$0")/h-m-m
 MINIMUM_REQUIREMENTS="MINIMUM REQUIREMENTS: PHP 7+ and one of these three must exist on PATH: xclip, xsel or wl-clipboard."
@@ -28,11 +28,14 @@ if ! command -v php > /dev/null 2>&1;then
     exit 1
 fi
 
-# Test if xclip, xsel or wl-clipboard are on PATH
-if ! command -v xclip > /dev/null 2>&1 && ! command -v xsel > /dev/null 2>&1 && ! command -v wl-clipboard > /dev/null 2>&1 ;then
-    printf "ERROR: xclip, xsel or wl-clipboard must exist on PATH. Installation cancelled.\n";
-    printf "%s\n" "$MINIMUM_REQUIREMENTS"
-    exit 1
+# Check if the system is a Mac
+if [[ $OSTYPE != darwin* ]];then
+    # Test if xclip, xsel or wl-clipboard are on PATH
+    if ! command -v xclip > /dev/null 2>&1 && ! command -v xsel > /dev/null 2>&1 && ! command -v wl-clipboard > /dev/null 2>&1 ;then
+        printf "ERROR: xclip, xsel or wl-clipboard must exist on PATH. Installation cancelled.\n";
+        printf "%s\n" "$MINIMUM_REQUIREMENTS"
+        exit 1
+    fi
 fi
 
 # Ask for user confirmation to install the script
@@ -68,6 +71,9 @@ if ! sudo cp "$HMM_PATH" "$DESTINATION_DIR/h-m-m"; then
    printf "ERROR: Could not copy h-m-m to %s\n" "$DESTINATION_DIR"
    exit 1
 fi
+
+# Ensure that the program is runnable by users other than root
+sudo chmod 755 "$DESTINATION_DIR/h-m-m"
 
 # Delete temporary file, if exists.
 rm -f /tmp/h-m-m
