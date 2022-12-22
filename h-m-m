@@ -2729,6 +2729,38 @@ function mmput(&$mm,$x,$y,$s)
 
 
 // }}}
+// {{{ rank
+
+function rank(&$mm, $add_positive, $add_negative)
+{
+
+	$negative = 0;
+	$positive = 0;
+	$existing = [];
+
+	if (mb_ereg('^\((\d+)\+,(\d+)\-\)', $mm['nodes'][ $mm['active_node'] ]['title'], $existing))
+	{
+		$positive = $existing[1];
+		$negative = $existing[2];
+		$mm['nodes'][ $mm['active_node'] ]['title'] =
+			mb_ereg_replace('^\(\d+\+,\d+\-\) *', '', $mm['nodes'][ $mm['active_node'] ]['title']);
+	}
+
+	$negative = max(0, $negative + $add_negative);
+	$positive = max(0, $positive + $add_positive);
+
+	$mm['nodes'][ $mm['active_node'] ]['title'] =
+		"({$positive}+,{$negative}-) "
+		.$mm['nodes'][ $mm['active_node'] ]['title']
+	;
+
+	$mm['modified'] = true;
+	build_map($mm);
+	display($mm);
+}
+
+
+// }}}
 // {{{ monitor key presses
 
 function monitor_key_presses(&$mm)
@@ -2840,6 +2872,11 @@ function monitor_key_presses(&$mm)
 			case '/':       search($mm); break;
 			case '?':       search($mm); break;
 			case ctrl_f:    search($mm); break;
+
+			case '=':       rank($mm, +1, 0); break;
+			case '+':       rank($mm, -1, 0); break;
+			case '-':       rank($mm,  0,+1); break;
+			case '_':       rank($mm,  0,-1); break;
 
 			case "\n":      insert_new_node($mm, insert_sibling); break;
 			case "\t":      insert_new_node($mm, insert_child); break;

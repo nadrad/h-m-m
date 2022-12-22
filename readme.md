@@ -22,10 +22,17 @@ Adding, removing, and editing nodes:
 * `Ctrl+p` - appends the clipboard text at the end of the active node's title
 * `e`, `i`, or `a` - edits the active node
 * `E`, `I`, or `A` - edits the active node, ignoring the existing text
-* `t` - toggles '✓ ', '✗ ', and '' at the beginning of the title
-* `#` - adds or removes sequential numbers at the beginning of the titles of a node and its siblings
 * `u` - undo
 * `Ctrl+r` - redo
+
+Marks:
+
+* `t` - toggles '✓ ', '✗ ', and '' at the beginning of the title
+* `#` - adds or removes sequential numbers at the beginning of the titles of a node and its siblings
+* `=` - increase the positive ranking
+* `+` - decrease the positive ranking
+* `-` - increase the negative ranking
+* `_` - decrease the negative ranking
 
 Relative navigating and moving:
 
