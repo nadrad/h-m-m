@@ -2507,6 +2507,18 @@ function collapse_all(&$mm)
 }
 
 
+function collapse_all_children(&$mm)
+{
+	foreach ($mm['nodes'][ $mm['active_node'] ]['children'] as $cid)
+		if (!$mm['nodes'][$cid]['is_leaf'])
+			$mm['nodes'][$cid]['collapsed'] = true;
+
+	build_map($mm);
+	center_active_node($mm);
+	display($mm);
+}
+
+
 function collapse(&$mm, $id, $keep)
 {
 	if ($mm['nodes'][$id]['is_leaf']) return;
@@ -2811,6 +2823,7 @@ function monitor_key_presses(&$mm)
 			case 'l':       change_active_node($mm, 1,0); break;
 
 			case 'm':       go_to_root($mm); break;
+			case '~':       go_to_root($mm); break;
 
 			case 'n':       next_search_result($mm); break;
 			case 'N':       previous_search_result($mm); break;
@@ -2839,6 +2852,7 @@ function monitor_key_presses(&$mm)
 			case 'u':       undo($mm); break;
 
 			case 'v':       collapse_all($mm); break;
+			case 'V':       collapse_all_children($mm); break;
 
 			case 'w':       change_max_node_width($mm, width_change_factor);   break;
 			case 'W':       change_max_node_width($mm, 1/width_change_factor); break;
@@ -2866,7 +2880,6 @@ function monitor_key_presses(&$mm)
 			case '8':       collapse_level($mm, 8); break;
 			case '9':       collapse_level($mm, 9); break;
 
-			case '~':       go_to_root($mm); break;
 			case ' ':       toggle_node($mm); break;
 
 			case '/':       search($mm); break;
@@ -2883,7 +2896,7 @@ function monitor_key_presses(&$mm)
 		}
 
 		// uncomment the following to discover the escape codes:
-		// mecho "\033[1;1f";
+		// echo "\033[1;1f";
 		// for ($i=0; $i<strlen($in); $i++)
 		//   echo base_convert(ord($in[$i]),10,8).' ';
 		// echo '                    ';

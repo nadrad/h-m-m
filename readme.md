@@ -59,6 +59,7 @@ Collapsing and expanding:
 
 * `Space` - toggles the active node
 * `v` - collapses everything other than the first-level nodes
+* `V` - collapses all the children of the active node
 * `b` - expands all nodes
 * `1` to `9` - collapse the nth level and expand those before
 * `f` - focuses by collapsing all, but the ancestors and descendants of the active node
