@@ -2766,6 +2766,38 @@ function rank(&$mm, $add_positive, $add_negative)
 		.$mm['nodes'][ $mm['active_node'] ]['title']
 	;
 
+	push_change($mm);
+	$mm['modified'] = true;
+	build_map($mm);
+	display($mm);
+}
+
+
+// }}}
+// {{{ sort
+
+function sort_siblings(&$mm)
+{
+	if ($mm['active_node'] <= $mm['root_id'])
+		return;
+
+	$siblings = [];
+	$sibling_ids = $mm['nodes'][ $mm['nodes'][ $mm['active_node'] ]['parent'] ]['children'];
+
+	if (empty($sibling_ids))
+		return;
+
+	foreach ($sibling_ids as $sid)
+		if (mb_ereg('^\((\d+)\+,(\d+)\-\)', $mm['nodes'][$sid]['title'], $values))
+			$siblings[ (9000000 - $values[1] + $values[2]).'.'.$sid ] = $sid;
+		else
+			$siblings[ $mm['nodes'][$sid]['title'].'.'.$sid ] = $sid;
+
+	ksort($siblings, SORT_NATURAL);
+
+	$mm['nodes'][ $mm['nodes'][ $mm['active_node'] ]['parent'] ]['children'] = $siblings;
+
+	push_change($mm);
 	$mm['modified'] = true;
 	build_map($mm);
 	display($mm);
@@ -2847,6 +2879,7 @@ function monitor_key_presses(&$mm)
 			case 'S':       save($mm, true); break;
 
 			case 't':       toggle_symbol($mm); break;
+			case 'T':       sort_siblings($mm); break;
 			case '#':       toggle_numbers($mm); break;
 
 			case 'u':       undo($mm); break;

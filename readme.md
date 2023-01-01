@@ -29,19 +29,20 @@ Marks:
 
 * `t` - toggles '✓ ', '✗ ', and '' at the beginning of the title
 * `#` - adds or removes sequential numbers at the beginning of the titles of a node and its siblings
-* `=` - increase the positive ranking
-* `+` - decrease the positive ranking
-* `-` - increase the negative ranking
-* `_` - decrease the negative ranking
+* `=` - increases the positive ranking
+* `+` - decreases the positive ranking
+* `-` - increases the negative ranking
+* `_` - decreases the negative ranking
 
 Relative navigating and moving:
 
-* `h` or `←` - activate the parent of the previously active node
-* `l` or `→` - activate the middle child of the previously active node
-* `j` or `↓` - activate the lower sibling (or the nearest lower node if there's no lower sibling)
-* `k` or `↑` - activate the higher sibling (or the nearest higher node if there's no higher sibling)
+* `h` or `←` - activates the parent of the previously active node
+* `l` or `→` - activates the middle child of the previously active node
+* `j` or `↓` - activates the lower sibling (or the nearest lower node if there's no lower sibling)
+* `k` or `↑` - activates the higher sibling (or the nearest higher node if there's no higher sibling)
 * `J` - moves the current node down among its siblings
 * `K` - moves the current node up among its siblings
+* `T` - sorts the siblings of the active node
 
 Adjusting the view:
 
@@ -83,18 +84,18 @@ Save, export, and quit:
 
 In the text editor:
 
-* `↓` - move the cursor to the end of the line
-* `↑` - move the cursor to the beginning of the line
-* `←` or `Home` - move the cursor to the left
-* `→` or `End` - move the cursor to the right
-* `Ctrl+Left` or `Shift+Left` - move cursor to the previous word
-* `Ctrl+Right` or `Shift+right` - move cursor to the next word
-* `Delete` - delete character
-* `Ctrl+Delete` - delete word
-* `Backspace` - delete previous character
-* `ctrl+Backspace` - delete previous word
+* `↓` - moves the cursor to the end of the line
+* `↑` - moves the cursor to the beginning of the line
+* `←` or `Home` - moves the cursor to the left
+* `→` or `End` - moves the cursor to the right
+* `Ctrl+Left` or `Shift+Left` - moves cursor to the previous word
+* `Ctrl+Right` or `Shift+right` - moves cursor to the next word
+* `Delete` - deletes character
+* `Ctrl+Delete` - deletes word
+* `Backspace` - deletes previous character
+* `ctrl+Backspace` - deletes previous word
 * `Ctrl+v` or `Ctrl+Shift+v` - paste
-* `Esc` - cancel editing
+* `Esc` - cancels editing
 * `Enter` - wanna guess? ;)
 
 
