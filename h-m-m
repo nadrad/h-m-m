@@ -2650,7 +2650,7 @@ function display(&$mm, $force_center = false)
 			$line =
 				mb_ereg_replace
 				(
-					'\b(.\d)\. '
+					'\b(.?\d+)\. '
 					,dim_on.'\\1. '.dim_off
 					,$line
 				)
