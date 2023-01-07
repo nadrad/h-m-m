@@ -983,6 +983,8 @@ function toggle_numbers(&$mm)
 	if ($mm['active_node'] <= $mm['root'])
 		return;
 
+	$padlen = count($mm['nodes'][ $mm['nodes'][$mm['active_node']]['parent'] ]['children']) > 9 ? 2 : 1;
+
 	$ordered= false;
 	$i=1;
 	foreach ($mm['nodes'][ $mm['nodes'][$mm['active_node']]['parent'] ]['children'] as $cid)
@@ -993,7 +995,7 @@ function toggle_numbers(&$mm)
 		if ($ordered)
 			$mm['nodes'][$cid]['title'] = mb_ereg_replace('^\d+\. *','',$mm['nodes'][$cid]['title']);
 		else
-			$mm['nodes'][$cid]['title'] = ($i++).'. '.$mm['nodes'][$cid]['title'];
+			$mm['nodes'][$cid]['title'] = str_pad($i++, $padlen, '0', STR_PAD_LEFT).'. '.$mm['nodes'][$cid]['title'];
 
 	$mm['modified'] = true;
 	build_map($mm);
