@@ -2648,15 +2648,22 @@ function display(&$mm, $force_center = false)
 				.reset_color
 				.mb_substr($line, $x2)
 			;
-		else // styling the codes when the node is not active
-			$line =
-				mb_ereg_replace
-				(
-					'\b(.?\d+)\. '
-					,dim_on.'\\1. '.dim_off
-					,$line
-				)
-			;
+
+		// styling the codes when the node is not active
+		// it used to be the 'else' of the above condition
+		// because it resets the bold attribute of the active
+		// node. However, it think losing the bold attribute
+		// is better than leaving the numbers unformatted 
+		// in the same line as the active node.
+
+		$line =
+			mb_ereg_replace
+			(
+				'\b(.?\d+)\. '
+				,dim_on.'\\1. '.dim_off
+				,$line
+			)
+		;
 
 		// styling the search results
 
