@@ -687,7 +687,7 @@ function calculate_children_y(&$mm,$pid)
 function calculate_height_shift(&$mm, $id, $shift = 0)
 {
 	$mm['nodes'][$id]['yo'] += $shift;
-	$shift += max(0, round( ($mm['nodes'][$id]['lh'] - $mm['nodes'][$id]['clh'])/2 - 0.5 ));
+	$shift += max(0, floor( (($mm['nodes'][$id]['lh'] - $mm['nodes'][$id]['clh']))/2 - 0.9 ));
 
 	foreach ($mm['nodes'][$id]['children'] as $cid)
 		if (!$mm['nodes'][$id]['collapsed'])
