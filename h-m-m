@@ -4,7 +4,8 @@
 /**
  * h-m-m
  *
- * h-m-m (pronounced like the interjection "hmm") is a simple, fast, keyboard-centric terminal-based tool for working with mind maps.
+ * h-m-m (pronounced like the interjection "hmm") is a simple, fast,
+ * keyboard-centric terminal-based tool for working with mind maps.
  *
  * @author  Nader K. Rad <me@nader.pm>
  * @link    https://github.com/nadrad/h-m-m
@@ -1826,6 +1827,41 @@ function export_html_node(&$mm, $parent_id)
 
 
 // }}}
+// {{{ export text
+
+function export_text(&$mm)
+{
+	if (empty($mm['filename']))
+	{
+		message($mm, "Can't export the map when it doesn't have a file name yet. Save it first.");
+		return;
+	}
+
+	$file = fopen($mm['filename'].'.txt', "w");
+
+	if ($file===false)
+	{
+		message($mm, 'ERROR! Could not save the file');
+		return;
+	}
+
+	fwrite
+	(
+		$file
+		,implode("\n",$mm['map'])
+	);
+
+	fclose($file);
+
+	message($mm, 'Exported as '.$mm['filename'].'.txt');
+	$filename = getenv('PWD').'/'.basename($mm['filename']).'.txt';
+	copy_to_clipboard($mm, $filename);
+
+}
+
+
+
+// }}}
 // {{{ save
 
 function save(&$mm, $new_name = false)
@@ -2900,6 +2936,7 @@ function monitor_key_presses(&$mm)
 			case 'W':       change_max_node_width($mm, 1/width_change_factor); break;
 
 			case 'x':       export_html($mm); break;
+			case 'X':       export_text($mm); break;
 
 			case 'y':       yank_node($mm); break;
 			case 'Y':       yank_node($mm, true); break;
