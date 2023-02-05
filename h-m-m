@@ -132,6 +132,7 @@ if (isset($mm['arguments']['debug_config']))
 $clipboard                  = '';
 
 
+$mm['show_logo']            = true;
 $mm['changes']              = [];
 $mm['change_active_node']   = [];
 $mm['change_index']         = 0;
@@ -2621,6 +2622,7 @@ function display(&$mm, $force_center = false)
 
 	$blank = str_repeat(' ', $mm['terminal_width']);
 
+
 	// calculating the coordinates of the active node
 
 	$x1 =
@@ -2770,7 +2772,23 @@ function display(&$mm, $force_center = false)
 		$output .= $line;
 	}
 
+
 	echo reset_page.reset_color.$output;
+
+
+	// showing the logo :)
+
+	if ($mm['show_logo'])
+	{
+		$ll = $mm['terminal_width'] - 14;
+		echo "\033[1;${ll}f\033[38;5;237m ┌────────────┐ ";
+		echo "\033[2;${ll}f\033[38;5;237m │     ╭─ M   │ ";
+		echo "\033[3;${ll}f\033[38;5;237m │ H ──┤      │ ";
+		echo "\033[4;${ll}f\033[38;5;237m │     ╰─── M │ ";
+		echo "\033[5;${ll}f\033[38;5;237m └────────────┘ ";
+		$mm['show_logo'] = false;
+	}
+
 }
 
 
@@ -2994,9 +3012,6 @@ load_file($mm);
 collapse_all($mm);
 collapse_level($mm, $mm['initial_depth'], true);
 
-build_map($mm);
-center_active_node($mm);
-display($mm);
 monitor_key_presses($mm);
 
 // }}}
