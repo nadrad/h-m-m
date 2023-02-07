@@ -1880,7 +1880,7 @@ function save(&$mm, $new_name = false)
 		if (empty($mm['filename']) && $mm['nodes'][ $mm['root_id'] ]['title'] != 'root')
 			$path .= preg_replace('/[^a-zA-Z0-9]/','-',$mm['nodes'][ $mm['root_id'] ]['title']);
 
-		$new_name = magic_readline($mm, $path. ( $mm['filename'] ?? '') );
+		$new_name = magic_readline($mm, (empty($mm['filename']) ? $path : $mm['filename'] ) );
 
 		if ($new_name === false)
 		{
