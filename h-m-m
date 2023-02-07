@@ -315,6 +315,7 @@ function shutdown()
 		."\033[?25h" // enabling the text cursor
 	;
 	system("stty sane");
+	change_window_title('');
 	exit;
 }
 
@@ -3008,11 +3009,11 @@ function monitor_key_presses(&$mm)
 }
 
 // }}}
-// {{{ main
+// {{{ change window title
 
 function change_window_title($title)
 {
-	echo "\033]2;h-m-m -- ".str_replace('.hmm','',basename($title))."\007";
+	echo "\033]2;".( $title == '' ? ' ' : 'h-m-m -- '.str_replace('.hmm','',basename($title)) )."\007";
 }
 
 
