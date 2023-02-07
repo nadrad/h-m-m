@@ -485,6 +485,9 @@ function load_file(&$mm)
 		return;
 	}
 
+	change_window_title($mm['filename']);
+
+
 	// checking to see how many first-level nodes we have
 	$first_level_nodes = [];
 	foreach ($new_nodes as $id=>$node)
@@ -1902,6 +1905,8 @@ function save(&$mm, $new_name = false)
 		return;
 	}
 
+	change_window_title($mm['filename']);
+
 	$file = fopen($mm['filename'], "w");
 
 	$mm['modified'] = false;
@@ -2314,6 +2319,8 @@ function get_from_clipboard(&$mm)
 
 function load_empty_map(&$mm)
 {
+	change_window_title('new mind map');
+
 	if (isset($mm['nodes']))
 		unset($mm['nodes']);
 
@@ -2999,6 +3006,15 @@ function monitor_key_presses(&$mm)
 		// echo '                    ';
 	}
 }
+
+// }}}
+// {{{ main
+
+function change_window_title($title)
+{
+	echo "\033]2;h-m-m -- ".str_replace('.hmm','',basename($title))."\007";
+}
+
 
 // }}}
 // {{{ main
