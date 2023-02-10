@@ -1919,7 +1919,7 @@ function save(&$mm, $new_name = false)
 		return;
 	}
 
-	fwrite($file, map_to_list($mm, $mm['root_id']));
+	fwrite($file, map_to_list($mm, $mm['root_id']) . "\n");
 	fclose($file);
 
 	display($mm);
