@@ -55,6 +55,7 @@ Adjusting the view:
 * `W` - decreases the maximum node width
 * `z` - decreases line spacing
 * `Z` - increases line spacing 
+* `|` - align levels 
 
 Collapsing and expanding:
 
@@ -106,6 +107,7 @@ The following are the settings in h-m-m:
     max_parent_node_width = 25
     max_leaf_node_width = 55
     line_spacing = 1
+	align_levels = 0
     initial_depth = 1
 	center_lock = false
 	focus_lock = false

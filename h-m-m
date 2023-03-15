@@ -98,6 +98,7 @@ foreach ($e as $k=>$v)
 config($mm, 'max_parent_node_width', 25);
 config($mm, 'max_leaf_node_width',   55);
 config($mm, 'line_spacing',          1);
+config($mm, 'align_levels',          0);
 
 config($mm, 'initial_depth',         1);
 config($mm, 'center_lock',           false);
@@ -532,8 +533,8 @@ function calculate_x_and_lh(&$mm, $id)
 {
 	$node = $mm['nodes'][$id];
 
-	$mm['nodes'][$id]['x']
-		= $mm['nodes'][ $node['parent'] ]['x']
+	$mm['nodes'][$id]['x'] =
+		$mm['nodes'][ $node['parent'] ]['x']
 		+ $mm['nodes'][ $node['parent'] ]['w']
 		+ conn_left_len
 		+ conn_right_len
@@ -586,6 +587,43 @@ function calculate_x_and_lh(&$mm, $id)
 		$mm['nodes'][$id]['clh'] += $mm['nodes'][$cid]['clh'];
 	}
 }
+
+
+// }}}
+// {{{ calculate aligned x
+
+function calculate_aligned_x(&$mm,$id,$x)
+{
+	$mm['map_width'] =
+		max
+		(
+			  $mm['map_width']
+			, $mm['nodes'][$id]['x']
+			+ $mm['nodes'][$id]['w']
+		)
+	;
+
+	$max_width = 0;
+	foreach ($mm['nodes'][$id]['children'] as $cid)
+	{
+		$max_width = max( $max_width, $mm['nodes'][$cid]['w'] );
+		$mm['nodes'][$cid]['x'] = $x;
+	}
+
+	foreach ($mm['nodes'][$id]['children'] as $cid)
+		calculate_aligned_x
+		(
+			$mm
+			,$cid
+			,$max_width
+			+$x
+			+conn_left_len
+			+conn_right_len
+			+1
+		)
+	;
+}
+
 
 
 // }}}
@@ -733,12 +771,24 @@ function draw_connections(&$mm, $id)
 		$y1  = round( $node['y']  + $node['yo']  ) + round( ($node['lh'] ) / 2 - 0.6 );
 		$y2  = round( $child['y'] + $child['yo'] ) + round( ($child['lh']) / 2 - 0.6 );
 
+		$x =
+			$mm['align_levels']
+			? $node['x'] + $node['w'] - 2
+			: $child['x'] - conn_left_len - conn_right_len
+		;
+
+		$line =
+			$mm['align_levels']
+			? str_repeat('─', $child['x'] - $node['x'] - $node['w'] + 1)
+			: $mm['conn_single']
+		;
+
 		mmput
 		(
 			 $mm
-			,$child['x'] - conn_left_len - conn_right_len
+			,$x
 			,min($y1,$y2)
-			,$mm['conn_single']
+			,$line
 		);
 
 		if (abs(min($y1,$y2)-$y2)>0)
@@ -796,12 +846,24 @@ function draw_connections(&$mm, $id)
 
 	$middle  = round($node['y']+$node['yo']) + round($node['lh']/2-0.6);
 
+	$x =
+		$mm['align_levels']
+		? $node['x'] + $node['w'] - 2
+		: $mm['nodes'][$top_child]['x'] - conn_left_len - conn_right_len
+	;
+
+	$line =
+		$mm['align_levels']
+		? str_repeat('─', $mm['nodes'][$top_child]['x'] - $node['x'] - $node['w'] - 2 )
+		: $mm['conn_left']
+	;
+
 	mmput
 	(
 		 $mm
-		,$mm['nodes'][$top_child]['x'] - conn_left_len - conn_right_len
+		,$x
 		,$middle
-		,$mm['conn_left']
+		,$line
 	);
 
 	for ( $i = $top ; $i < $bottom ; $i++ )
@@ -963,6 +1025,8 @@ function build_map(&$mm)
 
 	// calculating the new coordinates
 	calculate_x_and_lh($mm,$mm['root_id']);
+	if ($mm['align_levels'])
+		calculate_aligned_x($mm,$mm['root_id'],$mm['nodes'][ $mm['root_id'] ]['w'] + conn_left_len + conn_right_len + 1);
 	calculate_h($mm);
 	calculate_y($mm);
 	calculate_height_shift($mm, $mm['root_id']);
@@ -1025,6 +1089,17 @@ function toggle_symbol(&$mm)
 		$mm['nodes'][ $mm['active_node'] ]['title'] = '✓ '.$mm['nodes'][ $mm['active_node'] ]['title'];
 
 	$mm['modified'] = true;
+	build_map($mm);
+	display($mm);
+}
+
+
+// }}}
+// {{{ toggle align
+
+function toggle_align(&$mm)
+{
+	$mm['align_levels'] = !$mm['align_levels'];
 	build_map($mm);
 	display($mm);
 }
@@ -2986,6 +3061,8 @@ function monitor_key_presses(&$mm)
 			case '9':       collapse_level($mm, 9); break;
 
 			case ' ':       toggle_node($mm); break;
+
+			case '|':       toggle_align($mm); break;
 
 			case '/':       search($mm); break;
 			case '?':       search($mm); break;
