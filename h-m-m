@@ -100,6 +100,9 @@ config($mm, 'max_leaf_node_width',   55);
 config($mm, 'line_spacing',          1);
 config($mm, 'align_levels',          0);
 
+config($mm, 'symbol1',               "✓");
+config($mm, 'symbol2',               "✗");
+
 config($mm, 'initial_depth',         1);
 config($mm, 'center_lock',           false);
 config($mm, 'focus_lock',            false);
@@ -1080,13 +1083,25 @@ function toggle_numbers(&$mm)
 
 function toggle_symbol(&$mm)
 {
-	$chr = mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],0,2);
-	if ($chr=='✓ ')
-		$mm['nodes'][ $mm['active_node'] ]['title'] = '✗ '.mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],2);
-	elseif ($chr=='✗ ')
-		$mm['nodes'][ $mm['active_node'] ]['title'] = mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],2);
+	$len1 = mb_strlen($mm['symbol1'])+1;
+	$len2 = mb_strlen($mm['symbol2'])+1;
+
+	$sym1 = mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],0,$len1);
+	$sym2 = mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],0,$len2);
+
+	if ($sym1==$mm['symbol1'].' ')
+		$mm['nodes'][ $mm['active_node'] ]['title'] =
+			$mm['symbol2']
+			.' '
+			.mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],$len1);
+	elseif ($sym2==$mm['symbol2'].' ')
+		$mm['nodes'][ $mm['active_node'] ]['title'] =
+			mb_substr($mm['nodes'][ $mm['active_node'] ]['title'],$len2);
 	else
-		$mm['nodes'][ $mm['active_node'] ]['title'] = '✓ '.$mm['nodes'][ $mm['active_node'] ]['title'];
+		$mm['nodes'][ $mm['active_node'] ]['title'] =
+			$mm['symbol1']
+			.' '
+			.$mm['nodes'][ $mm['active_node'] ]['title'];
 
 	$mm['modified'] = true;
 	build_map($mm);

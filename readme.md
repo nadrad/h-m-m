@@ -27,7 +27,7 @@ Adding, removing, and editing nodes:
 
 Marks:
 
-* `t` - toggles '✓ ', '✗ ', and '' at the beginning of the title
+* `t` - toggles '✓ ', '✗ ', and '' (or your custom symbols) at the beginning of the title
 * `#` - adds or removes sequential numbers at the beginning of the titles of a node and its siblings
 * `=` - increases the positive ranking
 * `+` - decreases the positive ranking
@@ -119,6 +119,8 @@ The following are the settings in h-m-m:
 	clipboard_in_command = ""
 	clipboard_out_command = ""
 	post_export_command = ""
+	symbol1 = ✓
+	symbol2 = ✗
 
 The colors are ASCII escape codes. 
 
