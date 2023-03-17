@@ -1211,8 +1211,30 @@ function toggle_hide(&$mm)
 	{
 		$mm['nodes'][ $mm['active_node'] ]['title'] = '[HIDDEN] ' . $mm['nodes'][ $mm['active_node'] ]['title'];
 		$is_hidden = true;
+
 		if (!$mm['show_hidden'])
-			$mm['active_node'] = $mm['nodes'][ $mm['active_node'] ]['parent'];
+		{
+			$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
+			if (count($mm['nodes'][$parent_id]['visible_children'])<=1)
+				$mm['active_node'] = $parent_id;
+			else
+			{
+				$previous_sibling = 0;
+				$passed = false;
+				foreach ($mm['nodes'][$parent_id]['visible_children'] as $cid)
+					if ($cid==$mm['active_node'])
+					{
+						if ($previous_sibling!=0) break;
+						$passed = true;
+					}
+					else
+					{
+						$previous_sibling = $cid;
+						if ($passed) break;
+					}
+				$mm['active_node'] = $previous_sibling;
+			}
+		}
 	}
 
 	build_map($mm);
@@ -2606,7 +2628,7 @@ function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 
 		$previous_sibling = 0;
 		$passed = false;
-		foreach ($mm['nodes'][$parent_id]['children'] as $cid)
+		foreach ($mm['nodes'][$parent_id]['visible_children'] as $cid)
 			if ($cid==$active_node)
 			{
 				if ($previous_sibling!=0) break;
@@ -2631,7 +2653,7 @@ function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 
 		unset($mm['nodes'][ $active_node ]);
 
-		if ($mm['nodes'][$parent_id]['is_leaf'])
+		if (count($mm['nodes'][$parent_id]['visible_children'])==0)
 			$mm['active_node'] = $parent_id;
 		else
 			$mm['active_node'] = $previous_sibling;
