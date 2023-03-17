@@ -33,6 +33,7 @@ Marks:
 * `+` - decreases the positive ranking
 * `-` - increases the negative ranking
 * `_` - decreases the negative ranking
+* `H` - toggles the hidden flag
 
 Relative navigating and moving:
 
@@ -47,7 +48,7 @@ Relative navigating and moving:
 Adjusting the view:
 
 * `c` - centers the active node on the screen
-* `C` - locks and always keeps active nodes on the center 
+* `C` - locks/unlocks active nodes on the center 
 * `~` or `m` - activate the root element
 * `g` - goes to the highest element
 * `G` - goes to the lowest element
@@ -55,7 +56,8 @@ Adjusting the view:
 * `W` - decreases the maximum node width
 * `z` - decreases line spacing
 * `Z` - increases line spacing 
-* `|` - align levels 
+* `|` - enables/disables aligned levels
+* `ctrl+h` - hides/views hidden nodes
 
 Collapsing and expanding:
 
