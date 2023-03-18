@@ -2296,7 +2296,8 @@ function change_active_node(&$mm, $x, $y)
 
 	if ($x > 0)
 	{
-		if ($node['is_leaf']) return;
+		if (count($node['visible_children'])==0)
+			return;
 
 		// auto-unfold node on right move
 		if ($node['collapsed'] ?? false) {
@@ -2715,7 +2716,8 @@ function expand_all(&$mm)
 
 function collapse_siblings(&$mm, $id)
 {
-	if ($id <= $mm['root_id']) return;
+	if ($id <= $mm['root_id'])
+		return;
 
 	$parent_id = $mm['nodes'][$id]['parent'];
 
@@ -2729,7 +2731,8 @@ function collapse_siblings(&$mm, $id)
 
 function expand_siblings(&$mm, $id)
 {
-	if ($mm['nodes'][$id]['is_leaf']) return;
+	if ($mm['nodes'][$id]['is_leaf'])
+		return;
 
 	$mm['nodes'][$id]['collapsed'] = false;
 	foreach ($mm['nodes'][$id]['children'] as $cid)
