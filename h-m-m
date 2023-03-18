@@ -2084,32 +2084,13 @@ function export_html_node(&$mm, $parent_id)
 
 function export_text(&$mm)
 {
-	if (empty($mm['filename']))
-	{
-		message($mm, "Can't export the map when it doesn't have a file name yet. Save it first.");
-		return;
-	}
+	$output = '';
+	foreach ($mm['map'] as $line)
+		if (rtrim($line) != '')
+			$output .= substr(rtrim($line),3)."\n";
 
-	$file = fopen($mm['filename'].'.txt', "w");
-
-	if ($file===false)
-	{
-		message($mm, 'ERROR! Could not save the file');
-		return;
-	}
-
-	fwrite
-	(
-		$file
-		,implode("\n",$mm['map'])
-	);
-
-	fclose($file);
-
-	message($mm, 'Exported as '.$mm['filename'].'.txt');
-	$filename = getenv('PWD').'/'.basename($mm['filename']).'.txt';
-	copy_to_clipboard($mm, $filename);
-
+	copy_to_clipboard($mm, $output);
+	message($mm, 'Exported the map to clipboard.');
 }
 
 
