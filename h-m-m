@@ -2656,6 +2656,14 @@ function delete_node_internal(&$mm, $active_node, $exclude_parent = false )
 			)
 		;
 
+		$mm['nodes'][$parent_id]['visible_children'] =
+			array_diff
+			(
+				$mm['nodes'][$parent_id]['visible_children'],
+				[$active_node]
+			)
+		;
+
 		if (count($mm['nodes'][$parent_id]['children'])==0)
 			$mm['nodes'][$parent_id]['is_leaf'] = true;
 
