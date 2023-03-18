@@ -1211,30 +1211,7 @@ function toggle_hide(&$mm)
 	{
 		$mm['nodes'][ $mm['active_node'] ]['title'] = '[HIDDEN] ' . $mm['nodes'][ $mm['active_node'] ]['title'];
 		$is_hidden = true;
-
-		if (!$mm['show_hidden'])
-		{
-			$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
-			if (count($mm['nodes'][$parent_id]['visible_children'])<=1)
-				$mm['active_node'] = $parent_id;
-			else
-			{
-				$previous_sibling = 0;
-				$passed = false;
-				foreach ($mm['nodes'][$parent_id]['visible_children'] as $cid)
-					if ($cid==$mm['active_node'])
-					{
-						if ($previous_sibling!=0) break;
-						$passed = true;
-					}
-					else
-					{
-						$previous_sibling = $cid;
-						if ($passed) break;
-					}
-				$mm['active_node'] = $previous_sibling;
-			}
-		}
+		move_active_node_to_sibling_or_parent($mm);
 	}
 
 	build_map($mm);
@@ -1245,10 +1222,40 @@ function toggle_hide(&$mm)
 function toggle_show_hidden(&$mm)
 {
 	$mm['show_hidden'] = !$mm['show_hidden'];
+	move_active_node_to_sibling_or_parent($mm);
+
 	build_map($mm);
 	display($mm);
 	message($mm, 'Hidden nodes will '.($mm['show_hidden'] ? '' : 'not ').'be shown.');
 }
+
+function move_active_node_to_sibling_or_parent(&$mm)
+{
+	if ($mm['show_hidden'] || substr($mm['nodes'][ $mm['active_node'] ]['title'],0,9)!='[HIDDEN] ' )
+		return;
+
+	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
+	if (count($mm['nodes'][$parent_id]['visible_children'])<=1)
+		$mm['active_node'] = $parent_id;
+	else
+	{
+		$passed = false;
+
+		// getting the next sibling
+		foreach ($mm['nodes'][$parent_id]['children'] as $cid)
+			if ($cid==$mm['active_node'])
+				$passed = true;
+			elseif ($passed && substr($mm['nodes'][$cid]['title'],0,9)!='[HIDDEN] ')
+			{
+				$mm['active_node'] = $cid;
+				return;
+			}
+
+		// so, there's no item after it!
+		$mm['active_node'] = end($mm['nodes'][ $mm['active_node'] ]['visible_children']);
+	}
+}
+
 
 
 // }}}
@@ -1894,24 +1901,24 @@ function move_active_node_down(&$mm)
 
 	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
 	$children = [];
-	$now = false;
+	$just_passed_active = false;
 
 	foreach ($mm['nodes'][ $parent_id ]['children'] as $child)
 	{
 		if ($child!=$mm['active_node'])
 			$children[] = $child;
 
-		if ($now)
+		if ($just_passed_active && ($mm['show_hidden'] || substr($mm['nodes'][$child]['title'],0,9)!='[HIDDEN] ' ) )
 		{
 			$children[] = $mm['active_node'];
-			$now = false;
+			$just_passed_active = false;
 		}
 
 		if ($child==$mm['active_node'])
-			$now = true;
+			$just_passed_active = true;
 	}
 
-	if ($now)
+	if ($just_passed_active)
 		$children[] = $mm['active_node'];
 
 	$mm['nodes'][ $parent_id ]['children'] = $children;
@@ -1930,7 +1937,7 @@ function move_active_node_up(&$mm)
 
 	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
 	$children = [];
-	$now = false;
+	$just_passed_active = false;
 	$rev_children = array_reverse($mm['nodes'][$parent_id]['children']);
 
 	foreach ($rev_children as $child)
@@ -1938,17 +1945,17 @@ function move_active_node_up(&$mm)
 		if ($child!=$mm['active_node'])
 			$children[] = $child;
 
-		if ($now)
+		if ($just_passed_active && ($mm['show_hidden'] || substr($mm['nodes'][$child]['title'],0,9)!='[HIDDEN] ' ) )
 		{
 			$children[] = $mm['active_node'];
-			$now = false;
+			$just_passed_active = false;
 		}
 
 		if ($child==$mm['active_node'])
-			$now = true;
+			$just_passed_active = true;
 	}
 
-	if ($now)
+	if ($just_passed_active)
 		$children[] = $mm['active_node'];
 
 	$mm['nodes'][ $parent_id ]['children'] = array_reverse($children);
