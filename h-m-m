@@ -1252,7 +1252,7 @@ function move_active_node_to_sibling_or_parent(&$mm)
 			}
 
 		// so, there's no item after it!
-		$mm['active_node'] = end($mm['nodes'][ $mm['active_node'] ]['visible_children']);
+		$mm['active_node'] = $parent_id;
 	}
 }
 
@@ -3096,9 +3096,26 @@ function sort_siblings(&$mm)
 
 	foreach ($sibling_ids as $sid)
 		if (mb_ereg('^\((\d+)\+,(\d+)\-\)', $mm['nodes'][$sid]['title'], $values))
-			$siblings[ (9000000 - $values[1] + $values[2]).'.'.$sid ] = $sid;
+			$siblings
+			[
+				(9000000 - $values[1] + $values[2])
+				.'.'
+				.$sid 
+			]
+			= $sid;
 		else
-			$siblings[ $mm['nodes'][$sid]['title'].'.'.$sid ] = $sid;
+			$siblings
+			[
+				mb_ereg_replace
+				(
+					'^\[HIDDEN\] |^'.$mm['symbol1'].' |^'.$mm['symbol2'].' '
+					,''
+					,$mm['nodes'][$sid]['title']
+				)
+				.'.'
+				.$sid
+			] 
+			= $sid;
 
 	ksort($siblings, SORT_NATURAL);
 
