@@ -803,7 +803,7 @@ function draw_connections(&$mm, $id)
 				 $mm
 				,$node['x'] + $node['w']+1
 				,$node['y'] + $node['yo']
-				,'─╫─'
+				,'─╫─ [+]'
 			);
 		return;
 	}
