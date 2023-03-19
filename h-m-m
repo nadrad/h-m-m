@@ -787,9 +787,9 @@ function draw_connections(&$mm, $id)
 
 
 	// if the node is collapsed
-	if ($node['collapsed'] ?? false)
+	if ( ($node['collapsed'] ?? false) && ($num_children > 0) )
 	{
-		if ($num_visible_children > 0)
+		if ($num_visible_children == $num_children)
 			mmput
 			(
 				 $mm
