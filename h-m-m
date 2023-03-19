@@ -673,7 +673,7 @@ function calculate_h(&$mm)
 
 		foreach ($mm['nodes'] as $id=>$node)
 
-			if ($node['is_leaf'] || ($node['collapsed'] ?? false))
+			if ($node['visible_children']==0 || ($node['collapsed'] ?? false))
 
 				$mm['nodes'][$id]['h']
 					= $mm['line_spacing']
