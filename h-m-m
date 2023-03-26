@@ -464,29 +464,17 @@ function map_to_list(&$mm, $id, $exclude_parent = false, $base = 0)
 
 function load_file(&$mm)
 {
-	global $argv;
+	$mm['filename'] = $mm['arguments']['filename'] ?? '';
 
-	if (!isset($argv[1]))
-	{
-		load_empty_map($mm);
-		return;
-	}
-
-	if (isset($mm['arguments']['filename']))
-		$mm['filename'] = $mm['arguments']['filename'];
+	if (isset($mm['arguments']['filename']) && file_exists($mm['filename']))
+		$lines = file($mm['filename'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	else
 	{
+		unset($mm['filename']);
 		load_empty_map($mm);
 		return;
 	}
 
-	if (!file_exists($argv[1]))
-	{
-		load_empty_map($mm);
-		return;
-	}
-
-	$lines = file($argv[1], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
 	// starting from 2 instead of 1, in case the files doesn't have
 	// a single root and we have to inject one. leaving "1" empty
@@ -3131,7 +3119,9 @@ function monitor_key_presses(&$mm)
 	{
 		usleep(20000);
 		$in = fread(STDIN, 16);
-		if (empty($in)) continue;
+
+		if (empty($in))
+			continue;
 
 		switch ($in)
 		{
@@ -3276,7 +3266,7 @@ enable_alternate_screen();
 load_file($mm);
 
 collapse_all($mm);
-collapse_level($mm, $mm['initial_depth'], true);
+collapse_level($mm, $mm['initial_depth'], false);
 
 monitor_key_presses($mm);
 
