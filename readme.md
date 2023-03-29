@@ -115,8 +115,8 @@ The following are the settings in h-m-m:
 	center_lock = false
 	focus_lock = false
 	max_undo_steps = 24
-    active_node_color = "\033[38;5;0m\033[48;5;172m\033[1m"
-    message_color = "\033[38;5;0m\033[48;5;141m\033[1m"
+    active_node_color = \033[38;5;0m\033[48;5;172m\033[1m
+    message_color = \033[38;5;0m\033[48;5;141m\033[1m
 	clipboard = os
 	clipboard_file = /tmp/h-m-m
 	clipboard_in_command = ""
