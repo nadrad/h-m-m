@@ -661,7 +661,7 @@ function calculate_h(&$mm)
 
 		foreach ($mm['nodes'] as $id=>$node)
 
-			if ($node['visible_children']==0 || ($node['collapsed'] ?? false))
+			if ($node['is_leaf'] || $node['visible_children']==0 || ($node['collapsed'] ?? false))
 
 				$mm['nodes'][$id]['h']
 					= $mm['line_spacing']
@@ -692,8 +692,6 @@ function calculate_h(&$mm)
 							, $node['lh']
 							+ $mm['line_spacing']
 						)
-						+ ($mm['nodes'][$id]['parent'] == $mm['root_id'])
-						* $mm['line_spacing'];
 					;
 			}
 	}
