@@ -77,7 +77,7 @@ Search:
 * `n` - goes to the next search result
 * `N` - goes to the previous search result
 
-Save, export, and quit:
+Save, export, quit, etc.:
 
 * `s` - saves with the previous file name (or asks for one if there's none)
 * `S` - saves with a new file name
@@ -85,6 +85,7 @@ Save, export, and quit:
 * `X` - export as a text map into clipboard
 * `q` - quits (if the changes were already saved)
 * `Q` - quits, ignoring the changes
+* `Ctrl+r` - open the active node as a file or URL using xdg-open
 
 In the text editor:
 

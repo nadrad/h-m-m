@@ -180,6 +180,7 @@ const ctrl_r                = "\022";
 const ctrl_f                = "\006";
 const ctrl_v                = "\026";
 const ctrl_h                = "\010";
+const ctrl_o                = "\017";
 
 const arr_down              = "\033\133\102";
 const arr_right             = "\033\133\103";
@@ -3062,6 +3063,17 @@ function rank(&$mm, $add_positive, $add_negative)
 
 
 // }}}
+// {{{ open link
+
+function open_link(&$mm)
+{
+	message($mm,'Opening the node with xdg-open...');
+	exec('xdg-open "'.$mm['nodes'][ $mm['active_node'] ]['title'].'" >/dev/null 2>&1 &', $output, $result);
+	display($mm);
+}
+
+
+// }}}
 // {{{ sort
 
 function sort_siblings(&$mm)
@@ -3169,6 +3181,7 @@ function monitor_key_presses(&$mm)
 			case 'n':       next_search_result($mm); break;
 			case 'N':       previous_search_result($mm); break;
 
+			case ctrl_o:    open_link($mm); break;
 			case 'o':       insert_new_node($mm, insert_sibling); break;
 			case 'O':       insert_new_node($mm, insert_child); break;
 
