@@ -85,7 +85,7 @@ Save, export, quit, etc.:
 * `X` - export as a text map into clipboard
 * `q` - quits (if the changes were already saved)
 * `Q` - quits, ignoring the changes
-* `Ctrl+r` - open the active node as a file or URL using xdg-open
+* `Ctrl+o` - open the active node as a file or URL using xdg-open
 
 In the text editor:
 
