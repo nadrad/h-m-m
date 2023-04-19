@@ -470,7 +470,6 @@ function load_file(&$mm)
 		$lines = file($mm['filename'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 	else
 	{
-		unset($mm['filename']);
 		load_empty_map($mm);
 		return;
 	}
@@ -2528,9 +2527,13 @@ function load_empty_map(&$mm)
 		]
 	;
 
+	$title = basename( $mm['filename'] ?? 'root' );
+	if (substr($title,-4)=='.hmm')
+		$title = substr($title,0,-4);
+
 	$mm['nodes'][1] =
 		[
-			'title'=> basename( $mm['filename'] ?? 'root' )
+			'title'=> $title
 			,'is_leaf'=>true
 			,'children'=>[]
 			,'collapsed'=>false
