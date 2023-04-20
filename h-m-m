@@ -2914,20 +2914,21 @@ function display(&$mm, $force_center = false)
 			;
 
 		// styling the codes when the node is not active
-		// it used to be the 'else' of the above condition
-		// because it resets the bold attribute of the active
-		// node. However, it think losing the bold attribute
-		// is better than leaving the numbers unformatted 
-		// in the same line as the active node.
+		// with "else", the downside is that other codes
+		// with the same "y" will not be styled.
+		// Without the "else", the downside is that the
+		// rest of the line in the active node won't be bold.
+		// between these two, I think the former is better.
 
-		$line =
-			mb_ereg_replace
-			(
-				'\b(.?\d+)\. '
-				,dim_on.'\\1. '.dim_off
-				,$line
-			)
-		;
+		else
+			$line =
+				mb_ereg_replace
+				(
+					'\b(.?\d+)\. '
+					,dim_on.'\\1. '.dim_off
+					,$line
+				)
+			;
 
 		// styling the search results
 
