@@ -2528,7 +2528,7 @@ function load_empty_map(&$mm)
 		]
 	;
 
-	$title = basename( $mm['filename'] ?? 'root' );
+	$title = basename( empty($mm['filename']) ? 'root' : $mm['filename'] );
 	if (substr($title,-4)=='.hmm')
 		$title = substr($title,0,-4);
 
