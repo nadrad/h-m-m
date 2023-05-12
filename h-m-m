@@ -916,7 +916,7 @@ function draw_connections(&$mm, $id)
 		.
 		(
 			$mm['align_levels']
-			? str_repeat('─', $mm['nodes'][$top_child]['x'] - $node['x'] - $node['w'] - 2 )
+			? str_repeat('─', $mm['nodes'][$top_child]['x'] - $node['x'] - $node['w'] - 3 )
 			: $mm['conn_left']
 		)
 	;
