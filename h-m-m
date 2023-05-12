@@ -833,7 +833,7 @@ function draw_connections(&$mm, $id)
 			.
 			(
 				$mm['align_levels']
-				? str_repeat('─', $child['x'] - $node['x'] - $node['w'] + 1)
+				? str_repeat('─', $child['x'] - $node['x'] - $node['w'] - 1)
 				: $mm['conn_single']
 			)
 		;
