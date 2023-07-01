@@ -139,7 +139,7 @@ You have 3 different ways of setting those values:
 
 Both underscores and dashes are accepted for the setting keys.
 
-When multiple values exists, the highest priority goes to the command line arguments and the lowest to the config file. 
+When multiple values exist, the highest priority goes to the command line arguments and the lowest to the config file. 
 
 
 # Clipboard
@@ -179,7 +179,7 @@ Most mind mapping applications use a similar format for copying and pasting. As 
 
 # Installing 
 
-Note: A few issues should be solved before **h-m-m** can be run in Windows. Until then, Windows users can probably use *Windows Subsystem for Linux* to run it.
+Note: A few issues should be solved before **h-m-m** can be run in Windows. Until then, Windows users can probably use *Windows Subsystem for Linux* to run it. There's an [open issue](https://github.com/nadrad/h-m-m/issues/29) for Windows, waiting for contributors!
 
 
 ## 1. Manual installation 
@@ -231,16 +231,9 @@ docker run --rm -it -v $(pwd):/app/ hmm
 ```
 
 
-# Compatibility 
-
-I think the method I've used in this program to interact with the terminal emulator is general and standard enough to be cross-platform, but I've developed it in Linux and I don't have any other operating system to test it on. If you run into a problem in Windows or Mac, let me know, especially if you know how to fix it, and I'll try to make it work. 
-
-Update: There's an [open issue](https://github.com/nadrad/h-m-m/issues/29) for Windows, waiting for contributors!
-
-
 # Feedback
 
-Programming is not my career, but rather a hobby, and I developed **h-m-m** because I wanted to have something like this and couldn't find one. Therefore, what I've done here may have a lot of room for improvement. If you see an embarrassing problem in the program or have an idea for improvement, feel free to contact me; I'd be happy to receive your feedback.
+Programming is not my career, but rather a hobby, and I developed **h-m-m** because I wanted to have something like this application and couldn't find one. Therefore, what I've done here may have a lot of room for improvement. If you see an embarrassing problem in the program or have an idea for improvement, feel free to contact me; I'd be happy to receive your feedback.
 
-Why php? It's simple: I only have a rusty knowledge of Pascal and a little familiarity with php. I thought about learning another language for this project (Haskell and Go were my top choices), but I didn't have time to do it. I'll probably do it later and convert it into a language I can compile :)
+Why php? It's simple: I only have a rusty knowledge of Pascal and a little familiarity with php. I thought about learning another language for this project (Nim is my top choice at this moment), but I didn't have time to do it. I'll probably do it later and convert it into a language I can compile :)
 
