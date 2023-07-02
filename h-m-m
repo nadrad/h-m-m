@@ -342,13 +342,19 @@ function list_to_map($lines, $root_id, $start_id)
 		$lines[$lid] =
 			mb_ereg_replace
 			(
-				"[\000-\010\013-\037\177]|".BOM
-				,''
-				,str_replace
+				"^( *)•"
+				,'\1*'
+				,
+				mb_ereg_replace
 				(
-					 [ "\t", "\n" ]
-					,[ "  ", " "  ]
-					,$lines[$lid]
+					"[\000-\010\013-\037\177]|".BOM
+					,''
+					,str_replace
+					(
+						 [ "\t", "\n" ]
+						,[ "  ", " "  ]
+						,$lines[$lid]
+					)
 				)
 			)
 		;
@@ -2388,7 +2394,8 @@ function append(&$mm)
 
 function paste_sub_tree(&$mm, $as_sibling )
 {
-	if ($as_sibling && $mm['active_node']==$mm['root_id']) return;
+	if ($as_sibling && $mm['active_node']==$mm['root_id'])
+		return;
 
 	if ($as_sibling)
 		$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
@@ -2411,7 +2418,8 @@ function paste_sub_tree(&$mm, $as_sibling )
 		)
 	;
 
-	if ($st==[]) return;
+	if ($st==[])
+		return;
 
 	push_change($mm);
 	$mm['modified'] = true;
