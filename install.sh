@@ -1,7 +1,7 @@
 #!/bin/sh
 
 HMM_PATH=$(dirname "$0")/h-m-m
-MINIMUM_REQUIREMENTS="MINIMUM REQUIREMENTS: PHP 7+ and one of these three must exist on PATH: xclip, xsel or wl-clipboard."
+MINIMUM_REQUIREMENTS="MINIMUM REQUIREMENTS: PHP 7+ and one of these three must exist on PATH: xclip, xsel, wl-clipboard, or pbcopy."
 DESTINATION_DIR=/usr/local/bin
 
 # Test if /usr/local/bin exists. If not fallback to /usr/bin
@@ -28,9 +28,14 @@ if ! command -v php > /dev/null 2>&1;then
     exit 1
 fi
 
-# Test if xclip, xsel or wl-clipboard are on PATH
-if ! command -v xclip > /dev/null 2>&1 && ! command -v xsel > /dev/null 2>&1 && ! command -v wl-clipboard > /dev/null 2>&1 ;then
-    printf "ERROR: xclip, xsel or wl-clipboard must exist on PATH. Installation cancelled.\n";
+# Test if a clipboard application is available
+if \
+  ! command -v xclip        > /dev/null 2>&1 && \
+  ! command -v xsel         > /dev/null 2>&1 && \
+  ! command -v wl-clipboard > /dev/null 2>&1 \
+  ! command -v pbcopy       > /dev/null 2>&1
+then
+    printf "ERROR: xclip, xsel, wl-clipboard, or pbcopy must exist on PATH. Installation cancelled.\n";
     printf "%s\n" "$MINIMUM_REQUIREMENTS"
     exit 1
 fi
