@@ -122,6 +122,8 @@ config($mm, 'clipboard_file',        "/tmp/h-m-m");
 config($mm, 'clipboard_in_command',  "");
 config($mm, 'clipboard_out_command', "");
 
+config($mm, 'auto_save',             false);
+
 
 if (isset($mm['arguments']['debug_config']))
 {
@@ -1342,7 +1344,7 @@ function toggle_numbers()
 		else
 			$mm['nodes'][$cid]['title'] = str_pad($i++, $padlen, '0', STR_PAD_LEFT).'. '.$mm['nodes'][$cid]['title'];
 
-	$mm['modified'] = true;
+	push_change($mm);
 	build_map($mm);
 	display($mm);
 }
@@ -1377,7 +1379,7 @@ function toggle_symbol()
 			.' '
 			.$mm['nodes'][ $mm['active_node'] ]['title'];
 
-	$mm['modified'] = true;
+	push_change($mm);
 	build_map($mm);
 	display($mm);
 }
@@ -1394,7 +1396,6 @@ function toggle_hide()
 		return;
 
 	push_change($mm);
-	$mm['modified'] = true;
 
 	$is_hidden = false;
 	if ( substr($mm['nodes'][ $mm['active_node'] ]['title'], 0, 9) == '[HIDDEN] ')
@@ -1547,7 +1548,6 @@ function push_node_down(&$mm, $id)
 		return;
 
 	push_change($mm);
-	$mm['modified'] = true;
 
 	if (isset($mm['nodes'][$id+1]))
 		push_node_down($mm,$id+1);
@@ -1635,7 +1635,6 @@ function insert_new_node($type)
 	display($mm);
 
 	push_change($mm);
-	$mm['modified'] = true;
 
 	$mm['nodes'][ $mm['active_node'] ]['title']='';
 	edit_node($mm);
@@ -1947,7 +1946,6 @@ function edit_node($rewrite = false)
 	{
 		delete_node_vh($mm, false, true);
 		push_change($mm);
-		$mm['modified'] = true;
 		build_map($mm);
 		display($mm);
 		return;
@@ -1963,7 +1961,6 @@ function edit_node($rewrite = false)
 	$mm['nodes'][ $mm['active_node'] ]['title'] = $output;
 
 	push_change($mm);
-	$mm['modified'] = true;
 
 	build_map($mm);
 	display($mm);
@@ -2233,7 +2230,6 @@ function move_node_down()
 	if ($mm['active_node']==0) return;
 
 	push_change($mm);
-	$mm['modified'] = true;
 
 	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
 	$children = [];
@@ -2271,7 +2267,6 @@ function move_node_up()
 	if ($mm['active_node']==0) return;
 
 	push_change($mm);
-	$mm['modified'] = true;
 
 	$parent_id = $mm['nodes'][ $mm['active_node'] ]['parent'];
 	$children = [];
@@ -2443,7 +2438,10 @@ function export_text()
 function save()
 {
 	global $mm;
-	save_vh($mm, false);
+	if ($mm['auto_save'])
+		message($mm,'auto_save is enabled and you don\'t need to save manually.');
+	else
+		save_vh($mm, false);
 }
 
 function save_as()
@@ -2506,7 +2504,8 @@ function save_vh(&$mm, $new_name = false)
 	fclose($file);
 
 	display($mm);
-	message($mm, 'Saved '.$mm['filename']);
+	if (!$mm['auto_save'])
+		message($mm, 'Saved '.$mm['filename']);
 }
 
 
@@ -2541,7 +2540,8 @@ function message(&$mm, $text)
 function quit()
 {
 	global $mm;
-	if (($mm['modified'] ?? false) === false) shutdown();
+	if (($mm['modified'] ?? false) === false)
+		shutdown();
 	message($mm, "You have unsaved changes. Save them, or use shift+Q to quit without saving.");
 }
 
@@ -2589,6 +2589,10 @@ function push_change(&$mm)
 	array_push($mm['changes'], $mm['nodes']);
 	array_push($mm['change_active_node'], $mm['active_node']);
 	$mm['change_index']++;
+
+	$mm['modified'] = true;
+	if ($mm['auto_save'])
+		save_vh($mm);
 }
 
 
@@ -2803,7 +2807,6 @@ function paste_sub_tree(&$mm, $as_sibling )
 		return;
 
 	push_change($mm);
-	$mm['modified'] = true;
 
 	$mm['nodes'] += $st;
 
@@ -2984,7 +2987,6 @@ function delete_node_vh(&$mm, $exclude_parent = false, $dont_copy_to_clipboard =
 		copy_to_clipboard($mm, map_to_list($mm, $mm['active_node'], $exclude_parent) );
 
 	push_change($mm);
-	$mm['modified'] = true;
 
 	delete_node_internal($mm, $mm['active_node'], $exclude_parent);
 
@@ -3504,7 +3506,6 @@ function rank(&$mm, $add_positive, $add_negative)
 	;
 
 	push_change($mm);
-	$mm['modified'] = true;
 	build_map($mm);
 	display($mm);
 }
@@ -3566,7 +3567,6 @@ function sort_siblings()
 	$mm['nodes'][ $mm['nodes'][ $mm['active_node'] ]['parent'] ]['children'] = $siblings;
 
 	push_change($mm);
-	$mm['modified'] = true;
 	build_map($mm);
 	display($mm);
 }

@@ -130,6 +130,7 @@ The following are the settings in h-m-m:
 	post_export_command = ""
 	symbol1 = ✓
 	symbol2 = ✗
+	auto_save = false
 
 The colors are ASCII escape codes. 
 
