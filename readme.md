@@ -72,7 +72,7 @@ Collapsing and expanding:
 
 Search:
 
-* `/`, `?`, or `Ctrl+f` - searches for a phrase
+* `/` or `Ctrl+f` - searches for a phrase
 * `n` - goes to the next search result
 * `N` - goes to the previous search result
 
@@ -85,6 +85,10 @@ Save, export, quit, etc.:
 * `q` - quits (if the changes were already saved)
 * `Q` - quits, ignoring the changes
 * `Ctrl+o` - open the active node as a file or URL using xdg-open
+
+Misc:
+
+* `?` - show the key bindings
 
 In the text editor:
 

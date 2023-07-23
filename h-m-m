@@ -183,6 +183,7 @@ const special_keys =
 	'ctrl_e' => "\005",
 	'ctrl_f' => "\006",
 	'ctrl_g' => "\007",
+	'ctrl_back_space' => "\010",
 	'ctrl_h' => "\010",
 	'ctrl_i' => "\011",
 	'ctrl_j' => "\012",
@@ -247,7 +248,6 @@ const special_keys =
 	'del' => "\033\133\063\176",
 	'ctrl_del' => "\033\133\63\073\065\176",
 	'back_space' => "\177",
-	'ctrl_back_space' => "\010",
 
 	'enter' => "\012",
 	'space' => "\040",
@@ -333,7 +333,6 @@ $keybindings['Q'] = 'shutdown';
 
 $keybindings['r'] = 'collapse_other_branches';
 $keybindings['R'] = 'collapse_inner';
-$keybindings[special_keys['ctrl_r']] = 'redo';
 
 $keybindings['s'] = 'save';
 $keybindings['S'] = 'save_as';
@@ -380,8 +379,8 @@ $keybindings['9'] = 'collapse_level_9';
 
 $keybindings['|'] = 'toggle_align';
 
+$keybindings['?']    = 'help';
 $keybindings['/']    = 'search';
-$keybindings['?']    = 'search';
 $keybindings[special_keys['ctrl_f']] = 'search';
 
 $keybindings['=']    = 'increase_positive_rank';
@@ -2071,6 +2070,57 @@ function go_to_bottom()
 
 	$mm['active_node'] = $yid;
 	display($mm, true);
+}
+
+
+// }}}
+// {{{ help
+
+function help()
+{
+
+	global $mm;
+	global $keybindings;
+
+	$keynames = array_flip(special_keys);
+
+	$commands = [];
+	foreach ($keybindings as $key => $command)
+		$commands[$command][] = ( $keynames[$key] ?? $key );
+
+	$output = [];
+	foreach ($commands as $command => $keys)
+		$output[] =
+		str_pad($command.' ',32,'.',STR_PAD_RIGHT)
+		.' '
+		.implode(', ',$keys);
+
+	sort($output);
+
+	$breakpoint = floor((count($output)-1)/2);
+
+	for ($i=0 ; $i<=$breakpoint ; $i++)
+		echo
+			' '
+			.str_pad($output[$i],56,' ',STR_PAD_RIGHT)
+			.
+			($output[$i+$breakpoint+1] ?? '')
+			."\n"
+		;
+	echo "\n";
+
+	message($mm, "Press any key to exit this help screen.");
+
+	while (true)
+	{
+		usleep(20000);
+		$in = fread(STDIN, 16);
+		if ($in != '')
+			break;
+	}
+
+	display($mm);
+
 }
 
 
