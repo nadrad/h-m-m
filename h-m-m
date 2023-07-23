@@ -3411,6 +3411,16 @@ function display(&$mm, $force_center = false)
 			)
 		;
 
+		// styling "(?)
+
+		$line =
+			str_replace
+			(
+				 '(?)'
+				,$mm['doubt_color'].'(?)'.default_color
+				,$line
+			);
+
 		// styling "???"
 
 		$line =
