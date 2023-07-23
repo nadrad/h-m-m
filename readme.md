@@ -6,7 +6,7 @@
 ![screenshot](screenshot.png)
 
 
-# Key bindings
+# Default key bindings
 
 Adding, removing, and editing nodes:
 
@@ -23,7 +23,6 @@ Adding, removing, and editing nodes:
 * `e`, `i`, or `a` - edits the active node
 * `E`, `I`, or `A` - edits the active node, ignoring the existing text
 * `u` - undo
-* `Ctrl+r` - redo
 
 Marks:
 
@@ -103,6 +102,8 @@ In the text editor:
 * `Esc` - cancels editing
 * `Enter` - wanna guess? ;)
 
+Other than the text editor key bindings, you can change all in your config file.
+
 
 # Configuration 
 
@@ -128,7 +129,79 @@ The following are the settings in h-m-m:
 
 The colors are ASCII escape codes. 
 
-You have 3 different ways of setting those values: 
+You can also change key bindings with a `bind x = command` syntax. The following are the commands:
+
+	append
+	center_active_node
+	collapse_all
+	collapse_children
+	collapse_inner
+	collapse_level_1
+	collapse_level_2
+	collapse_level_3
+	collapse_level_4
+	collapse_level_5
+	collapse_level_6
+	collapse_level_7
+	collapse_level_8
+	collapse_level_9
+	collapse_other_branches
+	decrease_line_spacing
+	decrease_negative_rank
+	decrease_positive_rank
+	decrease_text_width
+	delete_children
+	delete_node
+	delete_node_without_clipboard
+	edit_node_append
+	edit_node_replace
+	expand_all
+	export_html
+	export_text
+	focus
+	go_down
+	go_left
+	go_right
+	go_to_bottom
+	go_to_root
+	go_to_top
+	go_up
+	increase_line_spacing
+	increase_negative_rank
+	increase_positive_rank
+	increase_text_width
+	insert_new_child
+	insert_new_sibling
+	move_node_down
+	move_node_up
+	next_search_result
+	open_link
+	paste_as_children
+	paste_as_siblings
+	previous_search_result
+	quit
+	save
+	save_as
+	search
+	shutdown
+	sort_siblings
+	toggle_align
+	toggle_center_lock
+	toggle_focus_lock
+	toggle_hide
+	toggle_node
+	toggle_numbers
+	toggle_show_hidden
+	toggle_symbol
+	undo
+	yank_children
+	yank_node
+
+Keys can be `x`, `X` (shift+x), `ctrl_x`, `alt_x`, or special keys: `arr_down`, `arr_left`, `arr_right`, `arr_up`, `back_space`, `ctrl_arr_left`, `ctrl_arr_right`, `ctrl_back_space`, `ctrl_del`, `del`, `end`, `enter`, `equal`, `esc`, `home`, `shift_arr_left`, `shift_arr_right`, `space`, `tab` 
+
+Note: Not every possible key is defined because I'm going to replace this whole system with one that supports key sequences.
+
+Key bindings can only be set in a config file. There are 3 ways of changing settings:
 
 1. Pass them as arguments when running the program; e.g., `h-m-m --focus-lock=true --line-spacing=0 filename`
 1. Set them as environment variables with `hmm_` as prefix; e.g., `hmm_line_spacing=0`
