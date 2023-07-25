@@ -123,6 +123,7 @@ config($mm, 'clipboard_in_command',  "");
 config($mm, 'clipboard_out_command', "");
 
 config($mm, 'auto_save',             false);
+config($mm, 'echo_keys',             false);
 
 
 if (isset($mm['arguments']['debug_config']))
@@ -3601,11 +3602,13 @@ function monitor_key_presses(&$mm)
 		if (isset($keybindings[$in]))
 			call_user_func($keybindings[$in]);
 
-		// uncomment the following to discover the escape codes:
-		// echo "\033[1;1f";
-		// for ($i=0; $i<strlen($in); $i++)
-		//   echo base_convert(ord($in[$i]),10,8).' ';
-		// echo '                    ';
+		if ($mm['echo_keys'])
+		{
+			echo "\033[1;1f";
+			for ($i=0; $i<strlen($in); $i++)
+			  echo base_convert(ord($in[$i]),10,8).' ';
+			echo '                    ';
+		}
 	}
 }
 
