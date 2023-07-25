@@ -248,8 +248,8 @@ const special_keys =
 	'home' => "\033\133\110",
 	'end'  => "\033\133\106",
 
-	'home_alternative' => "\043",
-	'end_alternative'  => "\044",
+	'home_alternative' => "\033\133\061\176",
+	'end_alternative'  => "\033\133\064\176",
 
 	'del' => "\033\133\063\176",
 	'ctrl_del' => "\033\133\63\073\065\176",
