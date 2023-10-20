@@ -31,6 +31,8 @@ $mm=[];
 // parsing the command line arguments
 
 $mm['arguments'] = [];
+$mm['config'] = [];
+$mm['env'] = [];
 $alen = count($argv);
 
 for ( $i = 1 ; $i < $alen ; $i++ )
