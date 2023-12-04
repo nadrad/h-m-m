@@ -466,12 +466,12 @@ function check_the_available_clipboard_tool(&$mm)
 
 	// now, the main OS ;)
 
-	exec('command -v xclip xsel wl-copy', $result);
+	exec('command -v xclip xsel wl-copy klipper', $result);
 	$tool = basename($result[0] ?? '');
 
 	if (trim($tool)==='')
 	{
-		echo "Can't find your clipboard tool! I expected to find xclip, xsel, or wl-clipboard.".PHP_EOL;
+		echo "Can't find your clipboard tool! I expected to find xclip, xsel, wl-clipboard, or Klipper.".PHP_EOL;
 		exit(1);
 	}
 
@@ -490,6 +490,12 @@ function check_the_available_clipboard_tool(&$mm)
 		case 'wl-copy':
 			$mm['os_clipboard']['write'] = 'wl-copy';
 			$mm['os_clipboard']['read']  = 'wl-paste';
+			break;
+
+		case 'klipper':
+			$mm['clipboard'] = 'command';
+			$mm['clipboard_in_command']  = 'qdbus org.kde.klipper /klipper setClipboardContents %text%';
+			$mm['clipboard_out_command'] = 'qdbus org.kde.klipper /klipper getClipboardContents';
 			break;
 
 		default:
@@ -2864,7 +2870,8 @@ function copy_to_clipboard(&$mm, $text)
 	{
 		case 'os':
 			$clip = popen($mm['os_clipboard']['write'],'wb');
-			if (!isset($clip)) return;
+			if (!isset($clip))
+				return;
 			fwrite($clip,$text);
 			pclose($clip);
 			break;
