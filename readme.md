@@ -289,7 +289,7 @@ You can run the following command to install h-m-m:
 wget -q -O - 'https://raw.githubusercontent.com/nadrad/h-m-m/main/install.sh' | sh
 ```
 
-This command downloads and runs the install.sh script, which it turn downloads h-m-m, copies it to `/usr/local/bin`, checks the dependencies, and makes it executable. 
+This command downloads and runs the install.sh script, which in turn downloads h-m-m, copies it to `/usr/local/bin`, checks the dependencies, and makes it executable. 
 
 After installing, you can run `h-m-m` from anywhere in your terminal to run the application with an empty map, or `h-m-m filename` to open an existing file.
 
