@@ -10,4 +10,4 @@ RUN docker-php-ext-install mbstring
 
 COPY ./h-m-m .
 
-CMD ["./h-m-m"]
+CMD ./h-m-m $file
