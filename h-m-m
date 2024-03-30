@@ -338,6 +338,7 @@ $keybindings[special_keys['ctrl_p']] = 'append';
 
 $keybindings['q'] = 'quit';
 $keybindings['Q'] = 'shutdown';
+$keybindings[special_keys['ctrl_q']] = 'quit_with_debug';
 
 $keybindings['r'] = 'collapse_other_branches';
 $keybindings['R'] = 'collapse_inner';
@@ -2555,6 +2556,22 @@ function quit()
 	if (($mm['modified'] ?? false) === false)
 		shutdown();
 	message($mm, "You have unsaved changes. Save them, or use shift+Q to quit without saving.");
+}
+
+
+function quit_with_debug()
+{
+	global $mm;
+	$file = fopen('./h-m-m--debug.txt', "w");
+
+	if ($file!==false)
+	{
+		fwrite($file, serialize($mm));
+		fclose($file);
+		echo "Debug information is written to h-m-m--debug.txt file.";
+	}
+
+	shutdown();
 }
 
 
