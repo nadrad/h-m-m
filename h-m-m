@@ -515,7 +515,7 @@ function enable_alternate_screen()
 	// https://www.ibm.com/docs/en/aix/7.1?topic=s-stty-command
 	system('stty cbreak -echo -crterase intr undef');
 
-	echo 
+	echo
 		 "\033[?1049h" // enabling the alternate screen buffer
 		."\033[?25l" // disabling the text cursor
 		."\033[?9;1000;1001;1002;1003;1004;1007;1005;1006;1015;1016l" // disabling the mouse
@@ -526,7 +526,7 @@ function enable_alternate_screen()
 
 function shutdown()
 {
-	echo 
+	echo
 		clear_screen
 		."\033[?1049l" // enabling the default screen buffer
 		."\033[?25h" // enabling the text cursor
@@ -1725,7 +1725,7 @@ function magic_readline(&$mm, $title)
 			// ctrl+backspace
 			elseif ($in==special_keys['ctrl_back_space'])
 			{
-				$from = 
+				$from =
 					max
 					(
 						0
@@ -1741,7 +1741,7 @@ function magic_readline(&$mm, $title)
 						)
 					)
 				;
-				$title = 
+				$title =
 					 mb_substr($title, 0, $from + ($from>0) )
 					.mb_substr($title, $cursor-1)
 				;
@@ -1771,7 +1771,7 @@ function magic_readline(&$mm, $title)
 			elseif ($in==special_keys['ctrl_del'])
 			{
 				$len = mb_strlen($title);
-				$from = 
+				$from =
 					mb_strpos
 					(
 						$title
@@ -1785,7 +1785,7 @@ function magic_readline(&$mm, $title)
 				;
 				if ($from===false)
 					$from=$len;
-				$title = 
+				$title =
 					 mb_substr($title, 0, $cursor-1)
 					.mb_substr($title, $from+1 )
 				;
@@ -3584,7 +3584,7 @@ function sort_siblings()
 			[
 				(9000000 - $values[1] + $values[2])
 				.'.'
-				.$sid 
+				.$sid
 			]
 			= $sid;
 		else
@@ -3598,7 +3598,7 @@ function sort_siblings()
 				)
 				.'.'
 				.$sid
-			] 
+			]
 			= $sid;
 
 	ksort($siblings, SORT_NATURAL);
