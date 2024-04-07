@@ -796,13 +796,13 @@ function calculate_x_and_lh(&$mm, $id)
 		$mm['nodes'][$id]['w'] = 0;
 		foreach ($lines as $line)
 			$mm['nodes'][$id]['w'] =
-				max($mm['nodes'][$id]['w'], trim(mb_strlen($line)));
+				max($mm['nodes'][$id]['w'], trim(mb_strwidth($line)));
 
 		$mm['nodes'][$id]['lh'] = count($lines);
 	}
 	else
 	{
-		$mm['nodes'][$id]['w']  = mb_strlen(trim($node['title']));
+		$mm['nodes'][$id]['w']  = mb_strwidth(trim($node['title']));
 		$mm['nodes'][$id]['lh'] = 1;
 	}
 
@@ -1263,7 +1263,7 @@ function add_content_to_the_map(&$mm, $id)
 
 	$num_lines = count($lines);
 	for ( $i=0 ; $i<$num_lines ; $i++ )
-		mmput
+		mmputcontent
 		(
 			$mm,
 			$node['x'],
@@ -1321,7 +1321,7 @@ function build_map(&$mm)
 
 	// resetting the map, 2/2
 	$height = max($mm['map_bottom'],$mm['terminal_height']);
-	$blank = str_repeat(' ', $mm['map_width']+$mm['terminal_width']);
+	$blank = str_repeat(' ', max($mm['map_width'],$mm['terminal_width']));
 
 	for ($i=$mm['map_top'] ; $i<=$height ; $i++)
 		$mm['map'][$i] = $blank;
@@ -1883,7 +1883,7 @@ function magic_readline(&$mm, $title)
 function show_line(&$mm, $title, $cursor, $shift)
 {
 	$output  = mb_substr($title,$shift,$mm['terminal_width']-1);
-	$output .= str_repeat( ' ' ,$mm['terminal_width'] - mb_strlen($output) );
+	$output .= str_repeat( ' ' ,$mm['terminal_width'] - mb_strwidth($output) );
 
 	// showing the cursor
 	$output =
@@ -3510,6 +3510,16 @@ function mmput(&$mm,$x,$y,$s)
 		= mb_substr( $mm['map'][$y], 0, $x)
 		. $s
 		. mb_substr( $mm['map'][$y], $x + mb_strlen($s) );
+}
+
+function mmputcontent(&$mm,$x,$y,$s)
+{
+	$y = round($y);
+
+	$mm['map'][$y]
+		= mb_substr( $mm['map'][$y], 0, $x)
+		. $s
+		. mb_substr( $mm['map'][$y], $x + mb_strwidth($s) );
 }
 
 
