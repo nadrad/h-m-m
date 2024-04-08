@@ -241,9 +241,11 @@ const special_keys =
 	'arr_up'   => "\033\133\101",
 	'arr_left' => "\033\133\104",
 
+	'meta_arr_left' => "\033\033\133\104",
 	'ctrl_arr_left'   => "\033\133\061\073\065\104",
 	'shift_arr_left'  => "\033\133\061\073\062\104",
 
+	'meta_arr_right'=> "\033\033\133\103",
 	'ctrl_arr_right'  => "\033\133\061\073\065\103",
 	'shift_arr_right' => "\033\133\061\073\062\103",
 
@@ -256,6 +258,7 @@ const special_keys =
 	'del' => "\033\133\063\176",
 	'ctrl_del' => "\033\133\63\073\065\176",
 	'back_space' => "\177",
+	'meta_back_space' => "\033\177",
 
 	'enter' => "\012",
 	'space' => "\040",
@@ -1694,7 +1697,7 @@ function magic_readline(&$mm, $title)
 			elseif ($in==special_keys['arr_left'])
 				$cursor = max(1, $cursor-1);
 
-			elseif ($in==special_keys['ctrl_arr_left'] || $in==special_keys['shift_arr_left'])
+			elseif ($in==special_keys['ctrl_arr_left'] || $in==special_keys['shift_arr_left'] || $in==special_keys['meta_arr_left'])
 				$cursor =
 					$cursor < 3
 					? 1
@@ -1708,7 +1711,7 @@ function magic_readline(&$mm, $title)
 							)
 						);
 
-			elseif ($in==special_keys['ctrl_arr_right'] || $in==special_keys['shift_arr_right'])
+			elseif ($in==special_keys['ctrl_arr_right'] || $in==special_keys['shift_arr_right'] || $in==special_keys['meta_arr_right'])
 				$cursor =
 					$cursor > mb_strlen($title) -2
 					? mb_strlen($title) + 1
@@ -1722,8 +1725,8 @@ function magic_readline(&$mm, $title)
 							)
 						);
 
-			// ctrl+backspace
-			elseif ($in==special_keys['ctrl_back_space'])
+			// ctrl+backspace, meta+backspace, or alt+backspace
+			elseif ($in==special_keys['ctrl_back_space'] || $in==special_keys['meta_back_space'])
 			{
 				$from = 
 					max
