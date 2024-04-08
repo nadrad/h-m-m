@@ -3377,8 +3377,8 @@ function display(&$mm, $force_center = false)
 
 		// ensuring that the line is long enough even if the map line is
 		// shorter than the terminal width
-		if (mb_strlen($line) < $mm['terminal_width'])
-			$line .= str_repeat(' ', $mm['terminal_width'] - mb_strlen($line));
+		if (mb_strwidth($line) < $mm['terminal_width'])
+			$line .= str_repeat(' ', $mm['terminal_width'] - mb_strwidth($line));
 
 		// this one really depends on (x,y), but after this, the
 		// coordinates are not reliable anymore because of the
