@@ -763,6 +763,7 @@ function calculate_x_and_lh(&$mm, $id)
 {
 	$node = $mm['nodes'][$id];
 
+
 	$mm['nodes'][$id]['x'] =
 		$mm['nodes'][ $node['parent'] ]['x']
 		+ $mm['nodes'][ $node['parent'] ]['w']
@@ -796,7 +797,7 @@ function calculate_x_and_lh(&$mm, $id)
 		$mm['nodes'][$id]['w'] = 0;
 		foreach ($lines as $line)
 			$mm['nodes'][$id]['w'] =
-				max($mm['nodes'][$id]['w'], trim(mb_strwidth($line)));
+				max($mm['nodes'][$id]['w'], mb_strwidth(trim($line)));
 
 		$mm['nodes'][$id]['lh'] = count($lines);
 	}
@@ -824,6 +825,7 @@ function calculate_x_and_lh(&$mm, $id)
 		calculate_x_and_lh($mm, $cid);
 		$mm['nodes'][$id]['clh'] += $mm['nodes'][$cid]['clh'];
 	}
+
 }
 
 
@@ -1225,6 +1227,27 @@ function draw_connections(&$mm, $id)
 		draw_connections($mm, $cid);
 }
 
+function calculate_xo(&$mm)
+{
+	foreach($mm['nodes'] as $id=>$node) {
+		$node = $mm['nodes'][$id];
+		$mm['nodes'][$id]['xo'] = 0;
+
+		if (!array_key_exists('yo',$node)) {
+			$node['yo'] = 0;
+		}
+
+		foreach($mm['nodes'] as $fore_node ) {
+			if (!array_key_exists('yo', $fore_node)) {
+				$fore_node['yo'] = 0;
+			}
+
+			if ($fore_node['y'] + $fore_node['yo'] == $node['y']  + $node['yo'] && $fore_node['x'] < $node['x']) {
+				$mm['nodes'][$id]['xo'] +=  mb_strlen($fore_node['title']) - mb_strwidth($fore_node['title']);
+			}
+		}
+	}
+}
 
 // }}}
 // {{{ add content to the map
@@ -1263,10 +1286,10 @@ function add_content_to_the_map(&$mm, $id)
 
 	$num_lines = count($lines);
 	for ( $i=0 ; $i<$num_lines ; $i++ )
-		mmputcontent
+		mmput
 		(
 			$mm,
-			$node['x'],
+			$node['x']+$node['xo'],
 			$node['y']+$node['yo']+$i,
 			$lines[$i].' '
 		);
@@ -1299,6 +1322,7 @@ function build_map(&$mm)
 	}
 
 	$mm['nodes'][0]['x']  = 0;
+	$mm['nodes'][0]['xo']  = 0;
 	$mm['nodes'][0]['w']  = left_padding;
 	$mm['nodes'][0]['lh'] = 1;
 
@@ -1318,6 +1342,8 @@ function build_map(&$mm)
 	calculate_h($mm);
 	calculate_y($mm);
 	calculate_height_shift($mm, $mm['root_id']);
+
+	calculate_xo($mm);
 
 	// resetting the map, 2/2
 	$height = max($mm['map_bottom'],$mm['terminal_height']);
@@ -3329,14 +3355,14 @@ function display(&$mm, $force_center = false)
 		max
 		(
 			 0
-			,$mm['nodes'][ $mm['active_node'] ]['x']
+			,$mm['nodes'][ $mm['active_node'] ]['x'] + $mm['nodes'][ $mm['active_node'] ]['xo']
 			-1
 			-$mm['viewport_left']
 		)
 	;
 
 	$x2
-		= $mm['nodes'][ $mm['active_node'] ]['w']
+		= mb_strlen($mm['nodes'][ $mm['active_node'] ]['title'])
 		+ $x1
 		+ 2
 		- ($mm['active_node']==0 && left_padding==0)
@@ -3503,16 +3529,6 @@ function display(&$mm, $force_center = false)
 
 
 function mmput(&$mm,$x,$y,$s)
-{
-	$y = round($y);
-
-	$mm['map'][$y]
-		= mb_substr( $mm['map'][$y], 0, $x)
-		. $s
-		. mb_substr( $mm['map'][$y], $x + mb_strlen($s) );
-}
-
-function mmputcontent(&$mm,$x,$y,$s)
 {
 	$y = round($y);
 
