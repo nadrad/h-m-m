@@ -101,7 +101,7 @@ In the text editor:
 * `Delete` - deletes character
 * `Ctrl+Delete` - deletes word
 * `Backspace` - deletes previous character
-* `ctrl+Backspace` - deletes previous word
+* `ctrl+Backspace`, `ctrl+w` - deletes previous word
 * `Ctrl+v` or `Ctrl+Shift+v` - paste
 * `Esc` - cancels editing
 * `Enter` - wanna guess? ;)
