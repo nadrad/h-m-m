@@ -1756,7 +1756,7 @@ function magic_readline(&$mm, $title)
 						);
 
 			// ctrl+backspace, meta+backspace, or alt+backspace
-			elseif ($in==special_keys['ctrl_back_space'] || $in==special_keys['meta_back_space'])
+			elseif ($in==special_keys['ctrl_back_space'] || $in==special_keys['meta_back_space'] || $in==special_keys['ctrl_w'])
 			{
 				$from = 
 					max
