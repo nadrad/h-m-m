@@ -3365,7 +3365,7 @@ function display(&$mm, $force_center = false)
 	;
 
 	$x2
-		= mb_strlen($mm['nodes'][ $mm['active_node'] ]['title'])
+		= $mm['nodes'][ $mm['active_node'] ]['w']
 		+ $x1
 		+ 2
 		- ($mm['active_node']==0 && left_padding==0)
