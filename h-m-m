@@ -798,15 +798,19 @@ function calculate_x_and_lh(&$mm, $id)
 		$lines = explode(PHP_EOL ,wordwrap($node['title'] ,$max_width, PHP_EOL));
 
 		$mm['nodes'][$id]['w'] = 0;
+		$mm['nodes'][$id]['wl'] = 0;
 		foreach ($lines as $line)
-			$mm['nodes'][$id]['w'] =
-				max($mm['nodes'][$id]['w'], mb_strwidth(trim($line)));
+		{
+			$mm['nodes'][$id]['w']  = max($mm['nodes'][$id]['w'],  mb_strwidth(trim($line)));
+			$mm['nodes'][$id]['wl'] = max($mm['nodes'][$id]['wl'], mb_strlen(trim($line)));
+		}
 
 		$mm['nodes'][$id]['lh'] = count($lines);
 	}
 	else
 	{
 		$mm['nodes'][$id]['w']  = mb_strwidth(trim($node['title']));
+		$mm['nodes'][$id]['wl'] = mb_strlen(trim($node['title']));
 		$mm['nodes'][$id]['lh'] = 1;
 	}
 
@@ -3368,7 +3372,7 @@ function display(&$mm, $force_center = false)
 	;
 
 	$x2
-		= $mm['nodes'][ $mm['active_node'] ]['w']
+		= $mm['nodes'][ $mm['active_node'] ]['wl']
 		+ $x1
 		+ 2
 		- ($mm['active_node']==0 && left_padding==0)
