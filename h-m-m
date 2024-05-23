@@ -1912,7 +1912,10 @@ function magic_readline(&$mm, $title)
 function show_line(&$mm, $title, $cursor, $shift)
 {
 	$output  = mb_substr($title,$shift,$mm['terminal_width']-1);
-	$output .= str_repeat( ' ' ,$mm['terminal_width'] - mb_strwidth($output) );
+
+	$output_len = mb_strwidth($output);
+	if ($mm['terminal_width'] > $output_len)
+		$output .= str_repeat( ' ' ,$mm['terminal_width'] - mb_strwidth($output) );
 
 	// showing the cursor
 	$output =
