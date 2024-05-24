@@ -2411,7 +2411,7 @@ function export_html()
 
 	fclose($file);
 
-	message($mm, 'Exported as '.$mm['filename'].'.html');
+	message($mm, $mm['filename'].'.html', 'Exported as');
 	copy_to_clipboard($mm, $mm['filename'].'.html');
 	$filename = getenv('PWD').'/'.basename($mm['filename']).'.html';
 
@@ -2554,27 +2554,33 @@ function save_vh(&$mm, $new_name = false)
 
 	display($mm);
 	if (!$mm['auto_save'])
-		message($mm, 'Saved '.$mm['filename']);
+		message($mm, $mm['filename'], 'Saved');
 }
 
 
 // }}}
 // {{{ message
 
-function message(&$mm, $text)
+function message(&$mm, $body, $prefix='')
 {
 	$mm['terminal_width']  = (int)exec('tput cols');
 	$mm['terminal_height'] = (int)exec('tput lines');
+
+	$extralen = $mm['terminal_width'] - mb_strlen($prefix) - mb_strlen($body) - 1;
+	if ($extralen < 1)
+		$body = '...' . mb_substr($body, -$extralen+5);
 
 	echo
 		"\033["
 		.$mm['terminal_height'] // y
 		.";"
-		.max(0,$mm['terminal_width'] - mb_strlen($text) - 1) //x
+		.max(0,$extralen) //x
 		."f"
 		.$mm['message_color']
 		.' '
-		.$text
+		.$prefix
+		.($prefix=='' ? '' : ' ')
+		.$body
 		.' '
 		.reset_color
 	;
