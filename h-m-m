@@ -2566,9 +2566,9 @@ function message(&$mm, $body, $prefix='')
 	$mm['terminal_width']  = (int)exec('tput cols');
 	$mm['terminal_height'] = (int)exec('tput lines');
 
-	$extralen = $mm['terminal_width'] - mb_strlen($prefix) - mb_strlen($body) - 1;
+	$extralen = $mm['terminal_width'] - mb_strlen($prefix) - mb_strlen($body) - 2;
 	if ($extralen < 1)
-		$body = '...' . mb_substr($body, -$extralen+5);
+		$body = '...' . mb_substr($body, -$extralen+4);
 
 	echo
 		"\033["
