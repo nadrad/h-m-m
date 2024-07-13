@@ -109,6 +109,11 @@ In the text editor:
 Other than the text editor key bindings, you can change all in your config file.
 
 
+## Rankings
+
+When working with a group of people in a workshop, sometimes you need to decide on a subtopic (i.e., selecting one of the proposed items). After discussing them, people can vote "yes" or "no" for each item. You can add a positive point for each "yes" (`=`) and a negative one for each "no" (`-`). In the end, you can press shift+t to sort them and see the highest-ranking choices on the top.
+
+
 # Configuration 
 
 The following are the settings in h-m-m:
