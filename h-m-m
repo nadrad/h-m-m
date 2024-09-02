@@ -249,14 +249,13 @@ const special_keys =
 	'ctrl_arr_right'  => "\033\133\061\073\065\103",
 	'shift_arr_right' => "\033\133\061\073\062\103",
 
-	'home' => "\033\133\110",
-	'end'  => "\033\133\106",
+	'home_alternative1' => "\033\133\110",
+	'home_alternative2' => "\033\133\061\176",
+	'home_alternative3' => "\033\133\067\176",
 
-	'home2' => "\033\133\067\176",
-	'end2'  => "\033\133\070\176",
-
-	'home_alternative' => "\033\133\061\176",
-	'end_alternative'  => "\033\133\064\176",
+	'end_alternative1'  => "\033\133\106",
+	'end_alternative2'  => "\033\133\064\176",
+	'end_alternative3'  => "\033\133\070\176",
 
 	'del' => "\033\133\063\176",
 	'ctrl_del' => "\033\133\63\073\065\176",
@@ -1718,14 +1717,26 @@ function magic_readline(&$mm, $title)
 				return false;
 			}
 
-			elseif ($in==special_keys['arr_up'] || $in==special_keys['home'])
+			elseif
+			(
+				$in==special_keys['arr_up'] || 
+				$in==special_keys['home_alternative1'] ||
+				$in==special_keys['home_alternative2'] ||
+				$in==special_keys['home_alternative3']
+			)
 				$cursor = 1;
+
+			elseif
+			(
+				$in==special_keys['arr_down'] || 
+				$in==special_keys['end_alternative1'] ||
+				$in==special_keys['end_alternative2'] ||
+				$in==special_keys['end_alternative3']
+			)
+				$cursor = mb_strlen($title)+1;
 
 			elseif ($in==special_keys['arr_right'])
 				$cursor = min( mb_strlen($title)+1, $cursor+1);
-
-			elseif ($in==special_keys['arr_down'] || $in==special_keys['end'])
-				$cursor = mb_strlen($title)+1;
 
 			elseif ($in==special_keys['arr_left'])
 				$cursor = max(1, $cursor-1);
