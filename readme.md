@@ -109,6 +109,11 @@ In the text editor:
 Other than the text editor key bindings, you can change all in your config file.
 
 
+## Rankings
+
+When working with a group of people in a workshop, sometimes you need to decide on a subtopic (i.e., selecting one of the proposed items). After discussing them, people can vote "yes" or "no" for each item. You can add a positive point for each "yes" (`=`) and a negative one for each "no" (`-`). In the end, you can press shift+t to sort them and see the highest-ranking choices on the top.
+
+
 # Configuration 
 
 The following are the settings in h-m-m:
@@ -134,73 +139,88 @@ The following are the settings in h-m-m:
 
 The colors are ASCII escape codes. 
 
-You can also change key bindings with a `bind x = command` syntax. The following are the commands:
+You can also change key bindings with a `bind x = command` syntax. The following are the defaults:
 
-	append
-	center_active_node
-	collapse_all
-	collapse_children
-	collapse_inner
-	collapse_level_1
-	collapse_level_2
-	collapse_level_3
-	collapse_level_4
-	collapse_level_5
-	collapse_level_6
-	collapse_level_7
-	collapse_level_8
-	collapse_level_9
-	collapse_other_branches
-	decrease_line_spacing
-	decrease_negative_rank
-	decrease_positive_rank
-	decrease_text_width
-	delete_children
-	delete_node
-	delete_node_without_clipboard
-	edit_node_append
-	edit_node_replace
-	expand_all
-	export_html
-	export_text
-	focus
-	go_down
-	go_left
-	go_right
-	go_to_bottom
-	go_to_root
-	go_to_top
-	go_up
-	increase_line_spacing
-	increase_negative_rank
-	increase_positive_rank
-	increase_text_width
-	insert_new_child
-	insert_new_sibling
-	move_node_down
-	move_node_up
-	next_search_result
-	open_link
-	paste_as_children
-	paste_as_siblings
-	previous_search_result
-	quit
-	save
-	save_as
-	search
-	shutdown
-	sort_siblings
-	toggle_align
-	toggle_center_lock
-	toggle_focus_lock
-	toggle_hide
-	toggle_node
-	toggle_numbers
-	toggle_show_hidden
-	toggle_symbol
-	undo
-	yank_children
-	yank_node
+    bind   a                  =   edit_node_append
+    bind   A                  =   edit_node_replace
+    bind   b                  =   expand_all
+    bind   c                  =   center_active_node
+    bind   C                  =   toggle_center_lock
+    bind   ctrl_c             =   quit
+    bind   d                  =   delete_node
+    bind   D                  =   delete_children
+    bind   del                =   delete_node_without_clipboard
+    bind   e                  =   edit_node_append
+    bind   E                  =   edit_node_replace
+    bind   f                  =   focus
+    bind   F                  =   toggle_focus_lock
+    bind   g                  =   go_to_top
+    bind   G                  =   go_to_bottom
+    bind   h                  =   go_left
+    bind   H                  =   toggle_hide
+    bind   ctrl_h             =   toggle_show_hidden
+    bind   i                  =   edit_node_append
+    bind   I                  =   edit_node_replace
+    bind   j                  =   go_down
+    bind   J                  =   move_node_down
+    bind   k                  =   go_up
+    bind   K                  =   move_node_up
+    bind   l                  =   go_right
+    bind   m                  =   go_to_root
+    bind   ~                  =   go_to_root
+    bind   n                  =   next_search_result
+    bind   N                  =   previous_search_result
+    bind   o                  =   insert_new_sibling
+    bind   O                  =   insert_new_child
+    bind   ctrl_o             =   open_link
+    bind   p                  =   paste_as_children
+    bind   P                  =   paste_as_siblings
+    bind   ctrl_p             =   append
+    bind   q                  =   quit
+    bind   Q                  =   shutdown
+    bind   ctrl_q             =   quit_with_debug
+    bind   r                  =   collapse_other_branches
+    bind   R                  =   collapse_inner
+    bind   s                  =   save
+    bind   S                  =   save_as
+    bind   t                  =   toggle_symbol
+    bind   T                  =   sort_siblings
+    bind   #                  =   toggle_numbers
+    bind   u                  =   undo
+    bind   v                  =   collapse_all
+    bind   V                  =   collapse_children
+    bind   w                  =   increase_text_width
+    bind   W                  =   decrease_text_width
+    bind   x                  =   export_html
+    bind   X                  =   export_text
+    bind   y                  =   yank_node
+    bind   Y                  =   yank_children
+    bind   z                  =   decrease_line_spacing
+    bind   Z                  =   increase_line_spacing
+    bind   enter              =   insert_new_sibling
+    bind   tab                =   insert_new_child
+    bind   space              =   toggle_node
+    bind   arr_down           =   go_down
+    bind   arr_up             =   go_up
+    bind   arr_right          =   go_right
+    bind   arr_left           =   go_left
+    bind   1                  =   collapse_level_1
+    bind   2                  =   collapse_level_2
+    bind   3                  =   collapse_level_3
+    bind   4                  =   collapse_level_4
+    bind   5                  =   collapse_level_5
+    bind   6                  =   collapse_level_6
+    bind   7                  =   collapse_level_7
+    bind   8                  =   collapse_level_8
+    bind   9                  =   collapse_level_9
+    bind   |                  =   toggle_align
+    bind   ?                  =   help
+    bind   /                  =   search
+    bind   ctrl_f             =   search
+    bind   equal              =   increase_positive_rank
+    bind   +                  =   decrease_positive_rank
+    bind   -                  =   increase_negative_rank
+    bind   _                  =   decrease_negative_rank
 
 Keys can be `x`, `X` (shift+x), `ctrl_x`, `alt_x`, or special keys: `arr_down`, `arr_left`, `arr_right`, `arr_up`, `back_space`, `ctrl_arr_left`, `ctrl_arr_right`, `ctrl_back_space`, `ctrl_del`, `del`, `end`, `enter`, `equal`, `esc`, `home`, `shift_arr_left`, `shift_arr_right`, `space`, `tab` 
 
