@@ -291,9 +291,9 @@ You also need to have the following installed for h-m-m to work:
   * older versions of php along with the `mbstring` package (e.g., `php7.2-mbstring`)
 * `xclip`, `xsel`, `wl-clipboard`, or `klipper` in Linux. (Windows and Mac don't need it)
 
-After downloading or cloning, you can run `php h-m-m` in your terminal to run the program with a blank map or `php h-m-m filename` to open an existing file. If you don't already have a php interpreter installed, you would need to install it as well. Note: You don't need to set up a "web server" to run it because it's not a web application, but rather a terminal application that works like those written in Python, Bash, etc. 
- 
-Optionally, you can make the file executable by running the `chmod +x h-m-m` in your terminal, and afterward, you can run it as `h-m-m filename` (assuming that **h-m-m** is in your path). 
+After downloading or cloning, you can run `php h-m-m` in your terminal to run the program with a blank map or `php h-m-m filename` to open an existing file. Note: You don't need to set up a "web server" to run it because it's not a web application, but rather a terminal application that works like those written in Python, Bash, etc. 
+
+Optionally, you can make the file executable by running the `chmod +x h-m-m` in your terminal, and afterward, you can run it as `h-m-m filename` (assuming that **h-m-m** is in your path).
 
 
 ## 2. Installation for Arch Linux
