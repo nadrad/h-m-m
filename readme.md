@@ -277,7 +277,7 @@ Most mind mapping applications use a similar format for copying and pasting. As 
 
 # Installing 
 
-Note: A few issues should be solved before **h-m-m** can be run in Windows. Until then, Windows users can probably use *Windows Subsystem for Linux* to run it. There's an [open issue](https://github.com/nadrad/h-m-m/issues/29) for Windows, waiting for contributors!
+Note: A few issues should be solved before **h-m-m** can be run in Windows. Until then, Windows users can probably use *Windows Subsystem for Linux* to run it.
 
 
 ## 1. Manual installation 
