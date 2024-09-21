@@ -313,8 +313,6 @@ This command downloads and runs the install.sh script, which in turn downloads h
 
 After installing, you can run `h-m-m` from anywhere in your terminal to run the application with an empty map, or `h-m-m filename` to open an existing file.
 
-Note: It probably works in a Mac, but I'm not completely sure; so, [let me know](https://github.com/nadrad/h-m-m/issues/27).
-
 
 ## 4. Installation with Docker
 
