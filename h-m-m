@@ -3449,7 +3449,9 @@ function display(&$mm, $force_center = false)
 				.mb_substr($line, $x2)
 			;
 
-		// styling the codes when the node is not active
+		// styling the codes at the beginning of the node
+		// when the node is not active
+		//
 		// with "else", the downside is that other codes
 		// with the same "y" will not be styled.
 		// Without the "else", the downside is that the
@@ -3460,8 +3462,8 @@ function display(&$mm, $force_center = false)
 			$line =
 				mb_ereg_replace
 				(
-					'\b(.?\d+)\. '
-					,dim_on.'\\1. '.dim_off
+					'\b(.?[\d\.]+) '
+					,dim_on.'\\1 '.dim_off
 					,$line
 				)
 			;
@@ -3503,7 +3505,7 @@ function display(&$mm, $force_center = false)
 			)
 		;
 
-		// styling "(?)
+		// styling "(?)"
 
 		$line =
 			str_replace
@@ -3523,7 +3525,7 @@ function display(&$mm, $force_center = false)
 				,$line
 			);
 
-		// dimming {meta}s
+		// styling "{meta}"s
 
 		$line =
 			str_replace
