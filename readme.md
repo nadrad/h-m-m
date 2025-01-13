@@ -322,8 +322,11 @@ It's also possible to execute `h-m-m` through docker (or podman):
 # Build the image
 docker build -t hmm .
 
-# Run it
-docker run --rm -it -v $(pwd):/app/ hmm
+# Run it (mount $pwd for file access, X11 & DISLAY for clipboard access)
+docker run --rm -it -v $(pwd):/app/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY hmm
+
+# Convinience
+alias hmm='docker run --rm -it -v $(pwd):/app/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY hmm'
 ```
 
 
