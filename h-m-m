@@ -241,6 +241,9 @@ const special_keys =
 	'arr_up'   => "\033\133\101",
 	'arr_left' => "\033\133\104",
 
+	'alt_arr_up'   => "\033\133\061\073\063\101",
+	'alt_arr_down' => "\033\133\061\073\063\102",
+
 	'meta_arr_left' => "\033\033\133\104",
 	'ctrl_arr_left'   => "\033\133\061\073\065\104",
 	'shift_arr_left'  => "\033\133\061\073\062\104",
@@ -380,6 +383,9 @@ $keybindings[special_keys['arr_down']]  = 'go_down';
 $keybindings[special_keys['arr_up']]    = 'go_up';
 $keybindings[special_keys['arr_right']] = 'go_right';
 $keybindings[special_keys['arr_left']]  = 'go_left';
+
+$keybindings[special_keys['alt_arr_up']]   = 'add_star';
+$keybindings[special_keys['alt_arr_down']] = 'remove_star';
 
 $keybindings['1'] = 'collapse_level_1';
 $keybindings['2'] = 'collapse_level_2';
@@ -3674,6 +3680,59 @@ function sort_siblings()
 	push_change($mm);
 	build_map($mm);
 	display($mm);
+}
+
+
+// }}}
+// {{{ add or remove stars
+
+function add_star()
+{
+	add_or_remove_stars(+1);
+}
+
+function remove_star()
+{
+	add_or_remove_stars(-1);
+}
+
+function add_or_remove_stars($change)
+{
+	global $mm;
+	push_change($mm);
+	$mm['nodes'][ $mm['active_node'] ]['title'] = 
+		replace_stars
+		(
+			$mm['nodes'][ $mm['active_node'] ]['title']
+			,
+			max
+			(
+				0
+				,min
+				(
+					5
+					,mb_substr_count
+					(
+						$mm['nodes'][ $mm['active_node'] ]['title']
+						,'★'
+					)
+					+$change
+				)
+			)
+		)
+	;
+	build_map($mm);
+	display($mm);
+}
+
+function replace_stars($text,$stars)
+{
+	$stars_string = str_repeat('★',$stars).str_repeat('☆',5-$stars);
+
+	if (mb_ereg('[★☆]',$text))
+		return mb_ereg_replace('[★☆]+',$stars_string,$text);
+	else
+		return $text . $stars_string;
 }
 
 

@@ -32,6 +32,8 @@ Marks:
 * `+` - decreases the positive ranking
 * `-` - increases the negative ranking
 * `_` - decreases the negative ranking
+* `alt+up` - adds a star
+* `alt+down` - removes a star
 * `H` - toggles the hidden flag
 
 Relative navigating and moving:
@@ -112,6 +114,8 @@ Other than the text editor key bindings, you can change all in your config file.
 ## Rankings
 
 When working with a group of people in a workshop, sometimes you need to decide on a subtopic (i.e., selecting one of the proposed items). After discussing them, people can vote "yes" or "no" for each item. You can add a positive point for each "yes" (`=`) and a negative one for each "no" (`-`). In the end, you can press shift+t to sort them and see the highest-ranking choices on the top.
+
+Another way of ranking is to use stars. To do so, you can press `alt+up` or `alt+down` to add or remove stars and show a zero to five rank.
 
 
 # Configuration 
@@ -204,6 +208,8 @@ You can also change key bindings with a `bind x = command` syntax. The following
     bind   arr_up             =   go_up
     bind   arr_right          =   go_right
     bind   arr_left           =   go_left
+    bind   alt_arr_up         =   add_star
+    bind   alt_arr_down       =   remove_star
     bind   1                  =   collapse_level_1
     bind   2                  =   collapse_level_2
     bind   3                  =   collapse_level_3
