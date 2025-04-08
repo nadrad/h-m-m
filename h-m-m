@@ -2402,7 +2402,7 @@ function export_html()
 		.'summary { margin-left: -10px; cursor: pointer; }'
 		.'summary:hover, p:hover { color: #fbc531; }'
 		.'details:hover, p:hover { border-color: #e1b12c; }'
-		.'#source { position: absolute; bottom: 0; left: 0; padding: 5px 15px 8px 15px; margin: 100px 0 0 0; }'
+		.'#source { position: fixed; bottom: 0; left: 0; padding: 5px 15px 8px 15px; margin: 100px 0 0 0; }'
 		.'#source { background-color: #333; border: none; box-sizing: border-box;}'
 		.'#source > summary { list-style: none; }'
 		.'#source[open] { position: static; margin: 100px 0 0 0; font-size: 16px; }'
@@ -2413,6 +2413,7 @@ function export_html()
 		.'<div id=map>'
 		.export_html_node($mm, $mm['root_id'])
 		.'</div>'
+		.'<br>'
 		.'<details id=source>'
 		.'<summary>This is a limited, read-only version of a mind-map created in h-m-m | view source!</summary>'
 		.'<pre>'
