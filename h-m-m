@@ -3732,7 +3732,7 @@ function replace_stars($text,$stars)
 	if (mb_ereg('[★☆]',$text))
 		return mb_ereg_replace('[★☆]+',$stars_string,$text);
 	else
-		return $text . $stars_string;
+		return $text . ' ' . $stars_string;
 }
 
 
