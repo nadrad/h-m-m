@@ -2157,14 +2157,15 @@ function help()
 	$output = [];
 	foreach ($commands as $command => $keys)
 		$output[] =
-		str_pad($command.' ',32,'.',STR_PAD_RIGHT)
-		.' '
-		.implode(', ',$keys);
+			str_pad($command.' ',32,'.',STR_PAD_RIGHT)
+			.' '
+			.implode(', ',$keys);
 
 	sort($output);
 
 	$breakpoint = floor((count($output)-1)/2);
 
+	echo reset_page.reset_color;
 	for ($i=0 ; $i<=$breakpoint ; $i++)
 		echo
 			' '
