@@ -335,6 +335,66 @@ docker run --rm -it -v $(pwd):/app/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=
 alias hmm='docker run --rm -it -v $(pwd):/app/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY hmm'
 ```
 
+## 5. Installation with Nix/NixOS
+<details>
+<summary>with flakes (NixOS)</summary>
+
+Below is a fragment of a NixOS configuration that add h-m-m to system packages.
+
+```nix
+{
+  description = "Simple NixOS configurations";
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    h-m-m = {
+      url = "github:nadrad/h-m-m";
+      # Optional but recommended to limit the size of your system closure.
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+  outputs = { nixpkgs, h-m-m, ... }: {
+    nixosConfigurations = {
+      yourHost = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          # ...
+          {
+            nixpkgs.overlays = [ h-m-m.overlays.default ];
+          }
+          # add h-m-m to your system
+          ({ pkgs, ... }: {
+            environment.systemPackages = [ pkgs.h-m-m ];
+          });
+        ];
+      };
+    };
+  };
+}
+```
+</details>
+
+<details>
+<summary>with <code>nix profile</code></summary>
+
+You can also install it using the imperative method
+
+```sh
+$ nix profile install github:nadrad/h-m-m
+```
+</details>
+
+<details>
+<summary>with <code>nix shell</code> / <code>nix run</code></summary>
+
+If you don't want to install it on your system, you can try it with nix run or nix shell.
+
+```sh
+$ nix run github:nadrad/h-m-m -- <args>
+# or
+$ nix shell github:nadrad/h-m-m
+$ h-m-m <args>
+```
+</details>
 
 # Feedback
 
