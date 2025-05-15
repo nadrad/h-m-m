@@ -1728,7 +1728,9 @@ function magic_readline(&$mm, $title)
 				$in==special_keys['arr_up'] || 
 				$in==special_keys['home_alternative1'] ||
 				$in==special_keys['home_alternative2'] ||
-				$in==special_keys['home_alternative3']
+				$in==special_keys['home_alternative3'] ||
+				$in==special_keys['ctrl_p'] ||
+				$in==special_keys['ctrl_a']
 			)
 				$cursor = 1;
 
@@ -1737,17 +1739,27 @@ function magic_readline(&$mm, $title)
 				$in==special_keys['arr_down'] || 
 				$in==special_keys['end_alternative1'] ||
 				$in==special_keys['end_alternative2'] ||
-				$in==special_keys['end_alternative3']
+				$in==special_keys['end_alternative3'] ||
+				$in==special_keys['ctrl_n'] ||
+				$in==special_keys['ctrl_e']
 			)
 				$cursor = mb_strlen($title)+1;
 
-			elseif ($in==special_keys['arr_right'])
+			elseif
+			(
+				$in==special_keys['arr_right'] ||
+				$in==special_keys['ctrl_f']
+			)
 				$cursor = min( mb_strlen($title)+1, $cursor+1);
 
-			elseif ($in==special_keys['arr_left'])
+			elseif
+			(
+				$in==special_keys['arr_left'] ||
+				$in==special_keys['ctrl_b']
+			)
 				$cursor = max(1, $cursor-1);
 
-			elseif ($in==special_keys['ctrl_arr_left'] || $in==special_keys['shift_arr_left'] || $in==special_keys['meta_arr_left'])
+			elseif ($in==special_keys['ctrl_arr_left'] || $in==special_keys['shift_arr_left'] || $in==special_keys['meta_arr_left'] || $in==special_keys['alt_b'])
 				$cursor =
 					$cursor < 3
 					? 1
@@ -1761,7 +1773,7 @@ function magic_readline(&$mm, $title)
 							)
 						);
 
-			elseif ($in==special_keys['ctrl_arr_right'] || $in==special_keys['shift_arr_right'] || $in==special_keys['meta_arr_right'])
+			elseif ($in==special_keys['ctrl_arr_right'] || $in==special_keys['shift_arr_right'] || $in==special_keys['meta_arr_right'] || $in==special_keys['alt_f'])
 				$cursor =
 					$cursor > mb_strlen($title) -2
 					? mb_strlen($title) + 1
@@ -1821,7 +1833,7 @@ function magic_readline(&$mm, $title)
 				}
 			}
 
-			elseif ($in==special_keys['ctrl_del'])
+			elseif ($in==special_keys['ctrl_del'] || $in==special_keys['alt_d'])
 			{
 				$len = mb_strlen($title);
 				$from = 
