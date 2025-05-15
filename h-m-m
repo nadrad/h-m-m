@@ -1875,6 +1875,17 @@ function magic_readline(&$mm, $title)
 			elseif ($in==special_keys['enter'])
 				return trim($title);
 
+			elseif ($in==special_keys['ctrl_k'])
+			{
+				$title = mb_substr ($title, 0, $cursor-1);
+			}
+
+			elseif ($in==special_keys['ctrl_u'])
+			{
+				$title = mb_substr ($title, $cursor-1);
+				$cursor = 1;
+			}
+
 			elseif ($in==special_keys['ctrl_v'])
 			{
 				$content =

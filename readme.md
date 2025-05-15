@@ -104,6 +104,8 @@ In the text editor:
 * `Ctrl+Delete`or `Alt-d` - deletes word
 * `Backspace` - deletes previous character
 * `ctrl+Backspace`, `ctrl+w` - deletes previous word
+* `Ctrl-k` - deletes everything to the right of the cursor
+* `Ctrl-u` - deletes everything to the left of the cursor
 * `Ctrl+v` or `Ctrl+Shift+v` - paste
 * `Esc` - cancels editing
 * `Enter` - wanna guess? ;)
