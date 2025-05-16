@@ -94,16 +94,18 @@ Misc:
 
 In the text editor:
 
-* `↓` - moves the cursor to the end of the line
-* `↑` - moves the cursor to the beginning of the line
-* `←` or `Home` - moves the cursor to the left
-* `→` or `End` - moves the cursor to the right
-* `Ctrl+Left` or `Shift+Left` - moves cursor to the previous word
-* `Ctrl+Right` or `Shift+right` - moves cursor to the next word
+* `↓` or `Ctrl-e` or `Ctrl-n` - moves the cursor to the end of the line
+* `↑` or `Ctrl-p` or `Ctrl-a` or `Ctrl-p` - moves the cursor to the beginning of the line
+* `←` or `Home` or `Ctrl-b` - moves the cursor to the left
+* `→` or `End` or `Ctrl-f` - moves the cursor to the right
+* `Ctrl+Left` or `Shift+Left` or `Alt-b`- moves cursor to the previous word
+* `Ctrl+Right` or `Shift+right`or `Atl-f` - moves cursor to the next word
 * `Delete` - deletes character
-* `Ctrl+Delete` - deletes word
+* `Ctrl+Delete`or `Alt-d` - deletes word
 * `Backspace` - deletes previous character
 * `ctrl+Backspace`, `ctrl+w` - deletes previous word
+* `Ctrl-k` - deletes everything to the right of the cursor
+* `Ctrl-u` - deletes everything to the left of the cursor
 * `Ctrl+v` or `Ctrl+Shift+v` - paste
 * `Esc` - cancels editing
 * `Enter` - wanna guess? ;)
