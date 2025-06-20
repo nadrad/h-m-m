@@ -478,7 +478,7 @@ function check_the_available_clipboard_tool(&$mm)
 
 	// now, the main OS ;)
 
-	exec('command -v xclip xsel wl-copy klipper', $result);
+	exec('command -v xclip || command -v xsel || command -v wl-copy || command -v klipper', $result);
 	$tool = basename($result[0] ?? '');
 
 	if (trim($tool)==='')
