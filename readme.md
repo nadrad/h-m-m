@@ -6,7 +6,7 @@
 ![screenshot](screenshot.png)
 
 
-# Default key bindings
+## Default key bindings
 
 Adding, removing, and editing nodes:
 
@@ -117,14 +117,7 @@ In the text editor:
 Other than the text editor key bindings, you can change all in your config file.
 
 
-## Rankings
-
-When working with a group of people in a workshop, sometimes you need to decide on a subtopic (i.e., selecting one of the proposed items). After discussing them, people can vote "yes" or "no" for each item. You can add a positive point for each "yes" (`=`) and a negative one for each "no" (`-`). In the end, you can press shift+t to sort them and see the highest-ranking choices on the top.
-
-Another way of ranking is to use stars. To do so, you can press `alt+up` or `alt+down` to add or remove stars and show a zero to five rank.
-
-
-# Configuration 
+## Configuration 
 
 The following are the settings in h-m-m:
 
@@ -256,7 +249,7 @@ Both underscores and dashes are accepted for the setting keys.
 When multiple values exist, the highest priority goes to the command line arguments and the lowest to the config file. 
 
 
-# Clipboard
+## Clipboard
 
 The normal `os` clipboard works fine for most users, but some users may need other options:
 
@@ -266,12 +259,12 @@ The normal `os` clipboard works fine for most users, but some users may need oth
 * `--clipboard=command` uses `--clipboard_in_command="command %text%"` to send content to a shell command and `--clipboard_out_command="command"` to read content.
 
 
-# Exporting
+## Exporting
 
 You can export an HTML version of the map using the `x` key binding. This is useful for sending the file to someone who may not have h-m-m or a similar mind mapping application. To make the process easier, you can set a sell command to run after exporting the map; e.g., upload it to a server and copy the link to clipboard: `--post-export-command="upload.sh %filename% &>/dev/null"`.
 
 
-# Data format
+## Data format
 
 Mind maps are stored in plain text files (with `hmm` file extension by default) without metadata. The tree structure is represented by tab indentations; e.g., 
 
@@ -291,12 +284,12 @@ When you yank (copy) or delete (cut) a subtree, the data will be put into your c
 Most mind mapping applications use a similar format for copying and pasting. As a result, if you want to import a map from another application, you can probably select everything in that application, copy it, come to **h-m-m**, and paste it. The same usually works well when copying from HTML/PDF/Doc lists, spreadsheets (e.g., Calc and Excel), etc.
 
 
-# Installing 
+## Installing 
 
 Note: A few issues should be solved before **h-m-m** can be run in Windows. Until then, Windows users can probably use *Windows Subsystem for Linux* to run it.
 
 
-## 1. Manual installation 
+### 1. Manual installation 
 
 **h-m-m** is a single php file. You can download it from here, or clone it on your computer using git and add a scheduled job to update it once a day or week. 
 
@@ -312,12 +305,12 @@ After downloading or cloning, you can run `php h-m-m` in your terminal to run th
 Optionally, you can make the file executable by running the `chmod +x h-m-m` in your terminal, and afterward, you can run it as `h-m-m filename` (assuming that **h-m-m** is in your path).
 
 
-## 2. Installation for Arch Linux
+### 2. Installation for Arch Linux
 
 In Arch Linux, you can use the `h-m-m-git` AUR package to install it.
 
 
-## 3. Installation script for Linux (and Mac?)
+### 3. Installation script for Linux (and Mac?)
 
 You can run the following command to install h-m-m:
 
@@ -330,7 +323,7 @@ This command downloads and runs the install.sh script, which in turn downloads h
 After installing, you can run `h-m-m` from anywhere in your terminal to run the application with an empty map, or `h-m-m filename` to open an existing file.
 
 
-## 4. Installation with Docker
+### 4. Installation with Docker
 
 It's also possible to execute `h-m-m` through docker (or podman):
 
@@ -345,7 +338,7 @@ docker run --rm -it -v $(pwd):/app/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=
 alias hmm='docker run --rm -it -v $(pwd):/app/ -v /tmp/.X11-unix:/tmp/.X11-unix -e DISPLAY=$DISPLAY hmm'
 ```
 
-## 5. Installation with Nix/NixOS
+### 5. Installation with Nix/NixOS
 <details>
 <summary>with flakes (NixOS)</summary>
 
@@ -407,14 +400,14 @@ $ h-m-m <args>
 </details>
 
 
-# Feedback
+## Feedback
 
 Programming is not my career, but rather a hobby, and I developed **h-m-m** because I wanted to have something like this application and couldn't find one. Therefore, what I've done here may have a lot of room for improvement. If you see an embarrassing problem in the program or have an idea for improvement, feel free to contact me; I'd be happy to receive your feedback.
 
 Why php? It's simple: I only have a rusty knowledge of Pascal and a little familiarity with php. I thought about learning another language for this project (Nim is my top choice at this moment), but I didn't have time to do it. I'll probably do it later and convert it into a language I can compile :)
 
 
-# Related resources
+## Related resources
 
 A few people have published software/content about or related to h-m-m; these are the ones I know:
 
