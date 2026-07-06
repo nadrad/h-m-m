@@ -407,6 +407,14 @@ Programming is not my career, but rather a hobby, and I developed **h-m-m** beca
 Why php? It's simple: I only have a rusty knowledge of Pascal and a little familiarity with php. I thought about learning another language for this project (Nim is my top choice at this moment), but I didn't have time to do it. I'll probably do it later and convert it into a language I can compile :)
 
 
+## Contributions
+
+All kinds of human contributions are very welcome:
+
+- If you'd like to contribute a major feature, it's a good idea to create an issue for it first and talk about it a little before you start programming.
+- Please only contribute code that you've written yourself, not one that an LLM has written, even if you've fully reviewed it.
+
+
 ## Related resources
 
 A few people have published software/content about or related to h-m-m; these are the ones I know:
