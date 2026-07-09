@@ -415,6 +415,8 @@ $keybindings['+']    = 'decrease_positive_rank';
 $keybindings['-']    = 'increase_negative_rank';
 $keybindings['_']    = 'decrease_negative_rank';
 
+$keybindings[special_keys['ctrl_g']] = 'fuzzy_search';
+
 foreach ($mm['config'] as $key=>$value)
 	if (substr($key,0,4) == 'bind')
 	{
@@ -2317,6 +2319,253 @@ function next_search_result()
 
 	$mm['active_node'] = $nid;
 	display($mm);
+}
+
+
+// }}}
+// {{{ fuzzy search
+
+function fuzzy_match_score($query, $text)
+{
+	if ($query === '') return 0;
+
+	$q    = mb_strtolower($query);
+	$t    = mb_strtolower($text);
+	$qlen = mb_strlen($q);
+	$tlen = mb_strlen($t);
+
+	$qi          = 0;
+	$score       = 0;
+	$consecutive = 0;
+
+	for ($ti = 0; $ti < $tlen && $qi < $qlen; $ti++)
+	{
+		if (mb_substr($t, $ti, 1) === mb_substr($q, $qi, 1))
+		{
+			$score += 1 + $consecutive * 2;
+			if ($ti === 0 || mb_substr($t, $ti - 1, 1) === ' ')
+				$score += 3;
+			$consecutive++;
+			$qi++;
+		}
+		else
+			$consecutive = 0;
+	}
+
+	if ($qi < $qlen) return false;
+
+	return $score * 100 / max(1, $tlen);
+}
+
+
+function fuzzy_match_positions($query, $text)
+{
+	$q    = mb_strtolower($query);
+	$t    = mb_strtolower($text);
+	$qlen = mb_strlen($q);
+	$tlen = mb_strlen($text);
+	$qi   = 0;
+	$pos  = [];
+
+	for ($ti = 0; $ti < $tlen && $qi < $qlen; $ti++)
+		if (mb_substr($t, $ti, 1) === mb_substr($q, $qi, 1))
+		{
+			$pos[] = $ti;
+			$qi++;
+		}
+
+	return $pos;
+}
+
+
+function fuzzy_highlight($query, $text, $avail_w)
+{
+	$positions = fuzzy_match_positions($query, $text);
+	$tlen      = mb_strlen($text);
+	$result    = '';
+	$in_hl     = false;
+
+	for ($i = 0; $i < min($tlen, $avail_w); $i++)
+	{
+		$is_match = in_array($i, $positions);
+		if ($is_match && !$in_hl)  { $result .= invert_on;  $in_hl = true;  }
+		if (!$is_match && $in_hl)  { $result .= invert_off; $in_hl = false; }
+		$result .= mb_substr($text, $i, 1);
+	}
+
+	if ($in_hl) $result .= invert_off;
+	if ($tlen > $avail_w) $result .= '…';
+
+	return $result;
+}
+
+
+function fuzzy_search_get_matches(&$mm, $query, $limit)
+{
+	$results = [];
+
+	foreach ($mm['nodes'] as $id => $node)
+	{
+		if ($id === 0) continue;
+		if (!$mm['show_hidden'] && substr($node['title'], 0, 9) === '[HIDDEN] ') continue;
+
+		$score = fuzzy_match_score($query, $node['title']);
+		if ($score !== false)
+			$results[] = ['id' => $id, 'score' => $score, 'title' => $node['title']];
+	}
+
+	usort($results, fn($a, $b) => $b['score'] <=> $a['score']);
+	return array_slice($results, 0, $limit);
+}
+
+
+function fuzzy_draw_panel(&$mm, $query, $matches, $selected, &$prev_count)
+{
+	$w     = $mm['terminal_width'];
+	$h     = $mm['terminal_height'];
+	$count = count($matches);
+
+	// When the number of results changes, restore the mind map first so
+	// rows that are no longer part of the panel don't show stale content.
+	if ($count !== $prev_count)
+	{
+		display($mm);
+		$prev_count = $count;
+	}
+
+	// Separator + result rows (only when there are matches)
+	if ($count > 0)
+	{
+		$panel_top = $h - $count - 1;
+
+		echo "\033[{$panel_top};0f" . reset_color . dim_on . str_repeat('─', $w) . dim_off;
+
+		for ($i = 0; $i < $count; $i++)
+		{
+			$row       = $panel_top + 1 + $i;
+			$is_active = ($i === $selected);
+			$prefix    = $is_active ? '▶ ' : '  ';
+			$avail_w   = $w - 2;
+			$hl        = fuzzy_highlight($query, $matches[$i]['title'], $avail_w);
+			$vis_len   = 2 + min(mb_strlen($matches[$i]['title']), $avail_w);
+			$pad       = str_repeat(' ', max(0, $w - $vis_len));
+
+			echo "\033[{$row};0f" . reset_color;
+
+			if ($is_active)
+				echo $mm['active_node_color'] . $prefix . $hl . $pad . reset_color;
+			else
+				echo $prefix . $hl . $pad;
+		}
+	}
+
+	// Input row (always on the last terminal row)
+	$prompt   = ' ❯ ';
+	$prompt_w = mb_strwidth($prompt);
+	$input_w  = $w - $prompt_w - 1;
+	$q_disp   = mb_strlen($query) > $input_w
+		? mb_substr($query, mb_strlen($query) - $input_w)
+		: $query;
+	$pad = str_repeat(' ', max(0, $input_w - mb_strlen($q_disp)));
+
+	echo "\033[{$h};0f"
+		. $mm['active_node_color'] . $prompt . reset_color
+		. $q_disp . invert_on . ' ' . invert_off . $pad;
+}
+
+
+function fuzzy_expand_to(&$mm, $id)
+{
+	$pid = $mm['nodes'][$id]['parent'];
+	while ($pid > 0 && isset($mm['nodes'][$pid]))
+	{
+		$mm['nodes'][$pid]['collapsed'] = false;
+		$pid = $mm['nodes'][$pid]['parent'];
+	}
+}
+
+
+function fuzzy_search()
+{
+	global $mm;
+
+	$query      = '';
+	$selected   = 0;
+	$max_items  = 10;
+	$matches    = [];
+	$prev_count = -1;  // forces an initial display() call on first draw
+
+	display($mm);
+	fuzzy_draw_panel($mm, $query, $matches, $selected, $prev_count);
+
+	while (true)
+	{
+		usleep(5000);
+		$in = fread(STDIN, 66666);
+		if (empty($in)) continue;
+
+		if ($in === special_keys['esc'])
+		{
+			display($mm);
+			return;
+		}
+
+		if ($in === special_keys['enter'])
+		{
+			if (!empty($matches))
+			{
+				$nid = $matches[$selected]['id'];
+				fuzzy_expand_to($mm, $nid);
+				$mm['active_node'] = $nid;
+				build_map($mm);
+				display($mm, true);
+			}
+			else
+				display($mm);
+			return;
+		}
+
+		if ($in === special_keys['arr_up'] || $in === special_keys['ctrl_p'])
+			$selected = max(0, $selected - 1);
+
+		elseif ($in === special_keys['arr_down'] || $in === special_keys['ctrl_n'])
+			$selected = min(max(0, count($matches) - 1), $selected + 1);
+
+		elseif ($in === special_keys['back_space'])
+		{
+			if (mb_strlen($query) > 0)
+			{
+				$query    = mb_substr($query, 0, mb_strlen($query) - 1);
+				$matches  = $query !== '' ? fuzzy_search_get_matches($mm, $query, $max_items) : [];
+				$selected = 0;
+			}
+		}
+
+		elseif ($in === special_keys['ctrl_u'])
+		{
+			$query    = '';
+			$matches  = [];
+			$selected = 0;
+		}
+
+		elseif (ord($in[0]) < 32 || ord($in[0]) === 127)
+		{
+			// ignore other control sequences
+		}
+
+		else
+		{
+			$in = mb_ereg_replace("[\000-\010\013-\037\177]|" . BOM, '', $in);
+			if ($in !== '')
+			{
+				$query   .= $in;
+				$matches  = fuzzy_search_get_matches($mm, $query, $max_items);
+				$selected = 0;
+			}
+		}
+
+		fuzzy_draw_panel($mm, $query, $matches, $selected, $prev_count);
+	}
 }
 
 
